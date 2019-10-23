@@ -25,7 +25,7 @@ struct Identity {};
 struct Index {};
 struct Name {};
 struct MetaID {};
-struct Variant {};
+struct VariantID {};
 
 }
 
@@ -175,6 +175,46 @@ using NameHashedVector = boost::multi_index::multi_index_container<T,
             boost::multi_index::member<T, std::string, &T::mName>,
             std::less<>
         >
+    >
+>;
+
+struct VariantIndexKey {
+    typedef size_t result_type;
+
+    template<class... Args>
+    size_t operator()(const std::variant<Args...>& var) const {
+        return var.index();
+    }
+};
+
+template<class... Args>
+using OrderedVariantIDMap = boost::multi_index::multi_index_container<std::variant<Args...>,
+    boost::multi_index::indexed_by<
+        boost::multi_index::ordered_unique<
+            boost::multi_index::tag<Index::VariantID>,
+            VariantIndexKey
+        >,
+        boost::multi_index::random_access<boost::multi_index::tag<Index::Index>>
+    >
+>;
+
+struct VariantIndexKey2 {
+    typedef size_t result_type;
+
+    template<class T>
+    size_t operator()(const T& v) const {
+        return v.mVariant.index();
+    }
+};
+
+template<class T>
+using OrderedVariantIDMap2 = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::ordered_unique<
+            boost::multi_index::tag<Index::VariantID>,
+            VariantIndexKey2
+        >,
+        boost::multi_index::random_access<boost::multi_index::tag<Index::Index>>
     >
 >;
 

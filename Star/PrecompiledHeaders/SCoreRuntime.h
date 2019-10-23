@@ -62,6 +62,7 @@
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/map.hpp>
 
 // archive
 #include <boost/archive/binary_iarchive.hpp>
