@@ -17,7 +17,7 @@
 
 #pragma once
 #include <Star/Graphics/SRenderFormat.h>
-#include <StarCompiler/Graphics/SPixelFormat.h>
+#include <StarCompiler/Graphics/SPixelFormatTypes.h>
 
 namespace Star::Graphics::Render {
 

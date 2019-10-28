@@ -775,6 +775,8 @@ using fixed3 = Unorm3;
 using fixed2 = Unorm2;
 using fixed1 = Unorm1;
 
+using Bool = int32_t;
+
 using matrix = Matrix4f;
 using fixed = uint8_t;
 using uint = uint32_t;

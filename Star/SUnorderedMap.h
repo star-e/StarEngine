@@ -19,37 +19,13 @@
 
 namespace Star {
 
-#ifndef NDEBUG
-template<int N>
-struct print_size_as_warning {
-    char operator()() { return N + 256; } //deliberately causing overflow
-};
+template<class T>
+using UnorderedUUIDMap = std::unordered_map<boost::uuids::uuid, T>;
 
-#define PRINT_SIZE(NAME) \
-namespace { \
-inline void print_size_##NAME() noexcept { \
-    ::Star::print_size_as_warning<sizeof(NAME)>()(); \
-} \
-}
-
-#define PRINT_ALIGN(NAME) \
-namespace { \
-inline void print_align_##NAME() noexcept { \
-    ::Star::print_size_as_warning<alignof(NAME)>()(); \
-} \
-}
-
-#ifdef _DEBUG
-#define CHECK_SIZE(NAME, SIZE) 
-#else
-#define CHECK_SIZE(NAME, SIZE) static_assert(sizeof(NAME) == SIZE);
-#endif
-
-#else
-
-#define PRINT_SIZE(NAME) 
-#define CHECK_SIZE(NAME, SIZE) 
-
-#endif
+template<class T>
+using PmrUnorderedUUIDMap = std::unordered_map<boost::uuids::uuid, T,
+    std::hash<boost::uuids::uuid>, std::equal_to<boost::uuids::uuid>,
+    std::pmr::polymorphic_allocator<std::pair<const boost::uuids::uuid, T>>
+>;
 
 }

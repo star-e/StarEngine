@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <DebugSuffix Condition="'$(Configuration)'=='Debug'">d</DebugSuffix>
+    <DebugSuffix Condition="'$(Configuration)'!='Debug'">
+    </DebugSuffix>
+    <DashDebugSuffix Condition="'$(Configuration)'=='Debug'">-d</DashDebugSuffix>
+    <DashDebugSuffix Condition="'$(Configuration)'!='Debug'">
+    </DashDebugSuffix>
+    <DashDebugSuffixFull Condition="'$(Configuration)'=='Debug'">-debug</DashDebugSuffixFull>
+    <DashDebugSuffixFull Condition="'$(Configuration)'!='Debug'">
+    </DashDebugSuffixFull>
+    <UnderDebugSuffix Condition="'$(Configuration)'=='Debug'">_d</UnderDebugSuffix>
+    <UnderDebugSuffix Condition="'$(Configuration)'!='Debug'">
+    </UnderDebugSuffix>
+    <UnderDebugFullSuffix Condition="'$(Configuration)'=='Debug'">_debug</UnderDebugFullSuffix>
+    <UnderDebugFullSuffix Condition="'$(Configuration)'!='Debug'">
+    </UnderDebugFullSuffix>
+    <UnderConfigSuffix Condition="'$(Configuration)'=='Debug'">debug</UnderConfigSuffix>
+    <UnderConfigSuffix Condition="'$(Configuration)'!='Debug'">release</UnderConfigSuffix>
+    <BoostDebug Condition="'$(Configuration)'=='Debug'">-gd</BoostDebug>
+    <BoostDebug Condition="'$(Configuration)'!='Debug'">
+    </BoostDebug>
+    <VcpkgDebug Condition="'$(Configuration)'=='Debug'">debug\</VcpkgDebug>
+    <VcpkgDebug Condition="'$(Configuration)'!='Debug'">
+    </VcpkgDebug>
+    <VulkanLib Condition="'$(PlatformArchitecture)'=='32'">Lib32</VulkanLib>
+    <VulkanLib Condition="'$(PlatformArchitecture)'!='32'">Lib</VulkanLib>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutDir>$(SolutionDir)build\$(PlatformToolset)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(PlatformToolset)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\;$(StarVcpkg)\installed\$(Platform)-windows\include;$(StarVcpkg)\installed\$(Platform)-windows\include\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 /JMC %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;__AVX2__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

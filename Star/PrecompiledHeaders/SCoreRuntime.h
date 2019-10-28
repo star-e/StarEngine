@@ -31,7 +31,6 @@
 // container
 #include <boost/container/static_vector.hpp>
 #include <boost/container/small_vector.hpp>
-#include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/circular_buffer.hpp>
 
@@ -79,11 +78,9 @@
 #include <Star/SBitwise.h>
 #include <Star/SMemory.h>
 #include <Star/SSmallVector.h>
-#include <Star/SFlatMap.h>
 #include <Star/SAtomic.h>
 #include <Star/SHash.h>
-#include <Star/Core2/SMetaID.h>
+#include <Star/Core/SMetaID.h>
 #include <Star/Graphics/SRenderFormat.h>
-#include <Star/Graphics/SRenderDesc.h>
-#include <Star/Serialization/SRuntime.h>
-#include <Star/Serialization/SPmrBinaryInArchive.h>
+#include <Star/Graphics/SRenderTypes.h>
+#include <Star/SSerializationUtils.h>

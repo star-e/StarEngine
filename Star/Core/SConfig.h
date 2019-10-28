@@ -17,39 +17,30 @@
 
 #pragma once
 
-namespace Star {
-
-#ifndef NDEBUG
-template<int N>
-struct print_size_as_warning {
-    char operator()() { return N + 256; } //deliberately causing overflow
-};
-
-#define PRINT_SIZE(NAME) \
-namespace { \
-inline void print_size_##NAME() noexcept { \
-    ::Star::print_size_as_warning<sizeof(NAME)>()(); \
-} \
-}
-
-#define PRINT_ALIGN(NAME) \
-namespace { \
-inline void print_align_##NAME() noexcept { \
-    ::Star::print_size_as_warning<alignof(NAME)>()(); \
-} \
-}
-
-#ifdef _DEBUG
-#define CHECK_SIZE(NAME, SIZE) 
+#ifdef _MSC_VER
+#   ifdef STAR_CORE_STATIC
+#       define STAR_CORE_API
+#       define STAR_CORE_TEMPLATE
+#   else
+#       ifdef STAR_CORE_EXPORTS
+#           ifdef STAR_CORE_DEF
+#               define STAR_CORE_API
+#               define STAR_CORE_TEMPLATE
+#           else
+#               define STAR_CORE_API __declspec(dllexport)
+#               define STAR_CORE_TEMPLATE
+#           endif
+#       else
+#           ifdef _LIB
+#               define STAR_CORE_API
+#               define STAR_CORE_TEMPLATE
+#           else
+#               define STAR_CORE_API __declspec(dllimport)
+#               define STAR_CORE_TEMPLATE extern
+#           endif
+#       endif
+#   endif
 #else
-#define CHECK_SIZE(NAME, SIZE) static_assert(sizeof(NAME) == SIZE);
+#   define STAR_CORE_API   
+#   define STAR_CORE_TEMPLATE
 #endif
-
-#else
-
-#define PRINT_SIZE(NAME) 
-#define CHECK_SIZE(NAME, SIZE) 
-
-#endif
-
-}

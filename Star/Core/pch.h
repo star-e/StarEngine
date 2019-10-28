@@ -17,39 +17,5 @@
 
 #pragma once
 
-namespace Star {
-
-#ifndef NDEBUG
-template<int N>
-struct print_size_as_warning {
-    char operator()() { return N + 256; } //deliberately causing overflow
-};
-
-#define PRINT_SIZE(NAME) \
-namespace { \
-inline void print_size_##NAME() noexcept { \
-    ::Star::print_size_as_warning<sizeof(NAME)>()(); \
-} \
-}
-
-#define PRINT_ALIGN(NAME) \
-namespace { \
-inline void print_align_##NAME() noexcept { \
-    ::Star::print_size_as_warning<alignof(NAME)>()(); \
-} \
-}
-
-#ifdef _DEBUG
-#define CHECK_SIZE(NAME, SIZE) 
-#else
-#define CHECK_SIZE(NAME, SIZE) static_assert(sizeof(NAME) == SIZE);
-#endif
-
-#else
-
-#define PRINT_SIZE(NAME) 
-#define CHECK_SIZE(NAME, SIZE) 
-
-#endif
-
-}
+#include <Star/PrecompiledHeaders/SCore.h>
+#include <Star/PrecompiledHeaders/SCoreRuntime.h>

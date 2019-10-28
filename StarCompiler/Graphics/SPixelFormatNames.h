@@ -16,8 +16,7 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include <StarCompiler/Graphics/SPixelFormat.h>
-
+#include <StarCompiler/Graphics/SPixelFormatFwd.h>
 
 namespace Star {
 
@@ -76,7 +75,6 @@ inline const char* getName(const SIZING_Y_UV_420_& v) noexcept { return "SIZING_
 } // namespace Graphics
 
 } // namespace Star
-
 
 namespace Star {
 

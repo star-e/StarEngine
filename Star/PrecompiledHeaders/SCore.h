@@ -19,7 +19,9 @@
 
 #ifdef _MSC_VER
 #define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #undef NOMINMAX
 #endif
@@ -75,6 +77,8 @@
 #include <boost/iterator/iterator_facade.hpp>
 
 // container
+#include <boost/container/flat_map.hpp>
+
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -115,7 +119,9 @@
 #include <Star/SAliasCast.h>
 #include <Star/SOverload.h>
 #include <Star/SString.h>
+#include <Star/SSet.h>
 #include <Star/SMap.h>
+#include <Star/SFlatMap.h>
 #include <Star/SUnorderedMap.h>
 #include <Star/SMultiIndex.h>
 #include <Star/SUUID.h>
