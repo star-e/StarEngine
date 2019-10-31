@@ -15,11 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
-// Copyright (C) 2015-2018 Zhou Zhenglong <zlzhou.sh@outlook.com>
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
 #pragma once
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/tracking.hpp>
