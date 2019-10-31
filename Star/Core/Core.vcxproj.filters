@@ -63,6 +63,15 @@
     <ClInclude Include="SMetaID.h">
       <Filter>Lib</Filter>
     </ClInclude>
+    <ClInclude Include="..\SFileUtils.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SGraph.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SGraphUtils.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

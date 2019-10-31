@@ -252,7 +252,10 @@
     <ClInclude Include="..\SAtomic.h" />
     <ClInclude Include="..\SBitwise.h" />
     <ClInclude Include="..\SEnum.h" />
+    <ClInclude Include="..\SFileUtils.h" />
     <ClInclude Include="..\SFlatMap.h" />
+    <ClInclude Include="..\SGraph.h" />
+    <ClInclude Include="..\SGraphUtils.h" />
     <ClInclude Include="..\SHash.h" />
     <ClInclude Include="..\SMap.h" />
     <ClInclude Include="..\SMathFwd.h" />
