@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SConfig.h" />
+    <ClInclude Include="..\SAliasCast.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SAtomic.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SBitwise.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SEnum.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SFlatMap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SHash.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMathFwd.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMemory.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMultiIndex.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SOverload.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SSerializationUtils.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SSet.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SSmallVector.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SStaticSize.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SStaticVector.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SString.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SUnorderedMap.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SUUID.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SMetaID.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SMetaID.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{d7c05fef-5588-4fac-bc04-58687470178a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{de694378-1420-444b-8bea-dcac5dd680db}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

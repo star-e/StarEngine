@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine@outlook.com
+// Copyright (C) 2019 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -58,7 +58,6 @@ enum GFX_DRIVER_TYPE : uint32_t {
 };
 
 enum GFX_FEATURE_LEVEL : uint32_t {
-    GFX_FEATURE_LEVEL_1_0_CORE	= 0x1000,
     GFX_FEATURE_LEVEL_9_1	= 0x9100,
     GFX_FEATURE_LEVEL_9_2	= 0x9200,
     GFX_FEATURE_LEVEL_9_3	= 0x9300,
@@ -190,7 +189,6 @@ enum GFX_NAME : uint32_t {
     GFX_NAME_FINAL_LINE_DETAIL_TESSFACTOR	= 15,
     GFX_NAME_FINAL_LINE_DENSITY_TESSFACTOR	= 16,
     GFX_NAME_BARYCENTRICS	= 23,
-    GFX_NAME_SHADINGRATE	= 24,
     GFX_NAME_TARGET	= 64,
     GFX_NAME_DEPTH	= 65,
     GFX_NAME_COVERAGE	= 66,
@@ -198,8 +196,7 @@ enum GFX_NAME : uint32_t {
     GFX_NAME_DEPTH_LESS_EQUAL	= 68,
     GFX_NAME_STENCIL_REF	= 69,
     GFX_NAME_INNER_COVERAGE	= 70,
-    NAME_BARYCENTRICS	= GFX_NAME_BARYCENTRICS,
-    NAME_SHADINGRATE	= GFX_NAME_SHADINGRATE
+    NAME_BARYCENTRICS	= GFX_NAME_BARYCENTRICS
 };
 
 enum GFX_RESOURCE_RETURN_TYPE : uint32_t {
@@ -271,8 +268,7 @@ enum COMMAND_LIST_TYPE : uint32_t {
     COMMAND_LIST_TYPE_COMPUTE	= 2,
     COMMAND_LIST_TYPE_COPY	= 3,
     COMMAND_LIST_TYPE_VIDEO_DECODE	= 4,
-    COMMAND_LIST_TYPE_VIDEO_PROCESS	= 5,
-    COMMAND_LIST_TYPE_VIDEO_ENCODE	= 6
+    COMMAND_LIST_TYPE_VIDEO_PROCESS	= 5
 };
 
 enum COMMAND_QUEUE_FLAGS : uint32_t {
@@ -623,9 +619,7 @@ enum FEATURE : uint32_t {
     FEATURE_OPTIONS4	= 23,
     FEATURE_SERIALIZATION	= 24,
     FEATURE_CROSS_NODE	= 25,
-    FEATURE_OPTIONS5	= 27,
-    FEATURE_OPTIONS6	= 30,
-    FEATURE_QUERY_META_COMMAND	= 31
+    FEATURE_OPTIONS5	= 27
 };
 
 enum SHADER_MIN_PRECISION_SUPPORT : uint32_t {
@@ -803,8 +797,7 @@ enum GFX_SHADER_MODEL : uint32_t {
     GFX_SHADER_MODEL_6_1	= 0x61,
     GFX_SHADER_MODEL_6_2	= 0x62,
     GFX_SHADER_MODEL_6_3	= 0x63,
-    GFX_SHADER_MODEL_6_4	= 0x64,
-    GFX_SHADER_MODEL_6_5	= 0x65
+    GFX_SHADER_MODEL_6_4	= 0x64
 };
 
 struct FEATURE_DATA_SHADER_MODEL {
@@ -859,8 +852,7 @@ enum COMMAND_LIST_SUPPORT_FLAGS : uint32_t {
     COMMAND_LIST_SUPPORT_FLAG_COMPUTE	= ( 1 << COMMAND_LIST_TYPE_COMPUTE ) ,
     COMMAND_LIST_SUPPORT_FLAG_COPY	= ( 1 << COMMAND_LIST_TYPE_COPY ) ,
     COMMAND_LIST_SUPPORT_FLAG_VIDEO_DECODE	= ( 1 << COMMAND_LIST_TYPE_VIDEO_DECODE ) ,
-    COMMAND_LIST_SUPPORT_FLAG_VIDEO_PROCESS	= ( 1 << COMMAND_LIST_TYPE_VIDEO_PROCESS ) ,
-    COMMAND_LIST_SUPPORT_FLAG_VIDEO_ENCODE	= ( 1 << COMMAND_LIST_TYPE_VIDEO_ENCODE )
+    COMMAND_LIST_SUPPORT_FLAG_VIDEO_PROCESS	= ( 1 << COMMAND_LIST_TYPE_VIDEO_PROCESS )
 };
 
 struct FEATURE_DATA_D3D12_OPTIONS3 {
@@ -916,29 +908,6 @@ struct FEATURE_DATA_D3D12_OPTIONS5 {
     Bool mSRVOnlyTiledResourceTier3;
     RENDER_PASS_TIER mRenderPassesTier;
     RAYTRACING_TIER mRaytracingTier;
-};
-
-enum VARIABLE_SHADING_RATE_TIER : uint32_t {
-    VARIABLE_SHADING_RATE_TIER_NOT_SUPPORTED	= 0,
-    VARIABLE_SHADING_RATE_TIER_1	= 1,
-    VARIABLE_SHADING_RATE_TIER_2	= 2
-};
-
-struct FEATURE_DATA_D3D12_OPTIONS6 {
-    Bool mAdditionalShadingRatesSupported;
-    Bool mPerPrimitiveShadingRateSupportedWithViewportIndexing;
-    VARIABLE_SHADING_RATE_TIER mVariableShadingRateTier;
-    uint32_t mShadingRateImageTileSize;
-    Bool mBackgroundProcessingSupported;
-};
-
-struct FEATURE_DATA_QUERY_META_COMMAND {
-    boost::uuids::uuid mCommandId;
-    uint32_t mNodeMask;
-    const void *mQueryInputData;
-    size_t mQueryInputDataSizeInBytes;
-    void *mQueryOutputData;
-    size_t mQueryOutputDataSizeInBytes;
 };
 
 struct RESOURCE_ALLOCATION_INFO {
@@ -1148,7 +1117,6 @@ enum RESOURCE_STATES : uint32_t {
     RESOURCE_STATE_RESOLVE_DEST	= 0x1000,
     RESOURCE_STATE_RESOLVE_SOURCE	= 0x2000,
     RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE	= 0x400000,
-    RESOURCE_STATE_SHADING_RATE_SOURCE	= 0x1000000,
     RESOURCE_STATE_GENERIC_READ	= ( ( ( ( ( 0x1 | 0x2 )  | 0x40 )  | 0x80 )  | 0x200 )  | 0x800 ) ,
     RESOURCE_STATE_PRESENT	= 0,
     RESOURCE_STATE_PREDICATION	= 0x200,
@@ -2461,9 +2429,7 @@ enum AUTO_BREADCRUMB_OP : uint32_t {
     AUTO_BREADCRUMB_OP_EXECUTEMETACOMMAND	= 36,
     AUTO_BREADCRUMB_OP_ESTIMATEMOTION	= 37,
     AUTO_BREADCRUMB_OP_RESOLVEMOTIONVECTORHEAP	= 38,
-    AUTO_BREADCRUMB_OP_SETPIPELINESTATE1	= 39,
-    AUTO_BREADCRUMB_OP_INITIALIZEEXTENSIONCOMMAND	= 40,
-    AUTO_BREADCRUMB_OP_EXECUTEEXTENSIONCOMMAND	= 41
+    AUTO_BREADCRUMB_OP_SETPIPELINESTATE1	= 39
 };
 
 struct AUTO_BREADCRUMB_NODE {
@@ -2474,14 +2440,13 @@ struct AUTO_BREADCRUMB_NODE {
     void *mCommandList;
     void *mCommandQueue;
     uint32_t mBreadcrumbCount;
-    const uint32_t *mLastBreadcrumbValue;
-    const AUTO_BREADCRUMB_OP *mCommandHistory;
-    const struct AUTO_BREADCRUMB_NODE *mNext;
+    uint32_t *mLastBreadcrumbValue;
+    AUTO_BREADCRUMB_OP *mCommandHistory;
+    struct AUTO_BREADCRUMB_NODE *mNext;
 };
 
 enum DRED_VERSION : uint32_t {
-    DRED_VERSION_1_0	= 0x1,
-    DRED_VERSION_1_1	= 0x2
+    DRED_VERSION_1_0	= 0x1
 };
 
 enum DRED_FLAGS : uint32_t {
@@ -2490,90 +2455,16 @@ enum DRED_FLAGS : uint32_t {
     DRED_FLAG_DISABLE_AUTOBREADCRUMBS	= 2
 };
 
-enum DRED_ENABLEMENT : uint32_t {
-    DRED_ENABLEMENT_SYSTEM_CONTROLLED	= 0,
-    DRED_ENABLEMENT_FORCED_OFF	= 1,
-    DRED_ENABLEMENT_FORCED_ON	= 2
-};
-
 struct DEVICE_REMOVED_EXTENDED_DATA {
     DRED_FLAGS mFlags;
     AUTO_BREADCRUMB_NODE *mHeadAutoBreadcrumbNode;
-};
-
-enum DRED_ALLOCATION_TYPE : uint32_t {
-    DRED_ALLOCATION_TYPE_COMMAND_QUEUE	= 19,
-    DRED_ALLOCATION_TYPE_COMMAND_ALLOCATOR	= 20,
-    DRED_ALLOCATION_TYPE_PIPELINE_STATE	= 21,
-    DRED_ALLOCATION_TYPE_COMMAND_LIST	= 22,
-    DRED_ALLOCATION_TYPE_FENCE	= 23,
-    DRED_ALLOCATION_TYPE_DESCRIPTOR_HEAP	= 24,
-    DRED_ALLOCATION_TYPE_HEAP	= 25,
-    DRED_ALLOCATION_TYPE_QUERY_HEAP	= 27,
-    DRED_ALLOCATION_TYPE_COMMAND_SIGNATURE	= 28,
-    DRED_ALLOCATION_TYPE_PIPELINE_LIBRARY	= 29,
-    DRED_ALLOCATION_TYPE_VIDEO_DECODER	= 30,
-    DRED_ALLOCATION_TYPE_VIDEO_PROCESSOR	= 32,
-    DRED_ALLOCATION_TYPE_RESOURCE	= 34,
-    DRED_ALLOCATION_TYPE_PASS	= 35,
-    DRED_ALLOCATION_TYPE_CRYPTOSESSION	= 36,
-    DRED_ALLOCATION_TYPE_CRYPTOSESSIONPOLICY	= 37,
-    DRED_ALLOCATION_TYPE_PROTECTEDRESOURCESESSION	= 38,
-    DRED_ALLOCATION_TYPE_VIDEO_DECODER_HEAP	= 39,
-    DRED_ALLOCATION_TYPE_COMMAND_POOL	= 40,
-    DRED_ALLOCATION_TYPE_COMMAND_RECORDER	= 41,
-    DRED_ALLOCATION_TYPE_STATE_OBJECT	= 42,
-    DRED_ALLOCATION_TYPE_METACOMMAND	= 43,
-    DRED_ALLOCATION_TYPE_SCHEDULINGGROUP	= 44,
-    DRED_ALLOCATION_TYPE_VIDEO_MOTION_ESTIMATOR	= 45,
-    DRED_ALLOCATION_TYPE_VIDEO_MOTION_VECTOR_HEAP	= 46,
-    DRED_ALLOCATION_TYPE_VIDEO_EXTENSION_COMMAND	= 47,
-    DRED_ALLOCATION_TYPE_INVALID	= 0xffffffff
-};
-
-struct DRED_ALLOCATION_NODE {
-    const char *ObjectNameA;
-    const wchar_t *ObjectNameW;
-    DRED_ALLOCATION_TYPE mAllocationType;
-    const struct DRED_ALLOCATION_NODE *mNext;
-};
-
-struct DRED_AUTO_BREADCRUMBS_OUTPUT {
-    const AUTO_BREADCRUMB_NODE *mHeadAutoBreadcrumbNode;
-};
-
-struct DRED_PAGE_FAULT_OUTPUT {
-    GPU_VIRTUAL_ADDRESS mPageFaultVA;
-    const DRED_ALLOCATION_NODE *mHeadExistingAllocationNode;
-    const DRED_ALLOCATION_NODE *mHeadRecentFreedAllocationNode;
-};
-
-struct DEVICE_REMOVED_EXTENDED_DATA1 {
-    HRESULT mDeviceRemovedReason;
-    DRED_AUTO_BREADCRUMBS_OUTPUT mAutoBreadcrumbsOutput;
-    DRED_PAGE_FAULT_OUTPUT mPageFaultOutput;
 };
 
 struct VERSIONED_DEVICE_REMOVED_EXTENDED_DATA {
     DRED_VERSION mVersion;
     union {
         DEVICE_REMOVED_EXTENDED_DATA mDred_1_0;
-        DEVICE_REMOVED_EXTENDED_DATA1 mDred_1_1;
     };
-};
-
-enum BACKGROUND_PROCESSING_MODE : uint32_t {
-    BACKGROUND_PROCESSING_MODE_ALLOWED	= 0,
-    BACKGROUND_PROCESSING_MODE_ALLOW_INTRUSIVE_MEASUREMENTS	= ( BACKGROUND_PROCESSING_MODE_ALLOWED + 1 ) ,
-    BACKGROUND_PROCESSING_MODE_DISABLE_BACKGROUND_WORK	= ( BACKGROUND_PROCESSING_MODE_ALLOW_INTRUSIVE_MEASUREMENTS + 1 ) ,
-    BACKGROUND_PROCESSING_MODE_DISABLE_PROFILING_BY_SYSTEM	= ( BACKGROUND_PROCESSING_MODE_DISABLE_BACKGROUND_WORK + 1 )
-};
-
-enum MEASUREMENTS_ACTION : uint32_t {
-    MEASUREMENTS_ACTION_KEEP_ALL	= 0,
-    MEASUREMENTS_ACTION_COMMIT_RESULTS	= ( MEASUREMENTS_ACTION_KEEP_ALL + 1 ) ,
-    MEASUREMENTS_ACTION_COMMIT_RESULTS_HIGH_PRIORITY	= ( MEASUREMENTS_ACTION_COMMIT_RESULTS + 1 ) ,
-    MEASUREMENTS_ACTION_DISCARD_PREVIOUS	= ( MEASUREMENTS_ACTION_COMMIT_RESULTS_HIGH_PRIORITY + 1 )
 };
 
 enum RENDER_PASS_BEGINNING_ACCESS_TYPE : uint32_t {
@@ -2669,30 +2560,6 @@ struct MEMCPY_DEST {
     size_t mSlicePitch;
 };
 
-enum AXIS_SHADING_RATE : uint32_t {
-    AXIS_SHADING_RATE_1X	= 0,
-    AXIS_SHADING_RATE_2X	= 0x1,
-    AXIS_SHADING_RATE_4X	= 0x2
-};
-
-enum SHADING_RATE : uint32_t {
-    SHADING_RATE_1X1	= 0,
-    SHADING_RATE_1X2	= 0x1,
-    SHADING_RATE_2X1	= 0x4,
-    SHADING_RATE_2X2	= 0x5,
-    SHADING_RATE_2X4	= 0x6,
-    SHADING_RATE_4X2	= 0x9,
-    SHADING_RATE_4X4	= 0xa
-};
-
-enum SHADING_RATE_COMBINER : uint32_t {
-    SHADING_RATE_COMBINER_PASSTHROUGH	= 0,
-    SHADING_RATE_COMBINER_OVERRIDE	= 1,
-    SHADING_RATE_COMBINER_MIN	= 2,
-    SHADING_RATE_COMBINER_MAX	= 3,
-    SHADING_RATE_COMBINER_SUM	= 4
-};
-
 struct LargeWidth {
     uint64_t mValue = 0;
 };
@@ -2705,32 +2572,32 @@ struct Height {
     uint32_t mValue = 0;
 };
 
-struct Immediate_ {} constexpr Immediate;
-struct TiledImmediate_ {} constexpr TiledImmediate;
-struct TiledDeferred_ {} constexpr TiledDeferred;
+struct Immediate_ {} static constexpr Immediate;
+struct TiledImmediate_ {} static constexpr TiledImmediate;
+struct TiledDeferred_ {} static constexpr TiledDeferred;
 
 using GpuArch = std::variant<Immediate_, TiledImmediate_, TiledDeferred_>;
 
-struct D3D12_ {} constexpr D3D12;
-struct Vulkan_ {} constexpr Vulkan;
-struct Metal2_ {} constexpr Metal2;
+struct D3D12_ {} static constexpr D3D12;
+struct Vulkan_ {} static constexpr Vulkan;
+struct Metal2_ {} static constexpr Metal2;
 
 using API = std::variant<D3D12_, Vulkan_, Metal2_>;
 
-struct Matrix_ {} constexpr Matrix;
-struct Float4_ {} constexpr Float4;
-struct UInt4_ {} constexpr UInt4;
-struct Int4_ {} constexpr Int4;
-struct Float2_ {} constexpr Float2;
-struct UInt2_ {} constexpr UInt2;
-struct Int2_ {} constexpr Int2;
-struct Half4_ {} constexpr Half4;
-struct Float1_ {} constexpr Float1;
-struct UInt1_ {} constexpr UInt1;
-struct Int1_ {} constexpr Int1;
-struct Half2_ {} constexpr Half2;
-struct Fixed4_ {} constexpr Fixed4;
-struct Half1_ {} constexpr Half1;
+struct Matrix_ {} static constexpr Matrix;
+struct Float4_ {} static constexpr Float4;
+struct UInt4_ {} static constexpr UInt4;
+struct Int4_ {} static constexpr Int4;
+struct Float2_ {} static constexpr Float2;
+struct UInt2_ {} static constexpr UInt2;
+struct Int2_ {} static constexpr Int2;
+struct Half4_ {} static constexpr Half4;
+struct Float1_ {} static constexpr Float1;
+struct UInt1_ {} static constexpr UInt1;
+struct Int1_ {} static constexpr Int1;
+struct Half2_ {} static constexpr Half2;
+struct Fixed4_ {} static constexpr Fixed4;
+struct Half1_ {} static constexpr Half1;
 
 using DataType = std::variant<std::monostate, Matrix_, Float4_, UInt4_, Int4_, Float2_, UInt2_, Int2_, Half4_, Float1_, UInt1_, Int1_, Half2_, Fixed4_, Half1_>;
 
@@ -2756,7 +2623,7 @@ struct STAR_GRAPHICS_API ConstantBuffer {
     PmrFlatUInt32Map<DataInfo> mIndex;
 };
 
-struct FullScreenTriangle_ {} constexpr FullScreenTriangle;
+struct FullScreenTriangle_ {} static constexpr FullScreenTriangle;
 
 using DrawCallType = std::variant<std::monostate, FullScreenTriangle_>;
 
