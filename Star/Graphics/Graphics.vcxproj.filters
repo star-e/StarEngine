@@ -2,35 +2,56 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SRenderFormat.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="SRenderFormatDXGI.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="SRenderFormatUtils.h">
-      <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="SRenderFormatVulkan.h">
-      <Filter>Render</Filter>
-    </ClInclude>
     <ClInclude Include="SConfig.h" />
     <ClInclude Include="SRenderFwd.h">
-      <Filter>Render</Filter>
+      <Filter>1.Render</Filter>
     </ClInclude>
     <ClInclude Include="SRenderTypes.h">
-      <Filter>Render</Filter>
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderFwd.h">
+      <Filter>2.Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderNames.h">
+      <Filter>2.Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderTypes.h">
+      <Filter>2.Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormatVulkan.h">
+      <Filter>0.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormat.h">
+      <Filter>0.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormatDXGI.h">
+      <Filter>0.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormatUtils.h">
+      <Filter>0.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderNames.h">
+      <Filter>1.Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="SRenderFormatUtils.cpp">
-      <Filter>Render</Filter>
+      <Filter>0.Format</Filter>
+    </ClCompile>
+    <ClCompile Include="SRenderTypes.cpp">
+      <Filter>1.Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Render">
+    <Filter Include="0.Format">
+      <UniqueIdentifier>{56c46552-ec9a-4106-b153-617c1f5d9a9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.Render">
       <UniqueIdentifier>{c69ebf55-14a7-4483-9db7-4cd3684e99dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2.Shader">
+      <UniqueIdentifier>{97ed11ab-5343-4379-a141-189e14ab3957}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

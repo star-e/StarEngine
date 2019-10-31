@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SShaderAttribute.cpp">
+      <Filter>1.ShaderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderGraph.cpp">
+      <Filter>1.ShaderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderModule.cpp">
+      <Filter>1.ShaderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderValue.cpp">
+      <Filter>1.ShaderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderVariant.cpp">
+      <Filter>1.ShaderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderStage.cpp">
+      <Filter>1.ShaderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderProgram.cpp">
+      <Filter>1.ShaderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderPipeline.cpp">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderPass.cpp">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderPrototype.cpp">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderQueue.cpp">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderDescriptor.cpp">
+      <Filter>3.ShaderBinding</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderDatabase.cpp">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderBundle.cpp">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderRootSignature.cpp">
+      <Filter>3.ShaderBinding</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderRegisters.cpp">
+      <Filter>3.ShaderBinding</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderGroup.cpp">
+      <Filter>3.ShaderBinding</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderLevel.cpp">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SShaderDSL.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderFwd.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderNames.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderSemantics.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderTypes.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderAttribute.h">
+      <Filter>1.ShaderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderGraph.h">
+      <Filter>1.ShaderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderModule.h">
+      <Filter>1.ShaderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderValue.h">
+      <Filter>1.ShaderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderVariant.h">
+      <Filter>1.ShaderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderStage.h">
+      <Filter>1.ShaderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderProgram.h">
+      <Filter>1.ShaderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderPipeline.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderPass.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderPrototype.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderQueue.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderDescriptor.h">
+      <Filter>3.ShaderBinding</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderDatabase.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderBundle.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderRootSignature.h">
+      <Filter>3.ShaderBinding</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderRegisters.h">
+      <Filter>3.ShaderBinding</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderGroup.h">
+      <Filter>3.ShaderBinding</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderLevel.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="0.Types">
+      <UniqueIdentifier>{576d3460-4cab-43c5-91d2-067c78261dd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.ShaderGraph">
+      <UniqueIdentifier>{2f579610-8e19-4855-85be-255aa1ad75bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2.ShaderPrototype">
+      <UniqueIdentifier>{b61e03ab-5e97-4457-b24d-ea6e8b177ccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3.ShaderBinding">
+      <UniqueIdentifier>{01447ae8-af46-4076-828c-8ceeb75e6bba}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
