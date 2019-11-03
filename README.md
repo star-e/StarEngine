@@ -5,7 +5,7 @@ An experimental rendering engine
 https://zhuanlan.zhihu.com/starengine
 
 # 系统要求
-## 良好的网络环境，能顺利连接github与microsoft。
+良好的网络环境，能顺利连接github与microsoft。
 
 ## Visual Studio 2019 16.3, 需要安装以下四个模块。
 
@@ -32,9 +32,7 @@ https://zhuanlan.zhihu.com/starengine
 
 4. 在本地vcpkg目录打开cmd/powershell，然后在cmd/powershell中键入.\bootstrap编译vcpkg
 
-5. 在cmd/powershell中键入，vcpkg install --triplet x64-windows boost eigen3
-
-vcpkg会自动安装boost、eigen3和他们所需的依赖。安装时间视网络环境与机器配置而定。顺利的话，在30分钟左右。
+5. 在cmd/powershell中键入，vcpkg install --triplet x64-windows boost eigen3。vcpkg会自动安装boost、eigen3和他们所需的依赖。安装时间视网络环境与机器配置而定。顺利的话，在30分钟左右。
 
 6. 设置$(StarVcpkg)系统环境变量，目录为本地vcpkg目录。例如 c:\vcpkg。
 
