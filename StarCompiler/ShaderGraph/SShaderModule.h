@@ -20,7 +20,7 @@
 
 namespace Star::Graphics::Render::Shader {
 
-namespace ModuleDSL {
+namespace DSL {
 
 using Attributes = IdentityMap<AttributeUsage>;
 using Inputs = NameMap<ShaderValue>;

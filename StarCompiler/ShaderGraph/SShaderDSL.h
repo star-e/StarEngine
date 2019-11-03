@@ -23,8 +23,10 @@
 namespace Star::Graphics::Render::Shader {
 
 namespace DSL {
+
 static const matrix identity = matrix::Identity();
 static const matrix zero = matrix::Zero();
+
 }
 
 }

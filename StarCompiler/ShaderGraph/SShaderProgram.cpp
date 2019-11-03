@@ -26,7 +26,7 @@
 
 namespace Star::Graphics::Render::Shader {
 
-using namespace ModuleDSL;
+using namespace DSL;
 
 bool ShaderProgram::stageBegin(ShaderStageType stage, NameMap<ShaderValue> outputs) {
     visit(overload(

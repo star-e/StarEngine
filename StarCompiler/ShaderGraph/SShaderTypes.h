@@ -370,8 +370,8 @@ enum UnityAttributeFlags : uint32_t {
     TexScaleOffset = 1 << 14,
     SeparateSampler = 1 << 15,
     NoSampler = 1 << 16,
-    UnityPerMaterial = 1 << 17,
-    UnityPerDraw = 1 << 18,
+    PerMaterial = 1 << 17,
+    PerDraw = 1 << 18,
 };
 
 } // namespace Unity
