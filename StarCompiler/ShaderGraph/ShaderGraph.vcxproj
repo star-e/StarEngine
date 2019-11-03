@@ -31,7 +31,7 @@
     <ProjectGuid>{9487B67D-D83E-4E87-8B85-66B0E6D8F5A3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ShaderGraph</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>00.ShaderGraph</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
