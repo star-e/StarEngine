@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "00.ShaderGraph", "StarCompi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01.ShaderWorks", "StarCompiler\ShaderWorks\ShaderWorks.vcxproj", "{BC8B1985-574E-484E-9499-F7DE70805B8F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2.Apps", "2.Apps", "{D8167A8D-02D6-47A3-987F-7F71A4681589}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
