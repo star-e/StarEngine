@@ -18,7 +18,5 @@
 #pragma once
 
 #include <Star/PrecompiledHeaders/SCore.h>
-#include <Star/PrecompiledHeaders/SCoreRuntime.h>
-
-#include <Star/Serialization/SRuntime.h>
-#include <Star/Serialization/SPmrBinaryInArchive.h>
+#include <StarCompiler/PrecompiledHeaders/SCoreCompiler.h>
+#include <regex>

@@ -16,9 +16,35 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
+#include <string>
+#include <cstdint>
+#include <Star/SSerializationUtils.h>
 
-#include <Star/PrecompiledHeaders/SCore.h>
-#include <Star/PrecompiledHeaders/SCoreRuntime.h>
+namespace boost {
+namespace serialization {
 
-#include <Star/Serialization/SRuntime.h>
-#include <Star/Serialization/SPmrBinaryInArchive.h>
+STAR_CLASS_IMPLEMENTATION(std::pmr::string, object_serializable);
+STAR_CLASS_TRACKING(std::pmr::string, track_never);
+STAR_SERIALIZATION_SPLIT_FREE(std::pmr::string)
+
+template<class Archive>
+void save(Archive& ar, const std::pmr::string& v, const uint32_t version) {
+    uint32_t sz = static_cast<uint32_t>(v.size());
+    ar << sz;
+    if (sz) {
+        ar << make_binary_object(v.data(), sz);
+    }
+}
+
+template<class Archive>
+void load(Archive& ar, std::pmr::string& v, const uint32_t version) {
+    uint32_t sz = 0;
+    ar >> sz;
+    if (sz) {
+        v.resize(sz);
+        ar >> make_binary_object(v.data(), sz);
+    }
+}
+
+}
+}

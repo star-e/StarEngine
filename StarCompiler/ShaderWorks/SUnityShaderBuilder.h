@@ -16,9 +16,19 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
+#include <StarCompiler/ShaderGraph/SShaderPrototype.h>
 
-#include <Star/PrecompiledHeaders/SCore.h>
-#include <Star/PrecompiledHeaders/SCoreRuntime.h>
+namespace Star::Graphics::Render::Shader {
 
-#include <Star/Serialization/SRuntime.h>
-#include <Star/Serialization/SPmrBinaryInArchive.h>
+class UnityShaderBuilder {
+public:
+    std::string generateShader(const AttributeMap& attrs, const ShaderPrototype& p) const;
+private:
+    std::string generateProperties(const AttributeMap& attrMap, const ShaderPrototype& p) const;
+    std::string generateSubShaderStates(const ShaderLevel& subshader) const;
+    std::string generatePassStates(const ShaderPass& p) const;
+    std::string generateProgram(const AttributeMap& attrs, const ShaderPass& p) const;
+    std::string generateAttributes(const AttributeMap& attrs, bool instancing) const;
+};
+
+}

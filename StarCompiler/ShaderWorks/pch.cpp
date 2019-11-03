@@ -15,10 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+// pch.cpp: source file corresponding to the pre-compiled header
 
-#include <Star/PrecompiledHeaders/SCore.h>
-#include <Star/PrecompiledHeaders/SCoreRuntime.h>
+#include "pch.h"
 
-#include <Star/Serialization/SRuntime.h>
-#include <Star/Serialization/SPmrBinaryInArchive.h>
+// When you are using pre-compiled headers, this source file is necessary for compilation to succeed.

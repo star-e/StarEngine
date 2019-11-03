@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SShaderWorks.cpp" />
+    <ClCompile Include="SUnityShaderBuilder.cpp">
+      <Filter>Unity</Filter>
+    </ClCompile>
+    <ClCompile Include="SHLSLGenerator.cpp">
+      <Filter>HLSL</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SShaderWorks.h" />
+    <ClInclude Include="SUnityShaderBuilder.h">
+      <Filter>Unity</Filter>
+    </ClInclude>
+    <ClInclude Include="SHLSLGenerator.h">
+      <Filter>HLSL</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Unity">
+      <UniqueIdentifier>{21e6b469-eb2c-4d7d-920b-8bd1661fe384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{c8af206e-cb98-4aed-a3f8-8945b25130e0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

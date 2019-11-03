@@ -16,9 +16,10 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-
-#include <Star/PrecompiledHeaders/SCore.h>
-#include <Star/PrecompiledHeaders/SCoreRuntime.h>
-
-#include <Star/Serialization/SRuntime.h>
-#include <Star/Serialization/SPmrBinaryInArchive.h>
+#include <Star/Serialization/SMath.h>
+#include <Star/Serialization/SOptional.h>
+#include <Star/Serialization/SVariant.h>
+#include <Star/Serialization/SPmrPolymorphicAllocator.h>
+#include <Star/Serialization/SPmrString.h>
+#include <Star/Serialization/SPmrVector.h>
+#include <Star/Serialization/SFlatMap.h>

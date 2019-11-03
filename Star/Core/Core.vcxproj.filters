@@ -4,87 +4,120 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="SConfig.h" />
     <ClInclude Include="..\SAliasCast.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SAtomic.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SBitwise.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SEnum.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SFlatMap.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SHash.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SMap.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SMathFwd.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SMemory.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SMultiIndex.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SOverload.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SSerializationUtils.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SSet.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SSmallVector.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SStaticSize.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SStaticVector.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SString.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SUnorderedMap.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SUUID.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="SMetaID.h">
-      <Filter>Lib</Filter>
+      <Filter>02.Lib</Filter>
     </ClInclude>
     <ClInclude Include="..\SFileUtils.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SGraph.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
     </ClInclude>
     <ClInclude Include="..\SGraphUtils.h">
-      <Filter>Common</Filter>
+      <Filter>00.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SFlatMap.h">
+      <Filter>01.Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SMath.h">
+      <Filter>01.Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SOptional.h">
+      <Filter>01.Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SPmrPolymorphicAllocator.h">
+      <Filter>01.Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SPmrString.h">
+      <Filter>01.Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SPmrVector.h">
+      <Filter>01.Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SVariant.h">
+      <Filter>01.Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SPmrBinaryInArchive.h">
+      <Filter>01.Serialization\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serialization\SRuntime.h">
+      <Filter>01.Serialization\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="SMetaID.cpp">
-      <Filter>Lib</Filter>
+      <Filter>02.Lib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Common">
+    <Filter Include="00.Common">
       <UniqueIdentifier>{d7c05fef-5588-4fac-bc04-58687470178a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lib">
+    <Filter Include="01.Serialization">
+      <UniqueIdentifier>{079f1cce-23b3-454a-89c8-5f8a4e8c7a97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02.Lib">
       <UniqueIdentifier>{de694378-1420-444b-8bea-dcac5dd680db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01.Serialization\Utils">
+      <UniqueIdentifier>{f598c1e1-a761-4b3b-b299-c53f0dd4323a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
