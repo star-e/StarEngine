@@ -85,6 +85,7 @@ int buildUnityShaders(const ShaderWorks& shaderWorks, ShaderDatabase& db) {
     } // Shader
 
     BUILD("Star/PBR Standard", "../../Unity/Shaders/PBRStandard.shader");
+    //BUILD("Star/PBR Standard", "../../../StarUnity/Assets/Shaders/PBRStandard.shader");
 
     return 0;
 }
