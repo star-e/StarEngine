@@ -8,9 +8,7 @@
     <Link>
       <AdditionalDependencies>Bcrypt.lib;$(StarVcpkg)\installed\$(Platform)-windows\$(VcpkgDebug)lib\boost_*.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <ClCompile>
-      <PreprocessorDefinitions>BOOST_MOVE_USE_STANDARD_LIBRARY_MOVE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile />
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
