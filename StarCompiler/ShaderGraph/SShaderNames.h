@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -17,7 +17,6 @@
 
 #pragma once
 #include <StarCompiler/ShaderGraph/SShaderFwd.h>
-#include <Star/Graphics/SShaderNames.h>
 #include <Star/Graphics/SRenderNames.h>
 #include <StarCompiler/Graphics/SRenderNames.h>
 
@@ -42,18 +41,6 @@ inline const char* getName(const TS_& v) noexcept { return "TS"; }
 inline const char* getName(const HS_& v) noexcept { return "HS"; }
 inline const char* getName(const VS_& v) noexcept { return "VS"; }
 inline const char* getName(const CS_& v) noexcept { return "CS"; }
-inline const char* getName(RootAccessEnum e) noexcept {
-    switch(e) {
-    case RA_All: return "RA_All";
-    case RA_PS: return "RA_PS";
-    case RA_GS: return "RA_GS";
-    case RA_DS: return "RA_DS";
-    case RA_HS: return "RA_HS";
-    case RA_VS: return "RA_VS";
-    case RA_Count: return "RA_Count";
-    }
-    return "";
-}
 inline const char* getName(const ShaderStruct& v) noexcept { return "ShaderStruct"; }
 inline const char* getName(const ShaderValue& v) noexcept { return "ShaderValue"; }
 inline const char* getName(const InputPatch_& v) noexcept { return "InputPatch"; }
@@ -84,18 +71,6 @@ inline const char* getName(const RWTexture3D_& v) noexcept { return "RWTexture3D
 inline const char* getName(const SamplerState_& v) noexcept { return "SamplerState"; }
 inline const char* getName(const FloatRange& v) noexcept { return "FloatRange"; }
 inline const char* getName(const HalfRange& v) noexcept { return "HalfRange"; }
-inline const char* getName(UpdateEnum e) noexcept {
-    switch(e) {
-    case PerInstance: return "PerInstance";
-    case PerBatch: return "PerBatch";
-    case PerPass: return "PerPass";
-    case PerFrame: return "PerFrame";
-    case UpdateCount: return "UpdateCount";
-    }
-    return "";
-}
-inline const char* getName(const Table_& v) noexcept { return "Table"; }
-inline const char* getName(const Constants_& v) noexcept { return "Constants"; }
 
 inline const char* getName(const DefaultView_& v) noexcept { return "DefaultView"; }
 inline const char* getName(const ShaderAttribute& v) noexcept { return "ShaderAttribute"; }
@@ -190,11 +165,6 @@ inline const char* getName(const Line_& v) noexcept { return "Line"; }
 inline const char* getName(const Triangle_& v) noexcept { return "Triangle"; }
 inline const char* getName(const Patch_& v) noexcept { return "Patch"; }
 inline const char* getName(const InputLayoutState& v) noexcept { return "InputLayoutState"; }
-inline const char* getName(const AttributeCollection& v) noexcept { return "AttributeCollection"; }
-inline const char* getName(const DrawCall& v) noexcept { return "DrawCall"; }
-inline const char* getName(const DrawCallQueue& v) noexcept { return "DrawCallQueue"; }
-inline const char* getName(const UnorderedSubmissions& v) noexcept { return "UnorderedSubmissions"; }
-inline const char* getName(const PassSubmissions& v) noexcept { return "PassSubmissions"; }
 
 } // namespace Shader
 

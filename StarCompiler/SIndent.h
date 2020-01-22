@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -63,6 +63,21 @@ inline void copyString(std::ostream& os, const std::string& space, const std::st
     }
 }
 
+inline void copyString(std::ostream& os, const std::string& space, const std::pmr::string& str) {
+    std::basic_istringstream<char, std::char_traits<char>,
+        std::pmr::polymorphic_allocator<char>> iss(str);
+    std::string line;
+    while (std::getline(iss, line)) {
+        if (line.empty())
+            os << '\n';
+        else if (line[0] == '#') {
+            os << line << '\n';
+        } else {
+            os << space << line << '\n';
+        }
+    }
+}
+
 inline void try_copyString(std::ostream& os, const std::string& space, const std::string& str) {
     if (str.empty())
         return;
@@ -71,6 +86,21 @@ inline void try_copyString(std::ostream& os, const std::string& space, const std
 
 inline void copyString(std::ostream& os, const std::string& str) {
     std::istringstream iss(str);
+    std::string line;
+    while (std::getline(iss, line)) {
+        if (line.empty())
+            os << '\n';
+        else if (line[0] == '#') {
+            os << line << '\n';
+        } else {
+            os << line << '\n';
+        }
+    }
+}
+
+inline void copyString(std::ostream& os, const std::pmr::string& str) {
+    std::basic_istringstream<char, std::char_traits<char>,
+        std::pmr::polymorphic_allocator<char>> iss(str);
     std::string line;
     while (std::getline(iss, line)) {
         if (line.empty())

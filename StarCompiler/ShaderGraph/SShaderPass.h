@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -76,60 +76,30 @@ public:
     }
 
     ShaderPass& operator<<(Blend blend) {
-        Expects(!mShaderStates.empty());
-        mShaderStates.get<Index::Index>().modify(
-            mShaderStates.get<Index::Index>().end() - 1,
-            [&](PipelineState& pso) {
-                pso.mBlendState.mRenderTargets.emplace_back(blend);
-            }
-        );
+        mShaderState.mBlendState.mRenderTargets.emplace_back(blend);
         return *this;
     }
     
     ShaderPass& operator<<(CullMode cull) {
-        Expects(!mShaderStates.empty());
-        mShaderStates.get<Index::Index>().modify(
-            mShaderStates.get<Index::Index>().end() - 1,
-            [&](PipelineState& pso) {
-                pso.mRasterizerState.mCullMode = cull;
-            }
-        );
+        mShaderState.mRasterizerState.mCullMode = cull;
         return *this;
     }
 
     ShaderPass& operator<<(Unity::ZWrite z) {
-        Expects(!mShaderStates.empty());
-        mShaderStates.get<Index::Index>().modify(
-            mShaderStates.get<Index::Index>().end() - 1,
-            [&](PipelineState& pso) {
-                pso.mDepthStencilState.mDepthWrite = z.mEnabled;
-            }
-        );
+        mShaderState.mDepthStencilState.mDepthWrite = z.mEnabled;
         return *this;
     }
     
     ShaderPass& operator<<(ComparisonFunc comp) {
-        Expects(!mShaderStates.empty());
-        mShaderStates.get<Index::Index>().modify(
-            mShaderStates.get<Index::Index>().end() - 1,
-            [&](PipelineState& pso) {
-                pso.mDepthStencilState.mDepthFunc = comp;
-                if (std::holds_alternative<Always_>(comp)) {
-                    pso.mDepthStencilState.mDepthEnabled = false;
-                }
-            }
-        );
+        mShaderState.mDepthStencilState.mDepthFunc = comp;
+        if (std::holds_alternative<Always_>(comp)) {
+            mShaderState.mDepthStencilState.mDepthEnabled = false;
+        }
         return *this;
     }
 
     ShaderPass& operator<<(Unity::AlphaToMask_) {
-        Expects(!mShaderStates.empty());
-        mShaderStates.get<Index::Index>().modify(
-            mShaderStates.get<Index::Index>().end() - 1,
-            [&](PipelineState& pso) {
-                pso.mBlendState.mAlphaToCoverageEnable = true;
-            }
-        );
+        mShaderState.mBlendState.mAlphaToCoverageEnable = true;
         return *this;
     }
 
@@ -156,8 +126,7 @@ public:
 
     std::string mName;
     ShaderProgram mProgram;
-    OrderedNameMap<PipelineState> mShaderStates;
-    OrderedNameMap<InputLayoutState> mInputLayoutStates;
+    PipelineState mShaderState;
 
     Map<std::string, std::string> mUnityTags;
     Unity::AppData mUnityAppData = Unity::AppData::Full;

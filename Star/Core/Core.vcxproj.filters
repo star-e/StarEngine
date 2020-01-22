@@ -1,123 +1,114 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="SConfig.h" />
-    <ClInclude Include="..\SAliasCast.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SAtomic.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SBitwise.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SEnum.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SFlatMap.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SHash.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SMap.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SMathFwd.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SMemory.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SMultiIndex.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SOverload.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SSerializationUtils.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SSet.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SSmallVector.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SStaticSize.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SStaticVector.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SString.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SUnorderedMap.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SUUID.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="SMetaID.h">
-      <Filter>02.Lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SFileUtils.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SGraph.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SGraphUtils.h">
-      <Filter>00.Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SFlatMap.h">
-      <Filter>01.Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SMath.h">
-      <Filter>01.Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SOptional.h">
-      <Filter>01.Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SPmrPolymorphicAllocator.h">
-      <Filter>01.Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SPmrString.h">
-      <Filter>01.Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SPmrVector.h">
-      <Filter>01.Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SVariant.h">
-      <Filter>01.Serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SPmrBinaryInArchive.h">
-      <Filter>01.Serialization\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Serialization\SRuntime.h">
-      <Filter>01.Serialization\Utils</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SManagerFwd.cpp">
+      <Filter>2.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SManagerPrivate.cpp">
+      <Filter>2.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SResource.cpp">
+      <Filter>2.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SFetch.cpp">
+      <Filter>2.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SCoreTypes.cpp">
+      <Filter>1.Types</Filter>
+    </ClCompile>
+    <ClCompile Include="SProducer.cpp">
+      <Filter>2.Manager</Filter>
+    </ClCompile>
     <ClCompile Include="SMetaID.cpp">
-      <Filter>02.Lib</Filter>
+      <Filter>2.Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SResourceUtils.cpp">
+      <Filter>2.Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="00.Common">
-      <UniqueIdentifier>{d7c05fef-5588-4fac-bc04-58687470178a}</UniqueIdentifier>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SConfig.h" />
+    <ClInclude Include="SManagerFwd.h">
+      <Filter>2.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SManagerPrivate.h">
+      <Filter>2.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SResource.h">
+      <Filter>2.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SFetch.h">
+      <Filter>2.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SUnorderedMap.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PrecompiledHeaders\SCore.h">
+      <Filter>3.PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PrecompiledHeaders\SCoreRuntime.h">
+      <Filter>3.PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMathFwd.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SCoreFwd.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SCoreSerialization.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SCoreTypes.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SProducer.h">
+      <Filter>2.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMetaID.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SMetaID.h">
+      <Filter>2.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SFlatMap.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SWinRT.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SLocale.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SWinThread.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SScopeExit.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SResourceUtils.h">
+      <Filter>2.Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SGeometry.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SAlignedBuffer.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="0.Common">
+      <UniqueIdentifier>{c0f99c9e-0834-423a-b747-6f9fde895bd6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Serialization">
-      <UniqueIdentifier>{079f1cce-23b3-454a-89c8-5f8a4e8c7a97}</UniqueIdentifier>
+    <Filter Include="1.Types">
+      <UniqueIdentifier>{30c3418b-ec6f-44a2-80a5-33c575b73011}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02.Lib">
-      <UniqueIdentifier>{de694378-1420-444b-8bea-dcac5dd680db}</UniqueIdentifier>
+    <Filter Include="2.Manager">
+      <UniqueIdentifier>{bba062f9-23e9-4b51-8aad-7ab368e9a89d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01.Serialization\Utils">
-      <UniqueIdentifier>{f598c1e1-a761-4b3b-b299-c53f0dd4323a}</UniqueIdentifier>
+    <Filter Include="3.PCH">
+      <UniqueIdentifier>{5ac0da95-12aa-4f0b-9768-a15ff06dff63}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

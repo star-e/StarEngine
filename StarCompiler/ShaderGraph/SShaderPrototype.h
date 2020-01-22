@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -16,7 +16,7 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include <StarCompiler/ShaderGraph/SShaderBundle.h>
+#include <StarCompiler/ShaderGraph/SShaderSolution.h>
 
 namespace Star::Graphics::Render::Shader {
 
@@ -25,7 +25,8 @@ public:
     AttributeUsageMap getAttributes() const;
 
     std::string mName;
-    Map<std::string, ShaderBundle> mBundles;
+    std::string mAssetPath;
+    Map<std::string, ShaderSolution> mSolutions;
 };
 
 }

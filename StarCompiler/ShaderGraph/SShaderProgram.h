@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -27,6 +27,9 @@ class RootSignature;
 
 class ShaderProgram {
 public:
+    ShaderProgram() = default;
+    ShaderProgram(std::string_view name) : mName(name) {}
+
     bool stageBegin(ShaderStageType stage, NameMap<ShaderValue> outputs = {});
     bool stageEnd(ShaderStageType stage);
     void compile();
@@ -43,6 +46,7 @@ public:
     std::string mName;
     ShaderGraph mGraph;
     std::map<ShaderStageType, ShaderStage> mShaders;
+
     std::vector<ShaderVariant> mVariants;
     ShaderVariant mSkipVariants;
     GFX_SHADER_MODEL mShaderModel;

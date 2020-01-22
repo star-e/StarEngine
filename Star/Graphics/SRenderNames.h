@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -65,6 +65,8 @@ inline const char* getName(const FEATURE_DATA_D3D12_OPTIONS4& v) noexcept { retu
 inline const char* getName(const FEATURE_DATA_SERIALIZATION& v) noexcept { return "FEATURE_DATA_SERIALIZATION"; }
 inline const char* getName(const FEATURE_DATA_CROSS_NODE& v) noexcept { return "FEATURE_DATA_CROSS_NODE"; }
 inline const char* getName(const FEATURE_DATA_D3D12_OPTIONS5& v) noexcept { return "FEATURE_DATA_D3D12_OPTIONS5"; }
+inline const char* getName(const FEATURE_DATA_D3D12_OPTIONS6& v) noexcept { return "FEATURE_DATA_D3D12_OPTIONS6"; }
+inline const char* getName(const FEATURE_DATA_QUERY_META_COMMAND& v) noexcept { return "FEATURE_DATA_QUERY_META_COMMAND"; }
 inline const char* getName(const RESOURCE_ALLOCATION_INFO& v) noexcept { return "RESOURCE_ALLOCATION_INFO"; }
 inline const char* getName(const RESOURCE_ALLOCATION_INFO1& v) noexcept { return "RESOURCE_ALLOCATION_INFO1"; }
 inline const char* getName(const HEAP_PROPERTIES& v) noexcept { return "HEAP_PROPERTIES"; }
@@ -196,6 +198,10 @@ inline const char* getName(const BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC& v
 inline const char* getName(const RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO& v) noexcept { return "RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO"; }
 inline const char* getName(const AUTO_BREADCRUMB_NODE& v) noexcept { return "AUTO_BREADCRUMB_NODE"; }
 inline const char* getName(const DEVICE_REMOVED_EXTENDED_DATA& v) noexcept { return "DEVICE_REMOVED_EXTENDED_DATA"; }
+inline const char* getName(const DRED_ALLOCATION_NODE& v) noexcept { return "DRED_ALLOCATION_NODE"; }
+inline const char* getName(const DRED_AUTO_BREADCRUMBS_OUTPUT& v) noexcept { return "DRED_AUTO_BREADCRUMBS_OUTPUT"; }
+inline const char* getName(const DRED_PAGE_FAULT_OUTPUT& v) noexcept { return "DRED_PAGE_FAULT_OUTPUT"; }
+inline const char* getName(const DEVICE_REMOVED_EXTENDED_DATA1& v) noexcept { return "DEVICE_REMOVED_EXTENDED_DATA1"; }
 inline const char* getName(const VERSIONED_DEVICE_REMOVED_EXTENDED_DATA& v) noexcept { return "VERSIONED_DEVICE_REMOVED_EXTENDED_DATA"; }
 inline const char* getName(const RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS& v) noexcept { return "RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS"; }
 inline const char* getName(const RENDER_PASS_BEGINNING_ACCESS& v) noexcept { return "RENDER_PASS_BEGINNING_ACCESS"; }
@@ -213,9 +219,77 @@ inline const char* getName(const Height& v) noexcept { return "Height"; }
 inline const char* getName(const Immediate_& v) noexcept { return "Immediate"; }
 inline const char* getName(const TiledImmediate_& v) noexcept { return "TiledImmediate"; }
 inline const char* getName(const TiledDeferred_& v) noexcept { return "TiledDeferred"; }
-inline const char* getName(const D3D12_& v) noexcept { return "D3D12"; }
+inline const char* getName(const Direct3D_& v) noexcept { return "Direct3D"; }
 inline const char* getName(const Vulkan_& v) noexcept { return "Vulkan"; }
-inline const char* getName(const Metal2_& v) noexcept { return "Metal2"; }
+inline const char* getName(const Metal_& v) noexcept { return "Metal"; }
+inline const char* getName(const OpenGL_& v) noexcept { return "OpenGL"; }
+inline const char* getName(const BINORMAL_& v) noexcept { return "BINORMAL"; }
+inline const char* getName(const BLENDINDICES_& v) noexcept { return "BLENDINDICES"; }
+inline const char* getName(const BLENDWEIGHT_& v) noexcept { return "BLENDWEIGHT"; }
+inline const char* getName(const NORMAL_& v) noexcept { return "NORMAL"; }
+inline const char* getName(const POSITIONT_& v) noexcept { return "POSITIONT"; }
+inline const char* getName(const PSIZE_& v) noexcept { return "PSIZE"; }
+inline const char* getName(const TANGENT_& v) noexcept { return "TANGENT"; }
+inline const char* getName(const TEXCOORD_& v) noexcept { return "TEXCOORD"; }
+inline const char* getName(const SV_ClipDistance_& v) noexcept { return "SV_ClipDistance"; }
+inline const char* getName(const SV_CullDistance_& v) noexcept { return "SV_CullDistance"; }
+inline const char* getName(const SV_Coverage_& v) noexcept { return "SV_Coverage"; }
+inline const char* getName(const SV_Depth_& v) noexcept { return "SV_Depth"; }
+inline const char* getName(const SV_DepthGreaterEqual_& v) noexcept { return "SV_DepthGreaterEqual"; }
+inline const char* getName(const SV_DepthLessEqual_& v) noexcept { return "SV_DepthLessEqual"; }
+inline const char* getName(const SV_DispatchThreadID_& v) noexcept { return "SV_DispatchThreadID"; }
+inline const char* getName(const SV_DomainLocation_& v) noexcept { return "SV_DomainLocation"; }
+inline const char* getName(const SV_GroupID_& v) noexcept { return "SV_GroupID"; }
+inline const char* getName(const SV_GroupIndex_& v) noexcept { return "SV_GroupIndex"; }
+inline const char* getName(const SV_GroupThreadID_& v) noexcept { return "SV_GroupThreadID"; }
+inline const char* getName(const SV_GSInstanceID_& v) noexcept { return "SV_GSInstanceID"; }
+inline const char* getName(const SV_InnerCoverage_& v) noexcept { return "SV_InnerCoverage"; }
+inline const char* getName(const SV_InsideTessFactor_& v) noexcept { return "SV_InsideTessFactor"; }
+inline const char* getName(const SV_InstanceID_& v) noexcept { return "SV_InstanceID"; }
+inline const char* getName(const SV_IsFrontFace_& v) noexcept { return "SV_IsFrontFace"; }
+inline const char* getName(const SV_OutputControlPointID_& v) noexcept { return "SV_OutputControlPointID"; }
+inline const char* getName(const SV_Position_& v) noexcept { return "SV_Position"; }
+inline const char* getName(const SV_PrimitiveID_& v) noexcept { return "SV_PrimitiveID"; }
+inline const char* getName(const SV_RenderTargetArrayIndex_& v) noexcept { return "SV_RenderTargetArrayIndex"; }
+inline const char* getName(const SV_SampleIndex_& v) noexcept { return "SV_SampleIndex"; }
+inline const char* getName(const SV_StencilRef_& v) noexcept { return "SV_StencilRef"; }
+inline const char* getName(const SV_Target_& v) noexcept { return "SV_Target"; }
+inline const char* getName(const SV_TessFactor_& v) noexcept { return "SV_TessFactor"; }
+inline const char* getName(const SV_VertexID_& v) noexcept { return "SV_VertexID"; }
+inline const char* getName(const SV_ViewportArrayIndex_& v) noexcept { return "SV_ViewportArrayIndex"; }
+inline const char* getName(const CBV_& v) noexcept { return "CBV"; }
+inline const char* getName(const UAV_& v) noexcept { return "UAV"; }
+inline const char* getName(const SRV_& v) noexcept { return "SRV"; }
+inline const char* getName(const SSV_& v) noexcept { return "SSV"; }
+inline const char* getName(const RTV_& v) noexcept { return "RTV"; }
+inline const char* getName(const DSV_& v) noexcept { return "DSV"; }
+inline const char* getName(const IBV_& v) noexcept { return "IBV"; }
+inline const char* getName(const VBV_& v) noexcept { return "VBV"; }
+inline const char* getName(const SOV_& v) noexcept { return "SOV"; }
+inline const char* getName(const Table_& v) noexcept { return "Table"; }
+inline const char* getName(const Constants_& v) noexcept { return "Constants"; }
+inline const char* getName(RootAccessEnum e) noexcept {
+    switch(e) {
+    case RA_All: return "RA_All";
+    case RA_PS: return "RA_PS";
+    case RA_GS: return "RA_GS";
+    case RA_DS: return "RA_DS";
+    case RA_HS: return "RA_HS";
+    case RA_VS: return "RA_VS";
+    case RA_Count: return "RA_Count";
+    }
+    return "";
+}
+inline const char* getName(UpdateEnum e) noexcept {
+    switch(e) {
+    case PerInstance: return "PerInstance";
+    case PerBatch: return "PerBatch";
+    case PerPass: return "PerPass";
+    case PerFrame: return "PerFrame";
+    case UpdateCount: return "UpdateCount";
+    }
+    return "";
+}
 inline const char* getName(const Matrix_& v) noexcept { return "Matrix"; }
 inline const char* getName(const Float4_& v) noexcept { return "Float4"; }
 inline const char* getName(const UInt4_& v) noexcept { return "UInt4"; }
@@ -230,9 +304,8 @@ inline const char* getName(const Int1_& v) noexcept { return "Int1"; }
 inline const char* getName(const Half2_& v) noexcept { return "Half2"; }
 inline const char* getName(const Fixed4_& v) noexcept { return "Fixed4"; }
 inline const char* getName(const Half1_& v) noexcept { return "Half1"; }
-inline const char* getName(const DataInfo& v) noexcept { return "DataInfo"; }
+inline const char* getName(const DataID& v) noexcept { return "DataID"; }
 inline const char* getName(const ConstantBuffer& v) noexcept { return "ConstantBuffer"; }
-inline const char* getName(const FullScreenTriangle_& v) noexcept { return "FullScreenTriangle"; }
 
 } // namespace Render
 

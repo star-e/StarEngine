@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -24,42 +24,6 @@ namespace Graphics {
 
 namespace Render {
 
-struct CBV_ {} static constexpr CBV;
-inline bool operator==(const CBV_&, const CBV_&) noexcept { return true; }
-inline bool operator!=(const CBV_&, const CBV_&) noexcept { return false; }
-inline bool operator<(const CBV_&, const CBV_&) noexcept { return false; }
-struct UAV_ {} static constexpr UAV;
-inline bool operator==(const UAV_&, const UAV_&) noexcept { return true; }
-inline bool operator!=(const UAV_&, const UAV_&) noexcept { return false; }
-inline bool operator<(const UAV_&, const UAV_&) noexcept { return false; }
-struct SRV_ {} static constexpr SRV;
-inline bool operator==(const SRV_&, const SRV_&) noexcept { return true; }
-inline bool operator!=(const SRV_&, const SRV_&) noexcept { return false; }
-inline bool operator<(const SRV_&, const SRV_&) noexcept { return false; }
-struct SSV_ {} static constexpr SSV;
-inline bool operator==(const SSV_&, const SSV_&) noexcept { return true; }
-inline bool operator!=(const SSV_&, const SSV_&) noexcept { return false; }
-inline bool operator<(const SSV_&, const SSV_&) noexcept { return false; }
-struct RTV_ {} static constexpr RTV;
-inline bool operator==(const RTV_&, const RTV_&) noexcept { return true; }
-inline bool operator!=(const RTV_&, const RTV_&) noexcept { return false; }
-inline bool operator<(const RTV_&, const RTV_&) noexcept { return false; }
-struct DSV_ {} static constexpr DSV;
-inline bool operator==(const DSV_&, const DSV_&) noexcept { return true; }
-inline bool operator!=(const DSV_&, const DSV_&) noexcept { return false; }
-inline bool operator<(const DSV_&, const DSV_&) noexcept { return false; }
-struct IBV_ {} static constexpr IBV;
-inline bool operator==(const IBV_&, const IBV_&) noexcept { return true; }
-inline bool operator!=(const IBV_&, const IBV_&) noexcept { return false; }
-inline bool operator<(const IBV_&, const IBV_&) noexcept { return false; }
-struct VBV_ {} static constexpr VBV;
-inline bool operator==(const VBV_&, const VBV_&) noexcept { return true; }
-inline bool operator!=(const VBV_&, const VBV_&) noexcept { return false; }
-inline bool operator<(const VBV_&, const VBV_&) noexcept { return false; }
-struct SOV_ {} static constexpr SOV;
-inline bool operator==(const SOV_&, const SOV_&) noexcept { return true; }
-inline bool operator!=(const SOV_&, const SOV_&) noexcept { return false; }
-inline bool operator<(const SOV_&, const SOV_&) noexcept { return false; }
 struct BufferRaw_ {} static constexpr BufferRaw;
 inline bool operator==(const BufferRaw_&, const BufferRaw_&) noexcept { return true; }
 inline bool operator!=(const BufferRaw_&, const BufferRaw_&) noexcept { return false; }

@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="0.Misc">
+      <UniqueIdentifier>{29c8fdda-b808-4845-a6be-8983d873ba71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="2.Lib">
+      <UniqueIdentifier>{58ae0e1e-342b-4938-aeee-6694b2adeaa3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="resource.h">
+      <Filter>0.Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="SWinMessages.h">
+      <Filter>2.Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="SDesktopApp.h">
+      <Filter>2.Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="SWinClass.h">
+      <Filter>2.Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="SLuminousApp.h" />
+    <ClInclude Include="SLuminousGameWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="WinMain.cpp" />
+    <ClCompile Include="SWinMessages.cpp">
+      <Filter>2.Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="SDesktopApp.cpp">
+      <Filter>2.Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="SWinClass.cpp">
+      <Filter>2.Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="SLuminousApp.cpp" />
+    <ClCompile Include="SLuminousGameWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <Filter>0.Misc</Filter>
+    </None>
+    <None Include="PropertySheet.props">
+      <Filter>0.Misc</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LuminousDesktop.rc">
+      <Filter>1.Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="LuminousDesktop.exe.manifest">
+      <Filter>0.Misc</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt">
+      <Filter>0.Misc</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

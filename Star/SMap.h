@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -27,18 +27,32 @@ template<class Key, class Value>
 using Map = std::map<Key, Value, std::less<>>;
 
 template<class Key, class Value>
-using PmrMap = std::map<Key, Value, std::less<>,
-    std::pmr::polymorphic_allocator<std::pair<const Key, Value>>
->;
+using PmrMap = std::pmr::map<Key, Value, std::less<>>;
 
+// string
 template<class Value>
 using StringMap = std::map<std::string, Value, std::less<>>;
 
 template<class Value>
-using PmrStringMap = std::map<std::pmr::string, Value, std::less<>,
-    std::pmr::polymorphic_allocator<std::pair<const std::pmr::string, Value>>
->;
+using PmrStringMap = std::pmr::map<std::pmr::string, Value, std::less<>>;
 
+// uint32_t
+template<class Value>
+using UInt32Map = std::map<uint32_t, Value, std::less<>>;
+
+template<class Value>
+using PmrUInt32Map = std::pmr::map<uint32_t, Value, std::less<>>;
+
+// variant
+struct VariantIndexLess;
+
+template<class K, class T>
+using VariantIndexMap = std::map<K, T, VariantIndexLess>;
+
+template<class K, class T>
+using PmrVariantIndexMap = std::pmr::map<K, T, VariantIndexLess>;
+
+// help functions
 template<class Key, class Value, class KeyLike, class Allocator>
 inline bool exists(const std::map<Key, Value, std::less<>, Allocator>& m, const KeyLike& key) noexcept {
     auto iter = m.find(key);
@@ -48,7 +62,7 @@ inline bool exists(const std::map<Key, Value, std::less<>, Allocator>& m, const 
 template<class Key, class Value, class Allocator, class KeyLike>
 inline typename std::map<Key, Value, std::less<>, Allocator>::mapped_type&
 at(std::map<Key, Value, std::less<>, Allocator>& m, const KeyLike& key) {
-    auto iter = m.find(key);
+    auto iter = m.find(std::string_view(key));
     if (iter == m.end()) {
         throw std::out_of_range("at(std::map) out of range");
     }
@@ -58,7 +72,7 @@ at(std::map<Key, Value, std::less<>, Allocator>& m, const KeyLike& key) {
 template<class Key, class Value, class Allocator, class KeyLike>
 inline typename std::map<Key, Value, std::less<>, Allocator>::mapped_type const&
 at(const std::map<Key, Value, std::less<>, Allocator>& m, const KeyLike& key) {
-    auto iter = m.find(key);
+    auto iter = m.find(std::string_view(key));
     if (iter == m.end()) {
         throw std::out_of_range("at(std::map) out of range");
     }

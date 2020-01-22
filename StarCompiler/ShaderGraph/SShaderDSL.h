@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -36,14 +36,14 @@ static const matrix zero = matrix::Zero();
 #define ADD_ATTRIBUTES(...) { \
 auto attrs = AttributeMap __VA_ARGS__ ; \
 for (const auto& attr : attrs) { \
-    shaderWorks.mAttributes.emplace(attr); \
+    modules.mAttributes.emplace(attr); \
 } \
 }
 
 //--------------------------------------------------------------------
 // Shader Module
 #define ADD_MODULE(NAME, ...) {\
-    auto res = shaderWorks.mModules.emplace(createShaderModule(BOOST_PP_STRINGIZE(NAME), __VA_ARGS__));\
+    auto res = modules.mModules.emplace(createShaderModule(BOOST_PP_STRINGIZE(NAME), __VA_ARGS__));\
     if (res.second == false) {\
         throw std::invalid_argument("ShaderModule: " + std::string(BOOST_PP_STRINGIZE(NAME)) + " already exists");\
     }\
@@ -67,32 +67,37 @@ for (const ShaderStageType S_Stage = PS; Program.stageBegin(S_Stage); Program.st
 // Shader Group
 #define GROUP_ELEM(r, _, i, NAME) BOOST_PP_COMMA_IF(i) BOOST_PP_STRINGIZE(NAME)
 #define GROUP_STAGE(STAGE, ...) { \
-    ShaderGraph group = shaderWorks.createModuleGroup( \
-        { BOOST_PP_SEQ_FOR_EACH_I(GROUP_ELEM, _, BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__))) }, STAGE \
+    ShaderGraph group; \
+    modules.createModuleGroup( \
+        { BOOST_PP_SEQ_FOR_EACH_I(GROUP_ELEM, _, BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__))) }, STAGE, \
+        group \
     ); \
     group.fillGraph(Program.mGraph); \
 }
 #define Group(...) GROUP_STAGE(S_Stage, __VA_ARGS__)
 
+#define Node(NAME, ...) { \
+    auto m = createShaderModule(BOOST_PP_STRINGIZE(NAME), __VA_ARGS__); \
+    ShaderGraph group; \
+    group.createNode(m, S_Stage); \
+    group.validateNodes(false); \
+    group.fillGraph(Program.mGraph); \
+}
+
 //--------------------------------------------------------------------
 // Shader Prototype
 #define S_MAKE_CONST(NAME) if (const auto& NAME##0 = NAME; true) if (const auto& NAME = NAME##0; true)
 
-#define SimpleProgram(NAME) if (auto& Program = shaderWorks.createProgram(NAME); true)
-
-#define Shader(NAME) if (auto& Shader = db.mPrototypes.try_emplace(NAME, ShaderPrototype{ NAME }).first->second; true)
-#define Bundle(NAME) if (auto& Bundle = Shader.mBundles.try_emplace(NAME, ShaderBundle{ NAME }).first->second; true) S_MAKE_CONST(Shader)
+#define Shader(NAME, ...) if (auto& Shader = db.mPrototypes.try_emplace(NAME, ShaderPrototype{ NAME, __VA_ARGS__ }).first->second; true)
+#define Bundle(NAME) if (auto& Bundle = Shader.mSolutions.try_emplace(NAME, ShaderSolution{ NAME }).first->second; true) S_MAKE_CONST(Shader)
 #define Pipeline(NAME) if (auto& Pipeline = Bundle.mPipelines.try_emplace(NAME, ShaderPipeline{ NAME }).first->second; true) S_MAKE_CONST(Bundle)
-#define Queue(NAME) if (auto& Queue = Pipeline.mShaderQueues.try_emplace(NAME, ShaderQueue{ NAME }).first->second; true) S_MAKE_CONST(Pipeline)
-#define Level(...) if (auto& Level = *Queue.mShaderLevels.insert(Queue.mShaderLevels.end(), ShaderLevel{ __VA_ARGS__ }); true) S_MAKE_CONST(Queue)
-#define SubPass(...) if (auto& SubPass = *Level.mPasses[{ __VA_ARGS__ }].insert(Level.mPasses[{ __VA_ARGS__ }].end(), ShaderPass{ __VA_ARGS__ }); SubPass.mShaderStates.emplace(PipelineState{}).second) S_MAKE_CONST(Level)
-#define Program(...) if (auto& Program = SubPass.mProgram; true) S_MAKE_CONST(SubPass)
+#define Queue(NAME) if (auto& Queue = Pipeline.mQueues.try_emplace(NAME, ShaderQueue{ NAME }).first->second; true) S_MAKE_CONST(Pipeline)
+#define Level(...) if (auto& Level = *Queue.mLevels.insert(Queue.mLevels.end(), ShaderLevel{ __VA_ARGS__ }); true) S_MAKE_CONST(Queue)
+#define Subpass(...) if (auto& Subpass = *Level.mPasses[{ __VA_ARGS__ }].insert(Level.mPasses[{ __VA_ARGS__ }].end(), ShaderPass{ __VA_ARGS__ }); true) S_MAKE_CONST(Level)
+#define Program(...) if (auto& Program = Subpass.mProgram; true) S_MAKE_CONST(Subpass)
 
 #define SinglePass(BUNDLE, PIPELINE, QUEUE, LEVEL, ...) \
-Bundle(BUNDLE) Pipeline(PIPELINE) Queue(QUEUE) Level(LEVEL) SubPass(__VA_ARGS__) if (auto& Pass = SubPass; true) Program()
-
-// deploy
-#define BIND(SHADER, ...) shaderWorks.bindProgram(SHADER, __VA_ARGS__);
+Bundle(BUNDLE) Pipeline(PIPELINE) Queue(QUEUE) Level(LEVEL) Subpass(__VA_ARGS__) if (auto& Pass = Subpass; true) Program()
 
 // Unity
 #define UnityVertex(VERTEX_INPUT) \
@@ -106,9 +111,9 @@ Group(SUnityUnpackTexcoord); \
 }
 
 #define SubShader(...) Bundle("Unity") Pipeline("Default") Queue({ __VA_ARGS__ }) Level() if (auto& SubShader = Level; true)
-#define Pass(...) SubPass({ __VA_ARGS__ }) if (auto& Pass = SubPass; true) S_MAKE_CONST(SubShader)
+#define Pass(...) Subpass({ __VA_ARGS__ }) if (auto& Pass = Subpass; true) S_MAKE_CONST(SubShader)
 
 #define BUILD(NAME, PATH) { \
-auto content = UnityShaderBuilder().generateShader(shaderWorks.mAttributes, db.mPrototypes.at(NAME)); \
+auto content = UnityShaderBuilder().generateShader(modules.mAttributes, db.mPrototypes.at(NAME)); \
 updateFile(PATH, content); \
 }

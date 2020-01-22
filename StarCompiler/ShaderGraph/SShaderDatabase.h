@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -17,11 +17,14 @@
 
 #pragma once
 #include <StarCompiler/ShaderGraph/SShaderPrototype.h>
+#include <StarCompiler/ShaderGraph/SShaderGroups.h>
 
 namespace Star::Graphics::Render::Shader {
 
 class ShaderDatabase {
 public:
+    void fillShaderGroups(ShaderGroups& sg) const;
+
     Map<std::string, ShaderPrototype> mPrototypes;
 };
 

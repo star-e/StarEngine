@@ -28,11 +28,11 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{862856D4-6E50-45F6-AD3A-BAB466CD04FA}</ProjectGuid>
+    <ProjectGuid>{3BF7271C-C30E-4FF8-84F2-5D5C8DF83E02}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Core</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>00.Core</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -113,27 +113,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Star.Core</TargetName>
+    <TargetName>Star.Runtime.Core</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Star.Core</TargetName>
+    <TargetName>Star.Runtime.Core</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Core</TargetName>
+    <TargetName>Star.Runtime.Core</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Core</TargetName>
+    <TargetName>Star.Runtime.Core</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Core</TargetName>
+    <TargetName>Star.Runtime.Core</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Core</TargetName>
+    <TargetName>Star.Runtime.Core</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -149,6 +149,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -165,6 +167,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -195,9 +199,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;STAR_CORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;STAR_CORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -235,9 +240,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;STAR_CORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>STAR_CORE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -248,40 +254,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\SAliasCast.h" />
-    <ClInclude Include="..\SAtomic.h" />
-    <ClInclude Include="..\SBitwise.h" />
-    <ClInclude Include="..\SEnum.h" />
-    <ClInclude Include="..\Serialization\SFlatMap.h" />
-    <ClInclude Include="..\Serialization\SMath.h" />
-    <ClInclude Include="..\Serialization\SOptional.h" />
-    <ClInclude Include="..\Serialization\SPmrBinaryInArchive.h" />
-    <ClInclude Include="..\Serialization\SPmrPolymorphicAllocator.h" />
-    <ClInclude Include="..\Serialization\SPmrString.h" />
-    <ClInclude Include="..\Serialization\SPmrVector.h" />
-    <ClInclude Include="..\Serialization\SRuntime.h" />
-    <ClInclude Include="..\Serialization\SVariant.h" />
-    <ClInclude Include="..\SFileUtils.h" />
+    <ClInclude Include="..\PrecompiledHeaders\SCore.h" />
+    <ClInclude Include="..\PrecompiledHeaders\SCoreRuntime.h" />
+    <ClInclude Include="..\SAlignedBuffer.h" />
     <ClInclude Include="..\SFlatMap.h" />
-    <ClInclude Include="..\SGraph.h" />
-    <ClInclude Include="..\SGraphUtils.h" />
-    <ClInclude Include="..\SHash.h" />
-    <ClInclude Include="..\SMap.h" />
+    <ClInclude Include="..\SGeometry.h" />
+    <ClInclude Include="..\SLocale.h" />
     <ClInclude Include="..\SMathFwd.h" />
-    <ClInclude Include="..\SMemory.h" />
-    <ClInclude Include="..\SMultiIndex.h" />
-    <ClInclude Include="..\SOverload.h" />
-    <ClInclude Include="..\SSerializationUtils.h" />
-    <ClInclude Include="..\SSet.h" />
-    <ClInclude Include="..\SSmallVector.h" />
-    <ClInclude Include="..\SStaticSize.h" />
-    <ClInclude Include="..\SStaticVector.h" />
-    <ClInclude Include="..\SString.h" />
+    <ClInclude Include="..\SMetaID.h" />
+    <ClInclude Include="..\SScopeExit.h" />
     <ClInclude Include="..\SUnorderedMap.h" />
-    <ClInclude Include="..\SUUID.h" />
+    <ClInclude Include="..\SWinRT.h" />
+    <ClInclude Include="..\SWinThread.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SConfig.h" />
+    <ClInclude Include="SCoreFwd.h" />
+    <ClInclude Include="SCoreSerialization.h" />
+    <ClInclude Include="SCoreTypes.h" />
+    <ClInclude Include="SFetch.h" />
     <ClInclude Include="SMetaID.h" />
+    <ClInclude Include="SResource.h" />
+    <ClInclude Include="SManagerPrivate.h" />
+    <ClInclude Include="SManagerFwd.h" />
+    <ClInclude Include="SProducer.h" />
+    <ClInclude Include="SResourceUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -292,7 +288,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SCoreTypes.cpp" />
+    <ClCompile Include="SFetch.cpp" />
+    <ClCompile Include="SManagerFwd.cpp" />
+    <ClCompile Include="SManagerPrivate.cpp" />
     <ClCompile Include="SMetaID.cpp" />
+    <ClCompile Include="SResource.cpp" />
+    <ClCompile Include="SProducer.cpp" />
+    <ClCompile Include="SResourceUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

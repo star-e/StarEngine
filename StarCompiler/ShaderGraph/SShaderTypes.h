@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -17,7 +17,6 @@
 
 #pragma once
 #include <StarCompiler/ShaderGraph/SShaderFwd.h>
-#include <Star/Graphics/SShaderTypes.h>
 #include <Star/Graphics/SRenderTypes.h>
 #include <StarCompiler/Graphics/SRenderTypes.h>
 
@@ -122,16 +121,6 @@ inline bool operator==(const ShaderStageType& lhs, const ShaderStageType& rhs) n
 inline bool operator!=(const ShaderStageType& lhs, const ShaderStageType& rhs) noexcept {
     return !(lhs == rhs);
 }
-
-enum RootAccessEnum : uint32_t {
-    RA_All = 0,
-    RA_PS = 1,
-    RA_GS = 2,
-    RA_DS = 3,
-    RA_HS = 4,
-    RA_VS = 5,
-    RA_Count = 6,
-};
 
 struct ShaderStruct {
     std::string mName;
@@ -325,23 +314,6 @@ inline bool operator!=(const HalfRange&lhs, const HalfRange&rhs) noexcept {
 using AttributeType = std::variant<matrix, float4, uint4, int4, float2, uint2, int2, half4, FloatRange, float1, uint1, int1, half2, fixed4, HalfRange, half1, InputPatch_, OutputPatch_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, SamplerState_>;
 
 inline bool operator<(const AttributeType& lhs, const AttributeType& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-
-enum UpdateEnum : uint32_t {
-    PerInstance = 0,
-    PerBatch = 1,
-    PerPass = 2,
-    PerFrame = 3,
-    UpdateCount = 4,
-};
-
-struct Table_ {} static constexpr Table;
-struct Constants_ {} static constexpr Constants;
-
-using RootSignatureType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
-
-inline bool operator<(const RootSignatureType& lhs, const RootSignatureType& rhs) noexcept {
     return lhs.index() < rhs.index();
 }
 
@@ -881,7 +853,7 @@ struct RasterizerState {
     {}
     FillMode mFillMode = Solid;
     CullMode mCullMode = Back;
-    bool mFrontCounterClockwise = false;
+    bool mFrontCounterClockwise = true;
     int32_t mDepthBias = 0;
     float mDepthBiasClamp = 0.0f;
     float mSlopeScaledDepthBias = 0.0f;
@@ -1064,35 +1036,6 @@ struct InputLayoutState {
     std::vector<InputElement> mInputLayout;
     IndexBufferStripCutValue mIBStripCutValue;
     PrimitiveTopologyType mPrimitiveTopologyType = Triangle;
-};
-
-struct AttributeCollection {
-    IdentityMap<AttributeUsage> mAttributes;
-};
-
-struct DrawCall {
-    DrawCallType mType;
-    MetaID mMaterial;
-    MetaID mMesh;
-    std::vector<AttributeCollection> mInstances;
-};
-
-struct DrawCallQueue {
-    std::vector<DrawCall> mDrawCalls;
-};
-
-using Submission = std::variant<DrawCallQueue>;
-
-inline bool operator<(const Submission& lhs, const Submission& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-
-struct UnorderedSubmissions {
-    std::vector<Submission> mSubmissions;
-};
-
-struct PassSubmissions {
-    std::vector<UnorderedSubmissions> mQueue;
 };
 
 } // namespace Shader

@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SConfig.h" />
+    <ClInclude Include="SAssetFbx.h">
+      <Filter>1.Fbx</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetFwd.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetSerialization.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetTypes.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetFbxImporter.h">
+      <Filter>1.Fbx</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetFbxUtils.h">
+      <Filter>1.Fbx</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetUtils.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetFactory.h" />
+    <ClInclude Include="SAssetContainer.h">
+      <Filter>0.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\DXTCompressor\DXTCompressorDLL.h">
+      <Filter>2.Texture\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="SAssetTexture.h">
+      <Filter>2.Texture</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SAssetFbx.cpp">
+      <Filter>1.Fbx</Filter>
+    </ClCompile>
+    <ClCompile Include="SAssetTypes.cpp">
+      <Filter>0.Types</Filter>
+    </ClCompile>
+    <ClCompile Include="SAssetFbxImporter.cpp">
+      <Filter>1.Fbx</Filter>
+    </ClCompile>
+    <ClCompile Include="SAssetUtils.cpp">
+      <Filter>0.Types</Filter>
+    </ClCompile>
+    <ClCompile Include="SAssetFactory.cpp" />
+    <ClCompile Include="..\..\3rdparty\DXTCompressor\DXTCompressorDLL.cpp">
+      <Filter>2.Texture\3rdparty</Filter>
+    </ClCompile>
+    <ClCompile Include="SAssetTexture.cpp">
+      <Filter>2.Texture</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="0.Types">
+      <UniqueIdentifier>{2716df04-b700-488a-9c21-4b9bda9c54e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.Fbx">
+      <UniqueIdentifier>{44f39293-6d25-4e89-b908-c2766ea29eab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2.Texture">
+      <UniqueIdentifier>{22333653-61d2-41d2-805e-ae422cba5338}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2.Texture\3rdparty">
+      <UniqueIdentifier>{8d988d42-db58-4f33-a04c-06116ad8772b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

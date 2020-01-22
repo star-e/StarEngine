@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -134,7 +134,7 @@ struct UnityPropertyDefaultValueVisitor {
 
     template<int _Options, int _MaxRows, int _MaxCols>
     std::string operator()(const Eigen::Matrix<uint8_t, 4, 1, _Options, _MaxRows, _MaxCols>& color) const {
-        Eigen::Matrix<float, 4, 1, _Options, _MaxRows, _MaxCols> v = color.cast<float>();
+        Eigen::Matrix<float, 4, 1, _Options, _MaxRows, _MaxCols> v = color.template cast<float>();
         v /= 255.f;
         return operator()(v);
     }
@@ -232,8 +232,8 @@ struct UnityHLSLNameVisitor {
 } // namespace
 
 std::string UnityShaderBuilder::generateShader(const AttributeMap& attrMap, const ShaderPrototype& p) const {
-    Expects(p.mBundles.size() == 1);
-    Expects(p.mBundles.begin()->second.mPipelines.size() == 1);
+    Expects(p.mSolutions.size() == 1);
+    Expects(p.mSolutions.begin()->second.mPipelines.size() == 1);
 
     std::ostringstream oss;
     std::string space;
@@ -265,12 +265,12 @@ std::string UnityShaderBuilder::generateShader(const AttributeMap& attrMap, cons
 
     OSS << "Shader \"" << p.mName << "\" {\n";
 
-    if (!p.mBundles.empty() && !p.mBundles.begin()->second.mPipelines.empty()) {
+    if (!p.mSolutions.empty() && !p.mSolutions.begin()->second.mPipelines.empty()) {
         auto attrs = getAttributes(attrMap, p.getAttributes());
         copyString(oss, generateProperties(attrs, p));
-        const auto& pipeline = p.mBundles.begin()->second.mPipelines.begin()->second;
-        for (const auto& [queueName, queue] : pipeline.mShaderQueues) {
-            for (const auto& subshader : queue.mShaderLevels) {
+        const auto& pipeline = p.mSolutions.begin()->second.mPipelines.begin()->second;
+        for (const auto& [queueName, queue] : pipeline.mQueues) {
+            for (const auto& subshader : queue.mLevels) {
                 oss << "\n";
                 OSS << "SubShader {\n";
 
@@ -429,8 +429,7 @@ std::string UnityShaderBuilder::generatePassStates(const ShaderPass& p) const {
         oss << " }\n"; // Tags
     }
 
-    Expects(p.mShaderStates.size() == 1);
-    const auto& pso = *p.mShaderStates.begin();
+    const auto& pso = p.mShaderState;
 
     if (!pso.mBlendState.mRenderTargets.empty()) {
         oss << "\n";
@@ -667,16 +666,16 @@ std::string UnityShaderBuilder::generateAttributes(
     int count = 0;
     int instanced = 0;
     for (const auto& attr : attrs) {
-        if (instancing && attr.mUpdateFrequency == PerInstance) {
-            ++instanced;
-            continue;
-        }
-
         if (attr.mFlags & Unity::Declared)
             continue;
 
         if (attr.mFlags & Unity::BuiltIn)
             continue;
+
+        if (instancing && attr.mUpdateFrequency == PerInstance) {
+            ++instanced;
+            continue;
+        }
 
         if (!visit(UnityIsPropertyVisitor{}, attr.mType))
             continue;

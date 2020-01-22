@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -20,7 +20,7 @@
 
 namespace Star {
 
-inline std::string camelToUnderscore(const std::string& str) {
+inline std::string camelToUnderscore(const std::string& str, bool fixSlash = false) {
     std::string out;
     out.reserve(str.size() + str.size() / 2);
     bool prevUpper = false;
@@ -45,6 +45,8 @@ inline std::string camelToUnderscore(const std::string& str) {
         } else {
             prevUpper = false;
             if (str[i] == '_') {
+                out.push_back('-');
+            } else if (fixSlash && str[i] == '/') {
                 out.push_back('-');
             } else {
                 out.push_back(tolower(str[i]));

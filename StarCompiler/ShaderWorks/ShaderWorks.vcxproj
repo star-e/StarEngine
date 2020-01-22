@@ -28,11 +28,11 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{BC8B1985-574E-484E-9499-F7DE70805B8F}</ProjectGuid>
+    <ProjectGuid>{925CA6A0-F6AE-49B5-BA96-F1F8811CFECF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ShaderWorks</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>01.ShaderWorks</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -192,9 +192,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -230,9 +231,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -243,9 +245,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="SBasicModules.h" />
     <ClInclude Include="SHLSLGenerator.h" />
-    <ClInclude Include="SShaderWorks.h" />
+    <ClInclude Include="SShaderAssetBuilder.h" />
+    <ClInclude Include="SShaderCompiler.h" />
+    <ClInclude Include="SStarModules.h" />
     <ClInclude Include="SUnityShaderBuilder.h" />
+    <ClInclude Include="SUnrealBlueprintBuilder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -256,9 +262,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SBasicModules.cpp" />
     <ClCompile Include="SHLSLGenerator.cpp" />
-    <ClCompile Include="SShaderWorks.cpp" />
+    <ClCompile Include="SShaderAssetBuilder.cpp" />
+    <ClCompile Include="SShaderCompiler.cpp" />
+    <ClCompile Include="SStarModules.cpp" />
     <ClCompile Include="SUnityShaderBuilder.cpp" />
+    <ClCompile Include="SUnrealBlueprintBuilder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -23,7 +23,7 @@ namespace Star::Graphics::Render::Shader {
 using namespace DSL;
 using namespace Unity;
 
-void createUnityModules(ShaderWorks& shaderWorks) {
+void createUnityModules(ShaderModules& modules) {
    ADD_ATTRIBUTES({
         { "MainTex", Texture2D, PerMaterial },
         { "BumpMap", Texture2D, PerMaterial },

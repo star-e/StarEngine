@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -26,7 +26,7 @@ using namespace Star::Graphics::Render;
 using namespace Star::Graphics::Render::Shader;
 using namespace Star::Graphics::Render::Shader::Unity;
 
-int buildUnityShaders(const ShaderWorks& shaderWorks, ShaderDatabase& db) {
+int buildUnityShaders(const ShaderModules& modules, ShaderDatabase& db) {
     Shader("Star/PBR Standard") {
 
     SubShader() {
@@ -96,10 +96,10 @@ int main() {
     std::cout << "---------------------------------------\n";
 
     try {
-        ShaderWorks shaderWorks;
+        ShaderModules modules;
         ShaderDatabase shaderDB;
-        createUnityModules(shaderWorks);
-        buildUnityShaders(shaderWorks, shaderDB);
+        createUnityModules(modules);
+        buildUnityShaders(modules, shaderDB);
     } catch (std::invalid_argument & e) {
         {
             CONSOLE_COLOR(Red);

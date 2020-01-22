@@ -28,11 +28,11 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{B8F883D2-5ACB-4144-8B47-5D5830C79DC2}</ProjectGuid>
+    <ProjectGuid>{218571C8-4C61-4BFF-844B-A803D5A7E249}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>UnityExamples</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>00.UnityExamples</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -83,63 +83,57 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\props\star.props" />
-    <Import Project="..\..\props\boost.props" />
     <Import Project="..\..\props\eigen_safe.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\props\star.props" />
-    <Import Project="..\..\props\boost.props" />
     <Import Project="..\..\props\eigen_safe.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\props\star.props" />
-    <Import Project="..\..\props\boost.props" />
     <Import Project="..\..\props\eigen_safe.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\props\star.props" />
-    <Import Project="..\..\props\boost.props" />
     <Import Project="..\..\props\eigen_safe.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\props\star.props" />
-    <Import Project="..\..\props\boost.props" />
     <Import Project="..\..\props\eigen_safe.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\props\star.props" />
-    <Import Project="..\..\props\boost.props" />
     <Import Project="..\..\props\eigen_safe.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Star.Unity.Examples</TargetName>
+    <TargetName>Star.Compiler.UnityExamples</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>Star.Unity.Examples</TargetName>
+    <TargetName>Star.Compiler.UnityExamples</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Unity.Examples</TargetName>
+    <TargetName>Star.Compiler.UnityExamples</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Unity.Examples</TargetName>
+    <TargetName>Star.Compiler.UnityExamples</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Unity.Examples</TargetName>
+    <TargetName>Star.Compiler.UnityExamples</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>Star.Unity.Examples</TargetName>
+    <TargetName>Star.Compiler.UnityExamples</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -265,10 +259,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\StarCompiler\ShaderGraph\ShaderGraph.vcxproj">
-      <Project>{9487b67d-d83e-4e87-8b85-66b0e6d8f5a3}</Project>
+      <Project>{ccdf6c8d-9ef1-4978-affb-4ee81daf5b01}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\StarCompiler\ShaderWorks\ShaderWorks.vcxproj">
-      <Project>{bc8b1985-574e-484e-9499-f7de70805b8f}</Project>
+      <Project>{925ca6a0-f6ae-49b5-ba96-f1f8811cfecf}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

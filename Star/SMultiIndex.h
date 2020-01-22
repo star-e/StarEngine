@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -130,11 +130,11 @@ using OrderedIdentityNameMap = boost::multi_index::multi_index_container<T,
 >;
 
 template<class T>
-using NameMetaIDHashMap = boost::multi_index::multi_index_container<T,
+using MetaIDNameIndex = boost::multi_index::multi_index_container<T,
     boost::multi_index::indexed_by<
         boost::multi_index::hashed_unique<
             boost::multi_index::tag<Index::MetaID>,
-            boost::multi_index::const_mem_fun<T, const boost::uuids::uuid&, &T::metaID>
+            boost::multi_index::member<T, MetaID, &T::mMetaID>
         >,
         boost::multi_index::ordered_unique<
             boost::multi_index::tag<Index::Name>,
@@ -142,6 +142,58 @@ using NameMetaIDHashMap = boost::multi_index::multi_index_container<T,
             std::less<>
         >
     >
+>;
+
+template<class T>
+using MetaIDNameMultiIndex = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::hashed_unique<
+            boost::multi_index::tag<Index::MetaID>,
+            boost::multi_index::member<T, MetaID, &T::mMetaID>
+        >,
+        boost::multi_index::ordered_non_unique<
+            boost::multi_index::tag<Index::Name>,
+            boost::multi_index::member<T, std::string, &T::mName>,
+            std::less<>
+        >
+    >
+>;
+
+template<class T>
+using PmrNameMetaIDIndex = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::hashed_unique<
+            boost::multi_index::tag<Index::MetaID>,
+            boost::multi_index::member<T, MetaID, &T::mMetaID>
+        >,
+        boost::multi_index::ordered_unique<
+            boost::multi_index::tag<Index::Name>,
+            boost::multi_index::member<T, std::pmr::string, &T::mName>,
+            std::less<>
+        >
+    >,
+    std::pmr::polymorphic_allocator<T>
+>;
+
+template<class T>
+using MetaIDIndex = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::hashed_unique<
+            boost::multi_index::tag<Index::MetaID>,
+            boost::multi_index::member<T, MetaID, &T::mMetaID>
+        >
+    >
+>;
+
+template<class T>
+using PmrMetaIDIndex = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::hashed_unique<
+            boost::multi_index::tag<Index::MetaID>,
+            boost::multi_index::member<T, MetaID, &T::mMetaID>
+        >
+    >,
+    std::pmr::polymorphic_allocator<T>
 >;
 
 template<class T>
@@ -155,6 +207,29 @@ using MetaIDHashMap = boost::multi_index::multi_index_container<T,
 >;
 
 template<class T>
+using PmrMetaIDHashMap = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::hashed_unique<
+            boost::multi_index::tag<Index::MetaID>,
+            boost::multi_index::const_mem_fun<T, const boost::uuids::uuid&, &T::metaID>
+        >
+    >,
+    std::pmr::polymorphic_allocator<T>
+>;
+
+template<class T>
+using PmrMetaIDHashListIndex = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::hashed_unique<
+            boost::multi_index::tag<Index::MetaID>,
+            boost::multi_index::member<T, MetaID, &T::mMetaID>
+        >,
+        boost::multi_index::sequenced<>
+    >,
+    std::pmr::polymorphic_allocator<T>
+>;
+
+template<class T>
 using NameSortedVector = boost::multi_index::multi_index_container<T,
     boost::multi_index::indexed_by<
         boost::multi_index::random_access<boost::multi_index::tag<Index::Index>>,
@@ -164,6 +239,19 @@ using NameSortedVector = boost::multi_index::multi_index_container<T,
             std::less<>
         >
     >
+>;
+
+template<class T>
+using PmrVectorNameIndex = boost::multi_index::multi_index_container<T,
+    boost::multi_index::indexed_by<
+        boost::multi_index::random_access<boost::multi_index::tag<Index::Index>>,
+        boost::multi_index::ordered_unique<
+            boost::multi_index::tag<Index::Name>,
+            boost::multi_index::member<T, std::pmr::string, &T::mName>,
+            std::less<>
+        >
+    >,
+    std::pmr::polymorphic_allocator<T>
 >;
 
 template<class T>

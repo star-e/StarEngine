@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -79,6 +79,31 @@ inline bool copyFile(const std::filesystem::path& src, const std::filesystem::pa
         create_directories(folder);
     }
     return updateFile(dst, content);
+}
+
+inline std::string readBinary(std::string_view file) {
+    std::ifstream ifs(file, std::ios::binary);
+    std::stringstream buffer;
+    buffer << ifs.rdbuf();
+    return buffer.str();
+}
+
+inline void readBinary(std::string_view file, std::pmr::string& buffer) {
+    std::ifstream ifs(file, std::ios::binary);
+    auto sz = getFileSize(ifs);
+    buffer.resize(sz);
+    ifs.read(buffer.data(), sz);
+}
+
+inline bool updateBinary(std::string_view file, std::string_view content) {
+    std::string orig = readBinary(file);
+    if (orig != content) {
+        std::ofstream ofs(file, std::ios::binary);
+        ofs.exceptions(std::ostream::failbit);
+        ofs.write(content.data(), content.size());
+        return true;
+    }
+    return false;
 }
 
 inline std::string readBinary(const std::filesystem::path& file) {

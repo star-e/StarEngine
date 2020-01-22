@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -25,7 +25,7 @@ public:
     AttributeUsageMap getAttributes() const;
 
     std::string mName;
-    std::vector<ShaderLevel> mShaderLevels;
+    std::vector<ShaderLevel> mLevels;
 };
 
 }

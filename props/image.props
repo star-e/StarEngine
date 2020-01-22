@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>BOOST_GIL_IO_ENABLE_GRAY_ALPHA;OPENEXR_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\libpng*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\turbojpeg$(DebugSuffix).lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\jpeg$(DebugSuffix).lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\tiff*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Half*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Ilm*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Iex*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Imath*.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

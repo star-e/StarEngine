@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -25,7 +25,7 @@ public:
     AttributeUsageMap getAttributes() const;
 
     std::string mName;
-    Map<std::string, ShaderQueue> mShaderQueues;
+    Map<std::string, ShaderQueue> mQueues;
 
     std::map<std::string, std::string> mUnityDependencies;
     std::string mUnityCustomEditor;

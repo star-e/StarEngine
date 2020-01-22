@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -46,7 +46,7 @@ void ShaderGroup::validate() const {
     }
 }
 
-void ShaderGroup::buildConstantBuffers(const AttributeMap& attrs) {
+void ShaderGroup::buildProgramConstantBuffers(const AttributeMap& attrs) {
     for (auto& [name, pair] : mPrograms) {
         auto& [program, rsg] = pair;
         program->buildConstantBuffers(attrs, rsg);
@@ -68,7 +68,6 @@ void ShaderGroup::collectConstantBuffers() {
             }
         }
     }
-    mRootSignature.mergeConstantBuffers(mUpdateFrequency, mRootSignature);
 }
 
 void ShaderGroup::collectDescriptors(const AttributeMap& attrs) {
@@ -241,7 +240,9 @@ std::string ShaderGroup::generateRootSignature() const {
     }
 
     // 2. build descriptors
-    for (const auto& [index, table] : mRootSignature.mTables) {
+    for (const auto& p : mRootSignature.mTables) {
+        const auto& index = p.first;
+        const auto& table = p.second;
         auto outputVisibility = [&]() {
             if (index.mVisibility != RA_All) {
                 oss << ", visibility = ";
@@ -437,6 +438,14 @@ void ShaderGroup::getShaderPrefix(std::string& prefix) const {
         prefix += "-";
     }
     prefix += camelToUnderscore(mName);
+}
+
+void ShaderGroup::getShaderPrefixSlash(std::string& prefix) const {
+    if (mParent) {
+        mParent->getShaderPrefixSlash(prefix);
+        prefix += "/";
+    }
+    prefix += mName;
 }
 
 const ShaderGroup& ShaderGroup::getRootSignatureShaderGroup() const {

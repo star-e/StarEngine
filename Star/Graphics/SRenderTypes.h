@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -58,6 +58,7 @@ enum GFX_DRIVER_TYPE : uint32_t {
 };
 
 enum GFX_FEATURE_LEVEL : uint32_t {
+    GFX_FEATURE_LEVEL_1_0_CORE	= 0x1000,
     GFX_FEATURE_LEVEL_9_1	= 0x9100,
     GFX_FEATURE_LEVEL_9_2	= 0x9200,
     GFX_FEATURE_LEVEL_9_3	= 0x9300,
@@ -189,6 +190,7 @@ enum GFX_NAME : uint32_t {
     GFX_NAME_FINAL_LINE_DETAIL_TESSFACTOR	= 15,
     GFX_NAME_FINAL_LINE_DENSITY_TESSFACTOR	= 16,
     GFX_NAME_BARYCENTRICS	= 23,
+    GFX_NAME_SHADINGRATE	= 24,
     GFX_NAME_TARGET	= 64,
     GFX_NAME_DEPTH	= 65,
     GFX_NAME_COVERAGE	= 66,
@@ -196,7 +198,8 @@ enum GFX_NAME : uint32_t {
     GFX_NAME_DEPTH_LESS_EQUAL	= 68,
     GFX_NAME_STENCIL_REF	= 69,
     GFX_NAME_INNER_COVERAGE	= 70,
-    NAME_BARYCENTRICS	= GFX_NAME_BARYCENTRICS
+    NAME_BARYCENTRICS	= GFX_NAME_BARYCENTRICS,
+    NAME_SHADINGRATE	= GFX_NAME_SHADINGRATE
 };
 
 enum GFX_RESOURCE_RETURN_TYPE : uint32_t {
@@ -268,7 +271,8 @@ enum COMMAND_LIST_TYPE : uint32_t {
     COMMAND_LIST_TYPE_COMPUTE	= 2,
     COMMAND_LIST_TYPE_COPY	= 3,
     COMMAND_LIST_TYPE_VIDEO_DECODE	= 4,
-    COMMAND_LIST_TYPE_VIDEO_PROCESS	= 5
+    COMMAND_LIST_TYPE_VIDEO_PROCESS	= 5,
+    COMMAND_LIST_TYPE_VIDEO_ENCODE	= 6
 };
 
 enum COMMAND_QUEUE_FLAGS : uint32_t {
@@ -619,7 +623,9 @@ enum FEATURE : uint32_t {
     FEATURE_OPTIONS4	= 23,
     FEATURE_SERIALIZATION	= 24,
     FEATURE_CROSS_NODE	= 25,
-    FEATURE_OPTIONS5	= 27
+    FEATURE_OPTIONS5	= 27,
+    FEATURE_OPTIONS6	= 30,
+    FEATURE_QUERY_META_COMMAND	= 31
 };
 
 enum SHADER_MIN_PRECISION_SUPPORT : uint32_t {
@@ -797,7 +803,8 @@ enum GFX_SHADER_MODEL : uint32_t {
     GFX_SHADER_MODEL_6_1	= 0x61,
     GFX_SHADER_MODEL_6_2	= 0x62,
     GFX_SHADER_MODEL_6_3	= 0x63,
-    GFX_SHADER_MODEL_6_4	= 0x64
+    GFX_SHADER_MODEL_6_4	= 0x64,
+    GFX_SHADER_MODEL_6_5	= 0x65
 };
 
 struct FEATURE_DATA_SHADER_MODEL {
@@ -852,7 +859,8 @@ enum COMMAND_LIST_SUPPORT_FLAGS : uint32_t {
     COMMAND_LIST_SUPPORT_FLAG_COMPUTE	= ( 1 << COMMAND_LIST_TYPE_COMPUTE ) ,
     COMMAND_LIST_SUPPORT_FLAG_COPY	= ( 1 << COMMAND_LIST_TYPE_COPY ) ,
     COMMAND_LIST_SUPPORT_FLAG_VIDEO_DECODE	= ( 1 << COMMAND_LIST_TYPE_VIDEO_DECODE ) ,
-    COMMAND_LIST_SUPPORT_FLAG_VIDEO_PROCESS	= ( 1 << COMMAND_LIST_TYPE_VIDEO_PROCESS )
+    COMMAND_LIST_SUPPORT_FLAG_VIDEO_PROCESS	= ( 1 << COMMAND_LIST_TYPE_VIDEO_PROCESS ) ,
+    COMMAND_LIST_SUPPORT_FLAG_VIDEO_ENCODE	= ( 1 << COMMAND_LIST_TYPE_VIDEO_ENCODE )
 };
 
 struct FEATURE_DATA_D3D12_OPTIONS3 {
@@ -908,6 +916,29 @@ struct FEATURE_DATA_D3D12_OPTIONS5 {
     Bool mSRVOnlyTiledResourceTier3;
     RENDER_PASS_TIER mRenderPassesTier;
     RAYTRACING_TIER mRaytracingTier;
+};
+
+enum VARIABLE_SHADING_RATE_TIER : uint32_t {
+    VARIABLE_SHADING_RATE_TIER_NOT_SUPPORTED	= 0,
+    VARIABLE_SHADING_RATE_TIER_1	= 1,
+    VARIABLE_SHADING_RATE_TIER_2	= 2
+};
+
+struct FEATURE_DATA_D3D12_OPTIONS6 {
+    Bool mAdditionalShadingRatesSupported;
+    Bool mPerPrimitiveShadingRateSupportedWithViewportIndexing;
+    VARIABLE_SHADING_RATE_TIER mVariableShadingRateTier;
+    uint32_t mShadingRateImageTileSize;
+    Bool mBackgroundProcessingSupported;
+};
+
+struct FEATURE_DATA_QUERY_META_COMMAND {
+    boost::uuids::uuid mCommandId;
+    uint32_t mNodeMask;
+    const void *mQueryInputData;
+    size_t mQueryInputDataSizeInBytes;
+    void *mQueryOutputData;
+    size_t mQueryOutputDataSizeInBytes;
 };
 
 struct RESOURCE_ALLOCATION_INFO {
@@ -1117,6 +1148,7 @@ enum RESOURCE_STATES : uint32_t {
     RESOURCE_STATE_RESOLVE_DEST	= 0x1000,
     RESOURCE_STATE_RESOLVE_SOURCE	= 0x2000,
     RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE	= 0x400000,
+    RESOURCE_STATE_SHADING_RATE_SOURCE	= 0x1000000,
     RESOURCE_STATE_GENERIC_READ	= ( ( ( ( ( 0x1 | 0x2 )  | 0x40 )  | 0x80 )  | 0x200 )  | 0x800 ) ,
     RESOURCE_STATE_PRESENT	= 0,
     RESOURCE_STATE_PREDICATION	= 0x200,
@@ -2429,7 +2461,9 @@ enum AUTO_BREADCRUMB_OP : uint32_t {
     AUTO_BREADCRUMB_OP_EXECUTEMETACOMMAND	= 36,
     AUTO_BREADCRUMB_OP_ESTIMATEMOTION	= 37,
     AUTO_BREADCRUMB_OP_RESOLVEMOTIONVECTORHEAP	= 38,
-    AUTO_BREADCRUMB_OP_SETPIPELINESTATE1	= 39
+    AUTO_BREADCRUMB_OP_SETPIPELINESTATE1	= 39,
+    AUTO_BREADCRUMB_OP_INITIALIZEEXTENSIONCOMMAND	= 40,
+    AUTO_BREADCRUMB_OP_EXECUTEEXTENSIONCOMMAND	= 41
 };
 
 struct AUTO_BREADCRUMB_NODE {
@@ -2440,13 +2474,14 @@ struct AUTO_BREADCRUMB_NODE {
     void *mCommandList;
     void *mCommandQueue;
     uint32_t mBreadcrumbCount;
-    uint32_t *mLastBreadcrumbValue;
-    AUTO_BREADCRUMB_OP *mCommandHistory;
-    struct AUTO_BREADCRUMB_NODE *mNext;
+    const uint32_t *mLastBreadcrumbValue;
+    const AUTO_BREADCRUMB_OP *mCommandHistory;
+    const struct AUTO_BREADCRUMB_NODE *mNext;
 };
 
 enum DRED_VERSION : uint32_t {
-    DRED_VERSION_1_0	= 0x1
+    DRED_VERSION_1_0	= 0x1,
+    DRED_VERSION_1_1	= 0x2
 };
 
 enum DRED_FLAGS : uint32_t {
@@ -2455,16 +2490,90 @@ enum DRED_FLAGS : uint32_t {
     DRED_FLAG_DISABLE_AUTOBREADCRUMBS	= 2
 };
 
+enum DRED_ENABLEMENT : uint32_t {
+    DRED_ENABLEMENT_SYSTEM_CONTROLLED	= 0,
+    DRED_ENABLEMENT_FORCED_OFF	= 1,
+    DRED_ENABLEMENT_FORCED_ON	= 2
+};
+
 struct DEVICE_REMOVED_EXTENDED_DATA {
     DRED_FLAGS mFlags;
     AUTO_BREADCRUMB_NODE *mHeadAutoBreadcrumbNode;
+};
+
+enum DRED_ALLOCATION_TYPE : uint32_t {
+    DRED_ALLOCATION_TYPE_COMMAND_QUEUE	= 19,
+    DRED_ALLOCATION_TYPE_COMMAND_ALLOCATOR	= 20,
+    DRED_ALLOCATION_TYPE_PIPELINE_STATE	= 21,
+    DRED_ALLOCATION_TYPE_COMMAND_LIST	= 22,
+    DRED_ALLOCATION_TYPE_FENCE	= 23,
+    DRED_ALLOCATION_TYPE_DESCRIPTOR_HEAP	= 24,
+    DRED_ALLOCATION_TYPE_HEAP	= 25,
+    DRED_ALLOCATION_TYPE_QUERY_HEAP	= 27,
+    DRED_ALLOCATION_TYPE_COMMAND_SIGNATURE	= 28,
+    DRED_ALLOCATION_TYPE_PIPELINE_LIBRARY	= 29,
+    DRED_ALLOCATION_TYPE_VIDEO_DECODER	= 30,
+    DRED_ALLOCATION_TYPE_VIDEO_PROCESSOR	= 32,
+    DRED_ALLOCATION_TYPE_RESOURCE	= 34,
+    DRED_ALLOCATION_TYPE_PASS	= 35,
+    DRED_ALLOCATION_TYPE_CRYPTOSESSION	= 36,
+    DRED_ALLOCATION_TYPE_CRYPTOSESSIONPOLICY	= 37,
+    DRED_ALLOCATION_TYPE_PROTECTEDRESOURCESESSION	= 38,
+    DRED_ALLOCATION_TYPE_VIDEO_DECODER_HEAP	= 39,
+    DRED_ALLOCATION_TYPE_COMMAND_POOL	= 40,
+    DRED_ALLOCATION_TYPE_COMMAND_RECORDER	= 41,
+    DRED_ALLOCATION_TYPE_STATE_OBJECT	= 42,
+    DRED_ALLOCATION_TYPE_METACOMMAND	= 43,
+    DRED_ALLOCATION_TYPE_SCHEDULINGGROUP	= 44,
+    DRED_ALLOCATION_TYPE_VIDEO_MOTION_ESTIMATOR	= 45,
+    DRED_ALLOCATION_TYPE_VIDEO_MOTION_VECTOR_HEAP	= 46,
+    DRED_ALLOCATION_TYPE_VIDEO_EXTENSION_COMMAND	= 47,
+    DRED_ALLOCATION_TYPE_INVALID	= 0xffffffff
+};
+
+struct DRED_ALLOCATION_NODE {
+    const char *ObjectNameA;
+    const wchar_t *ObjectNameW;
+    DRED_ALLOCATION_TYPE mAllocationType;
+    const struct DRED_ALLOCATION_NODE *mNext;
+};
+
+struct DRED_AUTO_BREADCRUMBS_OUTPUT {
+    const AUTO_BREADCRUMB_NODE *mHeadAutoBreadcrumbNode;
+};
+
+struct DRED_PAGE_FAULT_OUTPUT {
+    GPU_VIRTUAL_ADDRESS mPageFaultVA;
+    const DRED_ALLOCATION_NODE *mHeadExistingAllocationNode;
+    const DRED_ALLOCATION_NODE *mHeadRecentFreedAllocationNode;
+};
+
+struct DEVICE_REMOVED_EXTENDED_DATA1 {
+    HRESULT mDeviceRemovedReason;
+    DRED_AUTO_BREADCRUMBS_OUTPUT mAutoBreadcrumbsOutput;
+    DRED_PAGE_FAULT_OUTPUT mPageFaultOutput;
 };
 
 struct VERSIONED_DEVICE_REMOVED_EXTENDED_DATA {
     DRED_VERSION mVersion;
     union {
         DEVICE_REMOVED_EXTENDED_DATA mDred_1_0;
+        DEVICE_REMOVED_EXTENDED_DATA1 mDred_1_1;
     };
+};
+
+enum BACKGROUND_PROCESSING_MODE : uint32_t {
+    BACKGROUND_PROCESSING_MODE_ALLOWED	= 0,
+    BACKGROUND_PROCESSING_MODE_ALLOW_INTRUSIVE_MEASUREMENTS	= ( BACKGROUND_PROCESSING_MODE_ALLOWED + 1 ) ,
+    BACKGROUND_PROCESSING_MODE_DISABLE_BACKGROUND_WORK	= ( BACKGROUND_PROCESSING_MODE_ALLOW_INTRUSIVE_MEASUREMENTS + 1 ) ,
+    BACKGROUND_PROCESSING_MODE_DISABLE_PROFILING_BY_SYSTEM	= ( BACKGROUND_PROCESSING_MODE_DISABLE_BACKGROUND_WORK + 1 )
+};
+
+enum MEASUREMENTS_ACTION : uint32_t {
+    MEASUREMENTS_ACTION_KEEP_ALL	= 0,
+    MEASUREMENTS_ACTION_COMMIT_RESULTS	= ( MEASUREMENTS_ACTION_KEEP_ALL + 1 ) ,
+    MEASUREMENTS_ACTION_COMMIT_RESULTS_HIGH_PRIORITY	= ( MEASUREMENTS_ACTION_COMMIT_RESULTS + 1 ) ,
+    MEASUREMENTS_ACTION_DISCARD_PREVIOUS	= ( MEASUREMENTS_ACTION_COMMIT_RESULTS_HIGH_PRIORITY + 1 )
 };
 
 enum RENDER_PASS_BEGINNING_ACCESS_TYPE : uint32_t {
@@ -2560,6 +2669,30 @@ struct MEMCPY_DEST {
     size_t mSlicePitch;
 };
 
+enum AXIS_SHADING_RATE : uint32_t {
+    AXIS_SHADING_RATE_1X	= 0,
+    AXIS_SHADING_RATE_2X	= 0x1,
+    AXIS_SHADING_RATE_4X	= 0x2
+};
+
+enum SHADING_RATE : uint32_t {
+    SHADING_RATE_1X1	= 0,
+    SHADING_RATE_1X2	= 0x1,
+    SHADING_RATE_2X1	= 0x4,
+    SHADING_RATE_2X2	= 0x5,
+    SHADING_RATE_2X4	= 0x6,
+    SHADING_RATE_4X2	= 0x9,
+    SHADING_RATE_4X4	= 0xa
+};
+
+enum SHADING_RATE_COMBINER : uint32_t {
+    SHADING_RATE_COMBINER_PASSTHROUGH	= 0,
+    SHADING_RATE_COMBINER_OVERRIDE	= 1,
+    SHADING_RATE_COMBINER_MIN	= 2,
+    SHADING_RATE_COMBINER_MAX	= 3,
+    SHADING_RATE_COMBINER_SUM	= 4
+};
+
 struct LargeWidth {
     uint64_t mValue = 0;
 };
@@ -2578,11 +2711,189 @@ struct TiledDeferred_ {} static constexpr TiledDeferred;
 
 using GpuArch = std::variant<Immediate_, TiledImmediate_, TiledDeferred_>;
 
-struct D3D12_ {} static constexpr D3D12;
+struct Direct3D_ {} static constexpr Direct3D;
 struct Vulkan_ {} static constexpr Vulkan;
-struct Metal2_ {} static constexpr Metal2;
+struct Metal_ {} static constexpr Metal;
+struct OpenGL_ {} static constexpr OpenGL;
 
-using API = std::variant<D3D12_, Vulkan_, Metal2_>;
+using API = std::variant<Direct3D_, Vulkan_, Metal_>;
+
+struct BINORMAL_ {} static constexpr BINORMAL;
+inline bool operator==(const BINORMAL_&, const BINORMAL_&) noexcept { return true; }
+inline bool operator!=(const BINORMAL_&, const BINORMAL_&) noexcept { return false; }
+struct BLENDINDICES_ {} static constexpr BLENDINDICES;
+inline bool operator==(const BLENDINDICES_&, const BLENDINDICES_&) noexcept { return true; }
+inline bool operator!=(const BLENDINDICES_&, const BLENDINDICES_&) noexcept { return false; }
+struct BLENDWEIGHT_ {} static constexpr BLENDWEIGHT;
+inline bool operator==(const BLENDWEIGHT_&, const BLENDWEIGHT_&) noexcept { return true; }
+inline bool operator!=(const BLENDWEIGHT_&, const BLENDWEIGHT_&) noexcept { return false; }
+struct NORMAL_ {} static constexpr NORMAL;
+inline bool operator==(const NORMAL_&, const NORMAL_&) noexcept { return true; }
+inline bool operator!=(const NORMAL_&, const NORMAL_&) noexcept { return false; }
+struct POSITIONT_ {} static constexpr POSITIONT;
+inline bool operator==(const POSITIONT_&, const POSITIONT_&) noexcept { return true; }
+inline bool operator!=(const POSITIONT_&, const POSITIONT_&) noexcept { return false; }
+struct PSIZE_ {} static constexpr PSIZE;
+inline bool operator==(const PSIZE_&, const PSIZE_&) noexcept { return true; }
+inline bool operator!=(const PSIZE_&, const PSIZE_&) noexcept { return false; }
+struct TANGENT_ {} static constexpr TANGENT;
+inline bool operator==(const TANGENT_&, const TANGENT_&) noexcept { return true; }
+inline bool operator!=(const TANGENT_&, const TANGENT_&) noexcept { return false; }
+struct TEXCOORD_ {} static constexpr TEXCOORD;
+inline bool operator==(const TEXCOORD_&, const TEXCOORD_&) noexcept { return true; }
+inline bool operator!=(const TEXCOORD_&, const TEXCOORD_&) noexcept { return false; }
+struct SV_ClipDistance_ {} static constexpr SV_ClipDistance;
+inline bool operator==(const SV_ClipDistance_&, const SV_ClipDistance_&) noexcept { return true; }
+inline bool operator!=(const SV_ClipDistance_&, const SV_ClipDistance_&) noexcept { return false; }
+struct SV_CullDistance_ {} static constexpr SV_CullDistance;
+inline bool operator==(const SV_CullDistance_&, const SV_CullDistance_&) noexcept { return true; }
+inline bool operator!=(const SV_CullDistance_&, const SV_CullDistance_&) noexcept { return false; }
+struct SV_Coverage_ {} static constexpr SV_Coverage;
+inline bool operator==(const SV_Coverage_&, const SV_Coverage_&) noexcept { return true; }
+inline bool operator!=(const SV_Coverage_&, const SV_Coverage_&) noexcept { return false; }
+struct SV_Depth_ {} static constexpr SV_Depth;
+inline bool operator==(const SV_Depth_&, const SV_Depth_&) noexcept { return true; }
+inline bool operator!=(const SV_Depth_&, const SV_Depth_&) noexcept { return false; }
+struct SV_DepthGreaterEqual_ {} static constexpr SV_DepthGreaterEqual;
+inline bool operator==(const SV_DepthGreaterEqual_&, const SV_DepthGreaterEqual_&) noexcept { return true; }
+inline bool operator!=(const SV_DepthGreaterEqual_&, const SV_DepthGreaterEqual_&) noexcept { return false; }
+struct SV_DepthLessEqual_ {} static constexpr SV_DepthLessEqual;
+inline bool operator==(const SV_DepthLessEqual_&, const SV_DepthLessEqual_&) noexcept { return true; }
+inline bool operator!=(const SV_DepthLessEqual_&, const SV_DepthLessEqual_&) noexcept { return false; }
+struct SV_DispatchThreadID_ {} static constexpr SV_DispatchThreadID;
+inline bool operator==(const SV_DispatchThreadID_&, const SV_DispatchThreadID_&) noexcept { return true; }
+inline bool operator!=(const SV_DispatchThreadID_&, const SV_DispatchThreadID_&) noexcept { return false; }
+struct SV_DomainLocation_ {} static constexpr SV_DomainLocation;
+inline bool operator==(const SV_DomainLocation_&, const SV_DomainLocation_&) noexcept { return true; }
+inline bool operator!=(const SV_DomainLocation_&, const SV_DomainLocation_&) noexcept { return false; }
+struct SV_GroupID_ {} static constexpr SV_GroupID;
+inline bool operator==(const SV_GroupID_&, const SV_GroupID_&) noexcept { return true; }
+inline bool operator!=(const SV_GroupID_&, const SV_GroupID_&) noexcept { return false; }
+struct SV_GroupIndex_ {} static constexpr SV_GroupIndex;
+inline bool operator==(const SV_GroupIndex_&, const SV_GroupIndex_&) noexcept { return true; }
+inline bool operator!=(const SV_GroupIndex_&, const SV_GroupIndex_&) noexcept { return false; }
+struct SV_GroupThreadID_ {} static constexpr SV_GroupThreadID;
+inline bool operator==(const SV_GroupThreadID_&, const SV_GroupThreadID_&) noexcept { return true; }
+inline bool operator!=(const SV_GroupThreadID_&, const SV_GroupThreadID_&) noexcept { return false; }
+struct SV_GSInstanceID_ {} static constexpr SV_GSInstanceID;
+inline bool operator==(const SV_GSInstanceID_&, const SV_GSInstanceID_&) noexcept { return true; }
+inline bool operator!=(const SV_GSInstanceID_&, const SV_GSInstanceID_&) noexcept { return false; }
+struct SV_InnerCoverage_ {} static constexpr SV_InnerCoverage;
+inline bool operator==(const SV_InnerCoverage_&, const SV_InnerCoverage_&) noexcept { return true; }
+inline bool operator!=(const SV_InnerCoverage_&, const SV_InnerCoverage_&) noexcept { return false; }
+struct SV_InsideTessFactor_ {} static constexpr SV_InsideTessFactor;
+inline bool operator==(const SV_InsideTessFactor_&, const SV_InsideTessFactor_&) noexcept { return true; }
+inline bool operator!=(const SV_InsideTessFactor_&, const SV_InsideTessFactor_&) noexcept { return false; }
+struct SV_InstanceID_ {} static constexpr SV_InstanceID;
+inline bool operator==(const SV_InstanceID_&, const SV_InstanceID_&) noexcept { return true; }
+inline bool operator!=(const SV_InstanceID_&, const SV_InstanceID_&) noexcept { return false; }
+struct SV_IsFrontFace_ {} static constexpr SV_IsFrontFace;
+inline bool operator==(const SV_IsFrontFace_&, const SV_IsFrontFace_&) noexcept { return true; }
+inline bool operator!=(const SV_IsFrontFace_&, const SV_IsFrontFace_&) noexcept { return false; }
+struct SV_OutputControlPointID_ {} static constexpr SV_OutputControlPointID;
+inline bool operator==(const SV_OutputControlPointID_&, const SV_OutputControlPointID_&) noexcept { return true; }
+inline bool operator!=(const SV_OutputControlPointID_&, const SV_OutputControlPointID_&) noexcept { return false; }
+struct SV_Position_ {} static constexpr SV_Position;
+inline bool operator==(const SV_Position_&, const SV_Position_&) noexcept { return true; }
+inline bool operator!=(const SV_Position_&, const SV_Position_&) noexcept { return false; }
+struct SV_PrimitiveID_ {} static constexpr SV_PrimitiveID;
+inline bool operator==(const SV_PrimitiveID_&, const SV_PrimitiveID_&) noexcept { return true; }
+inline bool operator!=(const SV_PrimitiveID_&, const SV_PrimitiveID_&) noexcept { return false; }
+struct SV_RenderTargetArrayIndex_ {} static constexpr SV_RenderTargetArrayIndex;
+inline bool operator==(const SV_RenderTargetArrayIndex_&, const SV_RenderTargetArrayIndex_&) noexcept { return true; }
+inline bool operator!=(const SV_RenderTargetArrayIndex_&, const SV_RenderTargetArrayIndex_&) noexcept { return false; }
+struct SV_SampleIndex_ {} static constexpr SV_SampleIndex;
+inline bool operator==(const SV_SampleIndex_&, const SV_SampleIndex_&) noexcept { return true; }
+inline bool operator!=(const SV_SampleIndex_&, const SV_SampleIndex_&) noexcept { return false; }
+struct SV_StencilRef_ {} static constexpr SV_StencilRef;
+inline bool operator==(const SV_StencilRef_&, const SV_StencilRef_&) noexcept { return true; }
+inline bool operator!=(const SV_StencilRef_&, const SV_StencilRef_&) noexcept { return false; }
+struct SV_Target_ {} static constexpr SV_Target;
+inline bool operator==(const SV_Target_&, const SV_Target_&) noexcept { return true; }
+inline bool operator!=(const SV_Target_&, const SV_Target_&) noexcept { return false; }
+struct SV_TessFactor_ {} static constexpr SV_TessFactor;
+inline bool operator==(const SV_TessFactor_&, const SV_TessFactor_&) noexcept { return true; }
+inline bool operator!=(const SV_TessFactor_&, const SV_TessFactor_&) noexcept { return false; }
+struct SV_VertexID_ {} static constexpr SV_VertexID;
+inline bool operator==(const SV_VertexID_&, const SV_VertexID_&) noexcept { return true; }
+inline bool operator!=(const SV_VertexID_&, const SV_VertexID_&) noexcept { return false; }
+struct SV_ViewportArrayIndex_ {} static constexpr SV_ViewportArrayIndex;
+inline bool operator==(const SV_ViewportArrayIndex_&, const SV_ViewportArrayIndex_&) noexcept { return true; }
+inline bool operator!=(const SV_ViewportArrayIndex_&, const SV_ViewportArrayIndex_&) noexcept { return false; }
+
+using VertexElementType = std::variant<BINORMAL_, BLENDINDICES_, BLENDWEIGHT_, NORMAL_, POSITIONT_, PSIZE_, TANGENT_, TEXCOORD_, SV_Position_, SV_Target_>;
+
+inline bool operator<(const VertexElementType& lhs, const VertexElementType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+using SemanticType = std::variant<std::monostate, BINORMAL_, BLENDINDICES_, BLENDWEIGHT_, NORMAL_, POSITIONT_, PSIZE_, TANGENT_, TEXCOORD_, SV_ClipDistance_, SV_CullDistance_, SV_Coverage_, SV_Depth_, SV_DepthGreaterEqual_, SV_DepthLessEqual_, SV_DispatchThreadID_, SV_DomainLocation_, SV_GroupID_, SV_GroupIndex_, SV_GroupThreadID_, SV_GSInstanceID_, SV_InnerCoverage_, SV_InsideTessFactor_, SV_InstanceID_, SV_IsFrontFace_, SV_OutputControlPointID_, SV_Position_, SV_PrimitiveID_, SV_RenderTargetArrayIndex_, SV_SampleIndex_, SV_StencilRef_, SV_Target_, SV_TessFactor_, SV_VertexID_, SV_ViewportArrayIndex_>;
+
+inline bool operator<(const SemanticType& lhs, const SemanticType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+struct CBV_ {} static constexpr CBV;
+inline bool operator==(const CBV_&, const CBV_&) noexcept { return true; }
+inline bool operator!=(const CBV_&, const CBV_&) noexcept { return false; }
+inline bool operator<(const CBV_&, const CBV_&) noexcept { return false; }
+struct UAV_ {} static constexpr UAV;
+inline bool operator==(const UAV_&, const UAV_&) noexcept { return true; }
+inline bool operator!=(const UAV_&, const UAV_&) noexcept { return false; }
+inline bool operator<(const UAV_&, const UAV_&) noexcept { return false; }
+struct SRV_ {} static constexpr SRV;
+inline bool operator==(const SRV_&, const SRV_&) noexcept { return true; }
+inline bool operator!=(const SRV_&, const SRV_&) noexcept { return false; }
+inline bool operator<(const SRV_&, const SRV_&) noexcept { return false; }
+struct SSV_ {} static constexpr SSV;
+inline bool operator==(const SSV_&, const SSV_&) noexcept { return true; }
+inline bool operator!=(const SSV_&, const SSV_&) noexcept { return false; }
+inline bool operator<(const SSV_&, const SSV_&) noexcept { return false; }
+struct RTV_ {} static constexpr RTV;
+inline bool operator==(const RTV_&, const RTV_&) noexcept { return true; }
+inline bool operator!=(const RTV_&, const RTV_&) noexcept { return false; }
+inline bool operator<(const RTV_&, const RTV_&) noexcept { return false; }
+struct DSV_ {} static constexpr DSV;
+inline bool operator==(const DSV_&, const DSV_&) noexcept { return true; }
+inline bool operator!=(const DSV_&, const DSV_&) noexcept { return false; }
+inline bool operator<(const DSV_&, const DSV_&) noexcept { return false; }
+struct IBV_ {} static constexpr IBV;
+inline bool operator==(const IBV_&, const IBV_&) noexcept { return true; }
+inline bool operator!=(const IBV_&, const IBV_&) noexcept { return false; }
+inline bool operator<(const IBV_&, const IBV_&) noexcept { return false; }
+struct VBV_ {} static constexpr VBV;
+inline bool operator==(const VBV_&, const VBV_&) noexcept { return true; }
+inline bool operator!=(const VBV_&, const VBV_&) noexcept { return false; }
+inline bool operator<(const VBV_&, const VBV_&) noexcept { return false; }
+struct SOV_ {} static constexpr SOV;
+inline bool operator==(const SOV_&, const SOV_&) noexcept { return true; }
+inline bool operator!=(const SOV_&, const SOV_&) noexcept { return false; }
+inline bool operator<(const SOV_&, const SOV_&) noexcept { return false; }
+struct Table_ {} static constexpr Table;
+struct Constants_ {} static constexpr Constants;
+
+using RootSignatureType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
+
+inline bool operator<(const RootSignatureType& lhs, const RootSignatureType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+enum RootAccessEnum : uint32_t {
+    RA_All = 0,
+    RA_PS = 1,
+    RA_GS = 2,
+    RA_DS = 3,
+    RA_HS = 4,
+    RA_VS = 5,
+    RA_Count = 6,
+};
+
+enum UpdateEnum : uint32_t {
+    PerInstance = 0,
+    PerBatch = 1,
+    PerPass = 2,
+    PerFrame = 3,
+    UpdateCount = 4,
+};
 
 struct Matrix_ {} static constexpr Matrix;
 struct Float4_ {} static constexpr Float4;
@@ -2605,8 +2916,8 @@ inline bool operator<(const DataType& lhs, const DataType& rhs) noexcept {
     return lhs.index() < rhs.index();
 }
 
-struct DataInfo {
-    DataType mInfo;
+struct DataID {
+    DataType mType;
     uint16_t mOffset;
 };
 
@@ -2620,12 +2931,8 @@ struct STAR_GRAPHICS_API ConstantBuffer {
     ~ConstantBuffer();
 
     std::pmr::vector<char> mBuffer;
-    PmrFlatUInt32Map<DataInfo> mIndex;
+    PmrStringMap<DataID> mIndex;
 };
-
-struct FullScreenTriangle_ {} static constexpr FullScreenTriangle;
-
-using DrawCallType = std::variant<std::monostate, FullScreenTriangle_>;
 
 } // namespace Render
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -18,7 +18,9 @@
 #pragma once
 
 #ifdef _MSC_VER
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -80,9 +82,10 @@
 #include <boost/container/flat_map.hpp>
 
 #include <boost/multi_index_container.hpp>
-#include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/mem_fun.hpp>
@@ -114,15 +117,25 @@
 // Debug
 #include <Star/SStaticSize.h>
 
+#ifdef _DEBUG
+#ifndef STAR_DEV
+#define STAR_DEV
+#endif
+#endif
+
 // Release
 #include <Star/SEnum.h>
 #include <Star/SAliasCast.h>
 #include <Star/SOverload.h>
+#include <Star/SMetaID.h>
 #include <Star/SString.h>
 #include <Star/SSet.h>
+#include <Star/SVariant.h>
+#include <Star/SAlignedBuffer.h>
 #include <Star/SMap.h>
 #include <Star/SFlatMap.h>
 #include <Star/SUnorderedMap.h>
 #include <Star/SMultiIndex.h>
+#include <Star/SMultiIndexUtils.h>
 #include <Star/SUUID.h>
 #include <Star/SMathFwd.h>

@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -21,7 +21,7 @@ namespace Star::Graphics::Render::Shader {
 
 AttributeUsageMap ShaderQueue::getAttributes() const {
     AttributeUsageMap attrs;
-    for (const auto& level : mShaderLevels) {
+    for (const auto& level : mLevels) {
         merge(level.getAttributes(), attrs);
     }
     return attrs;

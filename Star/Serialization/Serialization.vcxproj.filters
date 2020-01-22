@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SFlatMap.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SMath.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SObservable.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SOptional.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SPmrPolymorphicAllocator.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SPmrString.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SPmrVector.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SSmallVector.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SStaticCollectionTraits.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SVariant.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SPmrBinaryInArchive.h">
+      <Filter>Archive</Filter>
+    </ClInclude>
+    <ClInclude Include="SRuntime.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="SPmrTextInArchive.h">
+      <Filter>Archive</Filter>
+    </ClInclude>
+    <ClInclude Include="SPmrXmlInArchive.h">
+      <Filter>Archive</Filter>
+    </ClInclude>
+    <ClInclude Include="basic_xml_grammar.ipp">
+      <Filter>Archive</Filter>
+    </ClInclude>
+    <ClInclude Include="SAlignedBuffer.h">
+      <Filter>Serialization</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SPmrBinaryInArchive.cpp">
+      <Filter>Archive</Filter>
+    </ClCompile>
+    <ClCompile Include="SPmrTextInArchive.cpp">
+      <Filter>Archive</Filter>
+    </ClCompile>
+    <ClCompile Include="SPmrXmlInArchive.cpp">
+      <Filter>Archive</Filter>
+    </ClCompile>
+    <ClCompile Include="xml_grammar.cpp">
+      <Filter>Archive</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Serialization">
+      <UniqueIdentifier>{29500eed-0907-4c02-90ee-f9e3ae952ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archive">
+      <UniqueIdentifier>{a6f71321-2d24-4c4a-9766-7889de7cdd54}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

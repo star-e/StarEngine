@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -17,13 +17,15 @@
 
 #pragma once
 #include <StarCompiler/ShaderGraph/SShaderTypes.h>
+#include <Star/Graphics/SRenderTypes.h>
 
-namespace Star::Graphics::Render::Shader {
+namespace Star::Graphics::Render {
 
-constexpr SV_Position_ POSITION;
-constexpr SV_Target_ COLOR;
+static constexpr SV_Position_ POSITION;
+static constexpr SV_Target_ COLOR;
 
-inline ShaderStageEnum getShaderStages(const SemanticType& type) noexcept {
+inline Shader::ShaderStageEnum getShaderStages(const SemanticType& type) noexcept {
+    using namespace Shader;
     return visit(overload(
         [](const BINORMAL_&) { return static_cast<ShaderStageEnum>(VS_Interp); },
         [](const BLENDINDICES_&) { return static_cast<ShaderStageEnum>(VS_Interp); },

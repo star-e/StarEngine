@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -54,7 +54,7 @@ const typename overload_visitor<Fs...>::type overload(Fs... x) {
     return overload_visitor<Fs...>(x...);
 }
 
-//template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-//template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 }

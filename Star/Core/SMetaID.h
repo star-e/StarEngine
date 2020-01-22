@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -17,11 +17,10 @@
 
 #pragma once
 #include <Star/Core/SConfig.h>
-#include <Star/SUUID.h>
+#include <Star/SMetaID.h>
 
 namespace Star {
 
-using MetaID = UUID;
 MetaID STAR_CORE_API safe_generateMetaID();
 
 }

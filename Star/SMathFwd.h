@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <Eigen/src/Core/util/Constants.h>
 #include <Eigen/src/Core/util/ForwardDeclarations.h>
+#include <unsupported/Eigen/AlignedVector3>
 
 namespace std {
 template <class T> class complex;
@@ -774,6 +775,11 @@ using fixed4 = Unorm4;
 using fixed3 = Unorm3;
 using fixed2 = Unorm2;
 using fixed1 = Unorm1;
+
+//---------------------------------------------
+// Special types
+using AlignedVector3d = Eigen::AlignedVector3<double>;
+using AlignedVector3f = Eigen::AlignedVector3<float>;
 
 using Bool = int32_t;
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -21,6 +21,9 @@
 #include <intrin.h>
 #endif
 
+#pragma intrinsic(_BitScanForward)
+#pragma intrinsic(_BitScanForward64)
+
 namespace Star {
     
 // http://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
@@ -32,7 +35,7 @@ constexpr uint32_t count_bits(uint32_t i) noexcept {
     return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
 }
 
-constexpr uint32_t count_bits(uint64_t value) noexcept {
+inline uint32_t count_bits(uint64_t value) noexcept {
     return count_bits(*(reinterpret_cast<const uint32_t*>(&value))) +
         count_bits(*(reinterpret_cast<const uint32_t*>(&value) + 1));
 }
@@ -78,6 +81,8 @@ inline std::pair<uint32_t, bool> find_msb(uint32_t mask) {
     return std::pair(result, found != 0);
 }
 
+#ifdef _M_X64
+
 inline std::pair<uint32_t, bool> find_lsb(uint64_t mask) {
     unsigned long result;
     auto found = _BitScanForward64(&result, mask);
@@ -89,6 +94,9 @@ inline std::pair<uint32_t, bool> find_msb(uint64_t mask) {
     auto found = _BitScanReverse64(&result, mask);
     return std::pair(result, found != 0);
 }
+
+#endif
+
 #endif // _MSC_VER
 
 }

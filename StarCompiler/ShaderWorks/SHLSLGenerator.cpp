@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -99,7 +99,6 @@ std::string HLSLGenerator::generateModules() const {
     std::ostringstream oss;
     std::string space;
 
-    int count = 0;
     for (const auto& p : mProgram.mGraph.mNodeIndex) {
         const auto& node = mProgram.mGraph.mNodeGraph[p.second];
         if (getContent(node).empty())
@@ -122,14 +121,14 @@ std::string HLSLGenerator::generateShader(const ShaderStageType& stage) const {
         if (!inputs.empty()) {
             oss << generateInput(stage) << std::endl;
         }
-        oss << generateMain(stage) << std::endl;
+        oss << generateMain(stage);
     } else {
         if (!inputs.empty()) {
             oss << generateInput(stage) << std::endl;
         }
         oss << generateOutput(stage);
         oss << "\n";
-        oss << generateMain(stage) << std::endl;
+        oss << generateMain(stage);
     }
 
     return oss.str();
@@ -204,7 +203,9 @@ std::string HLSLGenerator::generateAttributes(const AttributeMap& attrs,
     std::ostringstream oss;
     std::string space;
     int count = 0;
-    for (const auto& [index, table] : group.mRootSignature.mTables) {
+    for (const auto& t : group.mRootSignature.mTables) {
+        const auto& index = t.first;
+        const auto& table = t.second;
         auto ra = getRootAccessEnum(stage);
         if (index.mVisibility != RA_All && index.mVisibility != ra)
             continue;

@@ -2,56 +2,122 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SConfig.h" />
-    <ClInclude Include="SRenderFwd.h">
-      <Filter>1.Render</Filter>
-    </ClInclude>
-    <ClInclude Include="SRenderTypes.h">
-      <Filter>1.Render</Filter>
-    </ClInclude>
-    <ClInclude Include="SShaderFwd.h">
-      <Filter>2.Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="SShaderNames.h">
-      <Filter>2.Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="SShaderTypes.h">
-      <Filter>2.Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="SRenderFormatVulkan.h">
-      <Filter>0.Format</Filter>
-    </ClInclude>
     <ClInclude Include="SRenderFormat.h">
-      <Filter>0.Format</Filter>
+      <Filter>1.Format</Filter>
     </ClInclude>
-    <ClInclude Include="SRenderFormatDXGI.h">
-      <Filter>0.Format</Filter>
-    </ClInclude>
-    <ClInclude Include="SRenderFormatUtils.h">
-      <Filter>0.Format</Filter>
+    <ClInclude Include="SRenderFwd.h">
+      <Filter>2.Render</Filter>
     </ClInclude>
     <ClInclude Include="SRenderNames.h">
-      <Filter>1.Render</Filter>
+      <Filter>2.Render</Filter>
     </ClInclude>
+    <ClInclude Include="SRenderSerialization.h">
+      <Filter>2.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderTypes.h">
+      <Filter>2.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormatUtils.h">
+      <Filter>1.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormatTextureUtils.h">
+      <Filter>1.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormatVulkan.h">
+      <Filter>1.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderFormatDXGI.h">
+      <Filter>1.Format</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphFwd.h">
+      <Filter>3.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphSerialization.h">
+      <Filter>3.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphTypes.h">
+      <Filter>3.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SDescriptorPools.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SContentUtils.h">
+      <Filter>4.Content</Filter>
+    </ClInclude>
+    <ClInclude Include="SContentFwd.h">
+      <Filter>4.Content</Filter>
+    </ClInclude>
+    <ClInclude Include="SContentSerialization.h">
+      <Filter>4.Content</Filter>
+    </ClInclude>
+    <ClInclude Include="SContentTypes.h">
+      <Filter>4.Content</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderResource.h">
+      <Filter>5.Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphNames.h">
+      <Filter>3.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SCamera.h">
+      <Filter>5.Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SWindowMessages.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderEngine.h">
+      <Filter>5.Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="SRenderFormatUtils.cpp">
-      <Filter>0.Format</Filter>
-    </ClCompile>
     <ClCompile Include="SRenderTypes.cpp">
-      <Filter>1.Render</Filter>
+      <Filter>2.Render</Filter>
+    </ClCompile>
+    <ClCompile Include="SRenderFormatTextureUtils.cpp">
+      <Filter>1.Format</Filter>
+    </ClCompile>
+    <ClCompile Include="SRenderFormatUtils.cpp">
+      <Filter>1.Format</Filter>
+    </ClCompile>
+    <ClCompile Include="SRenderGraphTypes.cpp">
+      <Filter>3.RenderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SDescriptorPools.cpp">
+      <Filter>0.Common</Filter>
+    </ClCompile>
+    <ClCompile Include="SContentUtils.cpp">
+      <Filter>4.Content</Filter>
+    </ClCompile>
+    <ClCompile Include="SContentTypes.cpp">
+      <Filter>4.Content</Filter>
+    </ClCompile>
+    <ClCompile Include="SCamera.cpp">
+      <Filter>5.Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SRenderEngine.cpp">
+      <Filter>5.Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="0.Format">
-      <UniqueIdentifier>{56c46552-ec9a-4106-b153-617c1f5d9a9e}</UniqueIdentifier>
+    <Filter Include="3.RenderGraph">
+      <UniqueIdentifier>{89dba86c-0e88-4433-a814-bba7772c73b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="1.Render">
-      <UniqueIdentifier>{c69ebf55-14a7-4483-9db7-4cd3684e99dc}</UniqueIdentifier>
+    <Filter Include="2.Render">
+      <UniqueIdentifier>{d4f1c275-77d3-4966-9f20-5b5049486633}</UniqueIdentifier>
     </Filter>
-    <Filter Include="2.Shader">
-      <UniqueIdentifier>{97ed11ab-5343-4379-a141-189e14ab3957}</UniqueIdentifier>
+    <Filter Include="1.Format">
+      <UniqueIdentifier>{641af265-80e9-4207-a0df-780f0a676235}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="0.Common">
+      <UniqueIdentifier>{de3b491a-fd52-43bc-bccd-e962debd48b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4.Content">
+      <UniqueIdentifier>{73713d51-ea50-42d9-9754-52d8ee87479b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="5.Engine">
+      <UniqueIdentifier>{74ee568a-1a9e-40e3-a5b6-6c40e9fcd723}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

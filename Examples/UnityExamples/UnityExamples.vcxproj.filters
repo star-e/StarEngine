@@ -3,10 +3,19 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="UnityExamples.cpp" />
-    <ClCompile Include="SUnityModules.cpp" />
+    <ClCompile Include="SUnityModules.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SUnityModules.h" />
+    <ClInclude Include="SUnityModules.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{a17f3275-8933-471f-865a-5e166da988ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

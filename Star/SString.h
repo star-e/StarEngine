@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -22,6 +22,14 @@ namespace Star {
 
 inline std::string str(std::string_view sv) {
     return std::string(sv);
+}
+
+inline std::string_view sv(const std::string& str) noexcept {
+    return std::string_view(str);
+}
+
+inline std::string_view sv(const std::pmr::string& str) noexcept {
+    return std::string_view(str);
 }
 
 }

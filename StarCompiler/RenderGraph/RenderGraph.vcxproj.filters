@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SRenderGraph.h" />
+    <ClInclude Include="SRenderGraphDSL.h" />
+    <ClInclude Include="SRenderGraphUtils.h" />
+    <ClInclude Include="SRenderGraphFwd.h">
+      <Filter>2.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphNames.h">
+      <Filter>2.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphSerialization.h">
+      <Filter>2.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphTypes.h">
+      <Filter>2.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphContainer.h" />
+    <ClInclude Include="SRenderValue.h" />
+    <ClInclude Include="..\Graphics\SRenderFwd.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graphics\SPixelFormatFwd.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graphics\SPixelFormatNames.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graphics\SPixelFormatTypes.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graphics\SRenderFormatNames.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graphics\SRenderFormatUtils.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graphics\SRenderNames.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graphics\SRenderTypes.h">
+      <Filter>1.Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SGetVariantName.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMathNames.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SMultiIndex.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\STextUtils.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SConsoleColor.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SIndent.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SFormat.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderGraphFactory.h" />
+    <ClInclude Include="..\PrecompiledHeaders\SCoreCompiler.h">
+      <Filter>3.PCH</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SRenderGraph.cpp" />
+    <ClCompile Include="SRenderGraphUtils.cpp" />
+    <ClCompile Include="SRenderGraphFactory.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="0.Common">
+      <UniqueIdentifier>{82331853-8c20-48a8-9d2d-bc35a25ef5fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3.PCH">
+      <UniqueIdentifier>{f80937d7-3427-4755-bfa4-92ed0e738fba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2.RenderGraph">
+      <UniqueIdentifier>{bd830f32-e798-4218-b238-c95c348b7273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.Render">
+      <UniqueIdentifier>{c3376596-ce79-4dd4-9596-40ad1c3e5655}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

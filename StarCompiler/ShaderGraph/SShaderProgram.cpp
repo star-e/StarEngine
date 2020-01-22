@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -139,7 +139,7 @@ bool ShaderProgram::stageEnd(ShaderStageType stage) {
         }
     ), stage);
 
-    auto res = mShaders.emplace(std::pair{ stage, ShaderStage{ stage } });
+    auto res = mShaders.emplace(stage, ShaderStage{ stage });
     if (!res.second) {
         throw std::invalid_argument("multiple shader stage definition");
     }

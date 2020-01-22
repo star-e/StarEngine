@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -23,15 +23,6 @@ namespace Graphics {
 
 namespace Render {
 
-struct CBV_;
-struct UAV_;
-struct SRV_;
-struct SSV_;
-struct RTV_;
-struct DSV_;
-struct IBV_;
-struct VBV_;
-struct SOV_;
 struct BufferRaw_;
 
 using BufferFlag = std::variant<std::monostate, BufferRaw_>;

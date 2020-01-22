@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -16,7 +16,6 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include <Star/Graphics/SShaderFwd.h>
 #include <Star/Graphics/SRenderFwd.h>
 #include <StarCompiler/Graphics/SRenderFwd.h>
 
@@ -49,8 +48,6 @@ struct VS_;
 struct CS_;
 
 using ShaderStageType = std::variant<OM_, PS_, GS_, DS_, TS_, HS_, VS_, CS_>;
-
-enum RootAccessEnum : uint32_t;
 
 struct ShaderStruct;
 
@@ -89,13 +86,6 @@ struct FloatRange;
 struct HalfRange;
 
 using AttributeType = std::variant<matrix, float4, uint4, int4, float2, uint2, int2, half4, FloatRange, float1, uint1, int1, half2, fixed4, HalfRange, half1, InputPatch_, OutputPatch_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, SamplerState_>;
-
-enum UpdateEnum : uint32_t;
-
-struct Table_;
-struct Constants_;
-
-using RootSignatureType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
 
 enum AttributeFlags : uint32_t;
 
@@ -255,14 +245,6 @@ struct Patch_;
 using PrimitiveTopologyType = std::variant<Point_, Line_, Triangle_, Patch_>;
 
 struct InputLayoutState;
-struct AttributeCollection;
-struct DrawCall;
-struct DrawCallQueue;
-
-using Submission = std::variant<DrawCallQueue>;
-
-struct UnorderedSubmissions;
-struct PassSubmissions;
 
 } // namespace Shader
 

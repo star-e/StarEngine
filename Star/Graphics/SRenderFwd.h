@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -555,6 +555,16 @@ using GPU_VIRTUAL_ADDRESS = uint64_t;
 
 #define STAR_RAYTRACING_MAX_DECLARABLE_TRACE_RECURSION_DEPTH	( 31 )
 
+#define STAR_RAYTRACING_MAX_GEOMETRIES_PER_BOTTOM_LEVEL_ACCELERATION_STRUCTURE	( 16777216 )
+
+#define STAR_RAYTRACING_MAX_INSTANCES_PER_TOP_LEVEL_ACCELERATION_STRUCTURE	( 16777216 )
+
+#define STAR_RAYTRACING_MAX_PRIMITIVES_PER_BOTTOM_LEVEL_ACCELERATION_STRUCTURE	( 536870912 )
+
+#define STAR_RAYTRACING_MAX_RAY_GENERATION_SHADER_THREADS	( 1073741824 )
+
+#define STAR_RAYTRACING_MAX_SHADER_RECORD_STRIDE	( 4096 )
+
 #define STAR_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT	( 32 )
 
 #define STAR_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT	( 64 )
@@ -614,6 +624,8 @@ using GPU_VIRTUAL_ADDRESS = uint64_t;
 #define STAR_RESINFO_INSTRUCTION_MISSING_COMPONENT_RETVAL	( 0 )
 
 #define STAR_RESOURCE_BARRIER_ALL_SUBRESOURCES	( 0xffffffff )
+
+#define STAR_RS_SET_SHADING_RATE_COMBINER_COUNT	( 2 )
 
 #define STAR_SHADER_IDENTIFIER_SIZE_IN_BYTES	( 32 )
 
@@ -903,6 +915,11 @@ enum RENDER_PASS_TIER : uint32_t;
 enum RAYTRACING_TIER : uint32_t;
 
 struct FEATURE_DATA_D3D12_OPTIONS5;
+
+enum VARIABLE_SHADING_RATE_TIER : uint32_t;
+
+struct FEATURE_DATA_D3D12_OPTIONS6;
+struct FEATURE_DATA_QUERY_META_COMMAND;
 struct RESOURCE_ALLOCATION_INFO;
 struct RESOURCE_ALLOCATION_INFO1;
 
@@ -1188,10 +1205,20 @@ struct AUTO_BREADCRUMB_NODE;
 
 enum DRED_VERSION : uint32_t;
 enum DRED_FLAGS : uint32_t;
+enum DRED_ENABLEMENT : uint32_t;
 
 struct DEVICE_REMOVED_EXTENDED_DATA;
+
+enum DRED_ALLOCATION_TYPE : uint32_t;
+
+struct DRED_ALLOCATION_NODE;
+struct DRED_AUTO_BREADCRUMBS_OUTPUT;
+struct DRED_PAGE_FAULT_OUTPUT;
+struct DEVICE_REMOVED_EXTENDED_DATA1;
 struct VERSIONED_DEVICE_REMOVED_EXTENDED_DATA;
 
+enum BACKGROUND_PROCESSING_MODE : uint32_t;
+enum MEASUREMENTS_ACTION : uint32_t;
 enum RENDER_PASS_BEGINNING_ACCESS_TYPE : uint32_t;
 
 struct RENDER_PASS_BEGINNING_ACCESS_CLEAR_PARAMETERS;
@@ -1210,6 +1237,11 @@ enum RENDER_PASS_FLAGS : uint32_t;
 struct DISPATCH_RAYS_DESC;
 struct SUBRESOURCE_DATA;
 struct MEMCPY_DEST;
+
+enum AXIS_SHADING_RATE : uint32_t;
+enum SHADING_RATE : uint32_t;
+enum SHADING_RATE_COMBINER : uint32_t;
+
 struct LargeWidth;
 struct Width;
 struct Height;
@@ -1219,11 +1251,67 @@ struct TiledDeferred_;
 
 using GpuArch = std::variant<Immediate_, TiledImmediate_, TiledDeferred_>;
 
-struct D3D12_;
+struct Direct3D_;
 struct Vulkan_;
-struct Metal2_;
+struct Metal_;
+struct OpenGL_;
 
-using API = std::variant<D3D12_, Vulkan_, Metal2_>;
+using API = std::variant<Direct3D_, Vulkan_, Metal_>;
+
+struct BINORMAL_;
+struct BLENDINDICES_;
+struct BLENDWEIGHT_;
+struct NORMAL_;
+struct POSITIONT_;
+struct PSIZE_;
+struct TANGENT_;
+struct TEXCOORD_;
+struct SV_ClipDistance_;
+struct SV_CullDistance_;
+struct SV_Coverage_;
+struct SV_Depth_;
+struct SV_DepthGreaterEqual_;
+struct SV_DepthLessEqual_;
+struct SV_DispatchThreadID_;
+struct SV_DomainLocation_;
+struct SV_GroupID_;
+struct SV_GroupIndex_;
+struct SV_GroupThreadID_;
+struct SV_GSInstanceID_;
+struct SV_InnerCoverage_;
+struct SV_InsideTessFactor_;
+struct SV_InstanceID_;
+struct SV_IsFrontFace_;
+struct SV_OutputControlPointID_;
+struct SV_Position_;
+struct SV_PrimitiveID_;
+struct SV_RenderTargetArrayIndex_;
+struct SV_SampleIndex_;
+struct SV_StencilRef_;
+struct SV_Target_;
+struct SV_TessFactor_;
+struct SV_VertexID_;
+struct SV_ViewportArrayIndex_;
+
+using VertexElementType = std::variant<BINORMAL_, BLENDINDICES_, BLENDWEIGHT_, NORMAL_, POSITIONT_, PSIZE_, TANGENT_, TEXCOORD_, SV_Position_, SV_Target_>;
+using SemanticType = std::variant<std::monostate, BINORMAL_, BLENDINDICES_, BLENDWEIGHT_, NORMAL_, POSITIONT_, PSIZE_, TANGENT_, TEXCOORD_, SV_ClipDistance_, SV_CullDistance_, SV_Coverage_, SV_Depth_, SV_DepthGreaterEqual_, SV_DepthLessEqual_, SV_DispatchThreadID_, SV_DomainLocation_, SV_GroupID_, SV_GroupIndex_, SV_GroupThreadID_, SV_GSInstanceID_, SV_InnerCoverage_, SV_InsideTessFactor_, SV_InstanceID_, SV_IsFrontFace_, SV_OutputControlPointID_, SV_Position_, SV_PrimitiveID_, SV_RenderTargetArrayIndex_, SV_SampleIndex_, SV_StencilRef_, SV_Target_, SV_TessFactor_, SV_VertexID_, SV_ViewportArrayIndex_>;
+
+struct CBV_;
+struct UAV_;
+struct SRV_;
+struct SSV_;
+struct RTV_;
+struct DSV_;
+struct IBV_;
+struct VBV_;
+struct SOV_;
+struct Table_;
+struct Constants_;
+
+using RootSignatureType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
+
+enum RootAccessEnum : uint32_t;
+enum UpdateEnum : uint32_t;
 
 struct Matrix_;
 struct Float4_;
@@ -1242,11 +1330,8 @@ struct Half1_;
 
 using DataType = std::variant<std::monostate, Matrix_, Float4_, UInt4_, Int4_, Float2_, UInt2_, Int2_, Half4_, Float1_, UInt1_, Int1_, Half2_, Fixed4_, Half1_>;
 
-struct DataInfo;
+struct DataID;
 struct ConstantBuffer;
-struct FullScreenTriangle_;
-
-using DrawCallType = std::variant<std::monostate, FullScreenTriangle_>;
 
 } // namespace Render
 

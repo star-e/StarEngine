@@ -1,31 +1,50 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="SShaderWorks.cpp" />
-    <ClCompile Include="SUnityShaderBuilder.cpp">
-      <Filter>Unity</Filter>
-    </ClCompile>
-    <ClCompile Include="SHLSLGenerator.cpp">
-      <Filter>HLSL</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SShaderWorks.h" />
+    <ClInclude Include="SBasicModules.h">
+      <Filter>0.Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="SHLSLGenerator.h" />
+    <ClInclude Include="SShaderCompiler.h" />
     <ClInclude Include="SUnityShaderBuilder.h">
-      <Filter>Unity</Filter>
+      <Filter>1.Unity</Filter>
     </ClInclude>
-    <ClInclude Include="SHLSLGenerator.h">
-      <Filter>HLSL</Filter>
+    <ClInclude Include="SStarModules.h">
+      <Filter>0.Modules</Filter>
     </ClInclude>
+    <ClInclude Include="SUnrealBlueprintBuilder.h">
+      <Filter>2.Unreal</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderAssetBuilder.h" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Unity">
-      <UniqueIdentifier>{21e6b469-eb2c-4d7d-920b-8bd1661fe384}</UniqueIdentifier>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SBasicModules.cpp">
+      <Filter>0.Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="SHLSLGenerator.cpp" />
+    <ClCompile Include="SShaderCompiler.cpp" />
+    <ClCompile Include="SUnityShaderBuilder.cpp">
+      <Filter>1.Unity</Filter>
+    </ClCompile>
+    <ClCompile Include="SStarModules.cpp">
+      <Filter>0.Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="SUnrealBlueprintBuilder.cpp">
+      <Filter>2.Unreal</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderAssetBuilder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="0.Modules">
+      <UniqueIdentifier>{702606a1-e248-472d-a2a0-33c91902c645}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HLSL">
-      <UniqueIdentifier>{c8af206e-cb98-4aed-a3f8-8945b25130e0}</UniqueIdentifier>
+    <Filter Include="1.Unity">
+      <UniqueIdentifier>{933c3249-c3fd-42fb-bc3d-ea963e9573d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2.Unreal">
+      <UniqueIdentifier>{9c40fd6e-7625-4b2e-be15-b051978529f2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

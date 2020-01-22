@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -16,10 +16,10 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include <StarCompiler/ShaderWorks/SShaderWorks.h>
+#include <StarCompiler/ShaderGraph/SShaderModules.h>
 
 namespace Star::Graphics::Render::Shader {
 
-void createUnityModules(ShaderWorks& shaderWorks);
+void createUnityModules(ShaderModules& shaderWorks);
 
 }

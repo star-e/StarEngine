@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -71,9 +71,10 @@
 #include <Star/SFileUtils.h>
 #include <Star/SFlatMap.h>
 #include <Star/SGraph.h>
+#include <Star/SGeometry.h>
+#include <Star/SMultiIndexUtils.h>
 #include <Star/Core/SMetaID.h>
 #include <StarCompiler/SFormat.h>
-#include <StarCompiler/SMultiIndex.h>
 #include <StarCompiler/SGetVariantName.h>
 #include <StarCompiler/STextUtils.h>
 #include <StarCompiler/SIndent.h>

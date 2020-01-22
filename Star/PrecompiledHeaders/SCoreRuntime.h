@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -80,7 +80,8 @@
 #include <Star/SSmallVector.h>
 #include <Star/SAtomic.h>
 #include <Star/SHash.h>
+#include <Star/SGeometry.h>
+#include <Star/SSerializationUtils.h>
 #include <Star/Core/SMetaID.h>
 #include <Star/Graphics/SRenderFormat.h>
 #include <Star/Graphics/SRenderTypes.h>
-#include <Star/SSerializationUtils.h>

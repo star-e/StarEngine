@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -243,5 +243,5 @@ inline void serialize(
 
 #include <boost/serialization/collection_traits.hpp>
 
-BOOST_SERIALIZATION_COLLECTION_TRAITS(std::vector)
+BOOST_SERIALIZATION_COLLECTION_TRAITS(std::pmr::vector)
 #undef STD

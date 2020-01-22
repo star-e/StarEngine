@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -28,7 +28,7 @@ class ShaderGroup {
 public:
     void validate() const;
     // bottom-up
-    void buildConstantBuffers(const AttributeMap& attrs);
+    void buildProgramConstantBuffers(const AttributeMap& attrs);
 
     void collectConstantBuffers();
     void collectDescriptors(const AttributeMap& attrs);
@@ -41,6 +41,7 @@ public:
     const ShaderConstantBuffer& getConstantBuffer(const DescriptorIndex& index) const;
 
     void getShaderPrefix(std::string& prefix) const;
+    void getShaderPrefixSlash(std::string& prefix) const;
 
     const ShaderGroup& getRootSignatureShaderGroup() const;
 

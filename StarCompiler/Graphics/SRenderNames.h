@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -24,15 +24,6 @@ namespace Graphics {
 
 namespace Render {
 
-inline const char* getName(const CBV_& v) noexcept { return "CBV"; }
-inline const char* getName(const UAV_& v) noexcept { return "UAV"; }
-inline const char* getName(const SRV_& v) noexcept { return "SRV"; }
-inline const char* getName(const SSV_& v) noexcept { return "SSV"; }
-inline const char* getName(const RTV_& v) noexcept { return "RTV"; }
-inline const char* getName(const DSV_& v) noexcept { return "DSV"; }
-inline const char* getName(const IBV_& v) noexcept { return "IBV"; }
-inline const char* getName(const VBV_& v) noexcept { return "VBV"; }
-inline const char* getName(const SOV_& v) noexcept { return "SOV"; }
 inline const char* getName(const BufferRaw_& v) noexcept { return "BufferRaw"; }
 inline const char* getName(const BufferView& v) noexcept { return "BufferView"; }
 inline const char* getName(const MipChainView& v) noexcept { return "MipChainView"; }

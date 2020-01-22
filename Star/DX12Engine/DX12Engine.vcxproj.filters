@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="SConfig.h" />
+    <ClInclude Include="SDX12SwapChain.h">
+      <Filter>2.Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12FrameQueue.h">
+      <Filter>2.Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12ShaderDescriptorHeap.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12SamplerDescriptorHeap.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Helpers.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Factory.h">
+      <Filter>2.Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Fwd.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Types.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Render.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Utils.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Pointer.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12UploadBuffer.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12DescriptorArray.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12RenderWorks.h">
+      <Filter>1.Types</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12InternalFwd.h">
+      <Filter>0.Common</Filter>
+    </ClInclude>
+    <ClInclude Include="SDX12Engine.h">
+      <Filter>2.Engine</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SDX12SwapChain.cpp">
+      <Filter>2.Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12FrameQueue.cpp">
+      <Filter>2.Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12ShaderDescriptorHeap.cpp">
+      <Filter>0.Common</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12SamplerDescriptorHeap.cpp">
+      <Filter>0.Common</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12Helpers.cpp">
+      <Filter>0.Common</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12Factory.cpp">
+      <Filter>2.Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12Types.cpp">
+      <Filter>1.Types</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12Utils.cpp">
+      <Filter>1.Types</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12Pointer.cpp">
+      <Filter>1.Types</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12UploadBuffer.cpp">
+      <Filter>0.Common</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12DescriptorArray.cpp">
+      <Filter>0.Common</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12RenderWorks.cpp">
+      <Filter>1.Types</Filter>
+    </ClCompile>
+    <ClCompile Include="SDX12Engine.cpp">
+      <Filter>2.Engine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="2.Engine">
+      <UniqueIdentifier>{55c17b53-f036-417d-9c21-8c3b825133bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="0.Common">
+      <UniqueIdentifier>{33c1d059-700e-42b3-8248-08696947c47e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1.Types">
+      <UniqueIdentifier>{249ef723-8203-4cee-9e36-843eb620263a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

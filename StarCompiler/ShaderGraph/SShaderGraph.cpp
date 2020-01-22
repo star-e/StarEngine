@@ -1,4 +1,4 @@
-// Copyright (C) 2019 star.engine at outlook dot com
+// Copyright (C) 2019-2020 star.engine at outlook dot com
 //
 // This file is part of StarEngine
 //
@@ -584,9 +584,6 @@ size_t ShaderGraph::copyNodeAndSourcesFromShaderGroup(size_t nodeID, ShaderGraph
 }
 
 void ShaderGraph::copyNodeDependenciesFromShaderGroup(size_t dstNodeID, ShaderGraph& rhs, size_t rhsDstNodeID) const {
-    const auto& node = mNodeGraph[dstNodeID];
-    const auto& stage = mNodeStages[dstNodeID];
-
     // add node dependency dependencies
     auto edges = in_edges(dstNodeID, mDependencyGraph);
     for (auto iter = edges.first; iter != edges.second; ++iter) {
