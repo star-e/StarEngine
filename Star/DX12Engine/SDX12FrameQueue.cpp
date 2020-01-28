@@ -233,8 +233,8 @@ void DX12FrameQueue::renderFrame(const DX12FrameContext* pContext, std::pmr::mem
                     Camera cam{};
                     cam.mViewSpace = OpenGL;
                     cam.mNDC = Direct3D;
-                    cam.lookAt(Vector3f(0, 0, 0), Vector3f(0, 1, 0), Vector3f(0, 0, 1));
-                    //cam.lookTo(Vector3f(0, 1.0f, 0), Vector3f(1.f, 0, 0.0f), Vector3f(0, 1.0f, 0));
+                    //cam.lookAt(Vector3f(0, 2.0f, 0), Vector3f(0, 1, 0), Vector3f(0, 0, 1));
+                    cam.lookTo(Vector3f(0, 0, 1.7f), Vector3f(-1.f, 0, 0.0f), Vector3f(0, 0.0f, 1.0f));
                     cam.perspective(0.25f * S_PI, 16.0f / 9.0f, 0.25f, 512.0f);
 
                     auto sizeCB = sizeof(Matrix4f) * 2;

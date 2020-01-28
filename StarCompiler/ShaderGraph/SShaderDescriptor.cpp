@@ -23,7 +23,7 @@ bool isUnbounded(const DescriptorModel& model) noexcept {
     return visit(overload(
         [](const auto& v) -> bool {
             return visit(overload(
-                [](const DescriptorRange& r) {
+                [](const DescriptorArray& r) {
                     if (std::holds_alternative<RangeUnbounded>(r))
                         return true;
                     else
@@ -37,26 +37,26 @@ bool isUnbounded(const DescriptorModel& model) noexcept {
     ), model);
 }
 
-DescriptorType getDescriptorType(const DescriptorModel& model) {
+DescriptorRangeType getDescriptorType(const DescriptorModel& model) {
     return visit(overload(
-        [](const DescriptorCBV&) ->DescriptorType { return CBV; },
-        [](const DescriptorUAV&) ->DescriptorType { return UAV; },
-        [](const DescriptorSRV&) ->DescriptorType { return SRV; },
-        [](const DescriptorSSV&) ->DescriptorType { return SSV; }
+        [](const DescriptorCBV&) ->DescriptorRangeType { return CBV; },
+        [](const DescriptorUAV&) ->DescriptorRangeType { return UAV; },
+        [](const DescriptorSRV&) ->DescriptorRangeType { return SRV; },
+        [](const DescriptorSSV&) ->DescriptorRangeType { return SSV; }
     ), model);
 }
 
-DescriptorRange getDescriptorRange(const DescriptorModel& model, uint32_t count) noexcept {
+DescriptorArray getDescriptorRange(const DescriptorModel& model, uint32_t count) noexcept {
     return visit(overload(
-        [&](const auto& v) -> DescriptorRange {
+        [&](const auto& v) -> DescriptorArray {
             return visit(overload(
-                [&](const DescriptorRange& r) -> DescriptorRange {
+                [&](const DescriptorArray& r) -> DescriptorArray {
                     if (std::holds_alternative<RangeUnbounded>(r))
                         return RangeUnbounded{};
                     else
                         return RangeBounded{ count };
                 },
-                [&](const auto&) -> DescriptorRange {
+                [&](const auto&) -> DescriptorArray {
                     return RangeBounded{ count };
                 }
             ), v);
@@ -64,7 +64,7 @@ DescriptorRange getDescriptorRange(const DescriptorModel& model, uint32_t count)
     ), model);
 }
 
-Descriptor makeDescriptorRange(const DescriptorType& type, uint32_t space, const DescriptorRange& range) {
+Descriptor makeDescriptorRange(const DescriptorRangeType& type, uint32_t space, const DescriptorArray& range) {
     return visit(overload(
         [&](CBV_ v) {
             return Descriptor{ v, space, DescriptorCBV{ range } };
@@ -81,32 +81,29 @@ Descriptor makeDescriptorRange(const DescriptorType& type, uint32_t space, const
     ), type);
 }
 
-RootAccessEnum getRootAccessEnum(ShaderStageType stage) {
+ShaderVisibilityType getShaderVisibilityType(ShaderStageType stage) {
     return visit(overload(
-        [&](OM_) -> RootAccessEnum { throw std::invalid_argument("output merger do not support root signature"); },
-        [&](PS_) -> RootAccessEnum { return RA_PS; },
-        [&](GS_) -> RootAccessEnum { return RA_GS; },
-        [&](DS_) -> RootAccessEnum { return RA_DS; },
-        [&](TS_) -> RootAccessEnum { throw std::invalid_argument("tessellation shader do not support root signature"); },
-        [&](HS_) -> RootAccessEnum { return RA_HS; },
-        [&](VS_) -> RootAccessEnum { return RA_VS; },
-        [&](CS_) -> RootAccessEnum { throw std::invalid_argument("compute shader do not support root signature"); }
+        [](OM_ v) -> ShaderVisibilityType { throw std::invalid_argument("output merger do not support root signature"); },
+        [](PS_ v) -> ShaderVisibilityType { return v; },
+        [](GS_ v) -> ShaderVisibilityType { return v; },
+        [](DS_ v) -> ShaderVisibilityType { return v; },
+        [](TS_ v) -> ShaderVisibilityType { throw std::invalid_argument("tessellation shader do not support root signature"); },
+        [](HS_ v) -> ShaderVisibilityType { return v; },
+        [](VS_ v) -> ShaderVisibilityType { return v; },
+        [](CS_ v) -> ShaderVisibilityType { throw std::invalid_argument("compute shader do not support root signature"); }
     ), stage);
 }
 
-ShaderStageType getShaderStageType(RootAccessEnum e) {
-    switch (e) {
-    case RA_PS: return PS;
-    case RA_GS: return GS;
-    case RA_DS: return DS;
-    case RA_HS: return HS;
-    case RA_VS: return VS;
-    default:
-        throw std::runtime_error("unknown root access stage");
-    }
+ShaderStageType getShaderStageType(ShaderVisibilityType e) {
+    return visit(overload(
+        [](std::monostate) -> ShaderStageType {
+            throw std::runtime_error("shader visibility all cannot be converted to ShaderStageType");
+        },
+        [](const auto& v) -> ShaderStageType { return v; }
+    ), e);
 }
 
-const char* getRootDescriptorName(const DescriptorType& type) noexcept {
+const char* getRootDescriptorName(const DescriptorRangeType& type) noexcept {
     return visit(overload(
         [&](CBV_ v) {
             return "CBV";
@@ -123,7 +120,7 @@ const char* getRootDescriptorName(const DescriptorType& type) noexcept {
     ), type);
 }
 
-char getRegisterPrefix(const DescriptorType& type) noexcept {
+char getRegisterPrefix(const DescriptorRangeType& type) noexcept {
     return visit(overload(
         [&](CBV_ v) {
             return 'b';

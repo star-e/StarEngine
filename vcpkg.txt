@@ -1,0 +1,1 @@
+.\vcpkg.exe install --triplet x64-windows eigen3 boost libjpeg-turbo libpng tiff rxcpp directxtex ms-gsl

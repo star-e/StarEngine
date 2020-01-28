@@ -29,7 +29,7 @@ public:
     void mergeConstantBuffers(UpdateEnum update, RootSignature& rhs) const;
     
     void addConstantBufferDescriptor(const DescriptorIndex& index, const ShaderConstantBuffer& cb);
-    void addDescriptor(const ShaderAttribute& attr, RootAccessEnum stage);
+    void addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage);
 
     void collectCapacities(UpdateEnum update, std::map<DescriptorIndex, DescriptorTableCapacity>& rhs) const;
     void resizeCapacities(const std::map<DescriptorIndex, DescriptorTableCapacity>& rhs);
@@ -43,6 +43,7 @@ public:
 
     // compiled
     std::map<DescriptorIndex, ShaderConstantBuffer> mConstantBuffers;
+    std::map<DescriptorIndex, RootParameter> mRootParameters;
     std::map<DescriptorIndex, DescriptorTable> mTables;
     std::map<DescriptorIndex, DescriptorTableCapacity> mCapacities;
 };

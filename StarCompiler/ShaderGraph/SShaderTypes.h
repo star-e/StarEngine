@@ -99,29 +99,6 @@ enum ShaderStageEnum : uint32_t {
     SS_All = VS_All | HS_All | TS_All | DS_All | GS_All | PS_All,
 };
 
-struct OM_ {} static constexpr OM;
-struct PS_ {} static constexpr PS;
-struct GS_ {} static constexpr GS;
-struct DS_ {} static constexpr DS;
-struct TS_ {} static constexpr TS;
-struct HS_ {} static constexpr HS;
-struct VS_ {} static constexpr VS;
-struct CS_ {} static constexpr CS;
-
-using ShaderStageType = std::variant<OM_, PS_, GS_, DS_, TS_, HS_, VS_, CS_>;
-
-inline bool operator<(const ShaderStageType& lhs, const ShaderStageType& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-
-inline bool operator==(const ShaderStageType& lhs, const ShaderStageType& rhs) noexcept {
-    return lhs.index() == rhs.index();
-}
-
-inline bool operator!=(const ShaderStageType& lhs, const ShaderStageType& rhs) noexcept {
-    return !(lhs == rhs);
-}
-
 struct ShaderStruct {
     std::string mName;
 };
@@ -320,7 +297,7 @@ inline bool operator<(const AttributeType& lhs, const AttributeType& rhs) noexce
 enum AttributeFlags : uint32_t {
     NoFlags = 0,
     VisibleAll = 1 << 0,
-    Unbounded = 1 << 1,
+    UnboundedSize = 1 << 1,
     RootConstant = 1 << 2,
     RootLevel = 1 << 3,
     CombinedSampler = 1 << 4,
@@ -600,7 +577,98 @@ struct ShaderStageContent {
     std::string mMain;
 };
 
-using DescriptorType = std::variant<CBV_, UAV_, SRV_, SSV_>;
+using DescriptorRangeType = std::variant<CBV_, UAV_, SRV_, SSV_>;
+
+inline bool operator<(const DescriptorRangeType& lhs, const DescriptorRangeType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+inline bool operator==(const DescriptorRangeType& lhs, const DescriptorRangeType& rhs) noexcept {
+    return lhs.index() == rhs.index();
+}
+
+inline bool operator!=(const DescriptorRangeType& lhs, const DescriptorRangeType& rhs) noexcept {
+    return !(lhs == rhs);
+}
+
+struct DescriptorRegisterSpace {
+    DescriptorRangeType mType;
+    std::string mName;
+    uint32_t mSpace = 0;
+};
+
+inline bool operator<(const DescriptorRegisterSpace&lhs, const DescriptorRegisterSpace&rhs) noexcept {
+    return
+        std::forward_as_tuple(lhs.mType, lhs.mName, lhs.mSpace) <
+        std::forward_as_tuple(rhs.mType, rhs.mName, rhs.mSpace);
+}
+
+struct Bounded_ {} static constexpr Bounded;
+struct Unbounded_ {} static constexpr Unbounded;
+
+using Boundedness = std::variant<Bounded_, Unbounded_>;
+
+inline bool operator<(const Boundedness& lhs, const Boundedness& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+using ShaderCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_>;
+
+inline bool operator<(const ShaderCBV& lhs, const ShaderCBV& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+using ShaderSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_>;
+
+inline bool operator<(const ShaderSRV& lhs, const ShaderSRV& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+using ShaderUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_>;
+
+inline bool operator<(const ShaderUAV& lhs, const ShaderUAV& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+using ShaderSSV = std::variant<SamplerState_>;
+
+inline bool operator<(const ShaderSSV& lhs, const ShaderSSV& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+using ShaderDescriptor = std::variant<ShaderCBV, ShaderUAV, ShaderSRV, ShaderSSV>;
+
+struct DescriptorValue {
+    ShaderDescriptor mShaderDescriptor;
+    Boundedness mBoundedness;
+    std::string mName;
+};
+
+inline bool operator<(const DescriptorValue&lhs, const DescriptorValue&rhs) noexcept {
+    return
+        std::forward_as_tuple(lhs.mShaderDescriptor, lhs.mBoundedness, lhs.mName) <
+        std::forward_as_tuple(rhs.mShaderDescriptor, rhs.mBoundedness, rhs.mName);
+}
+
+struct DescriptorSubrange {
+    Set<DescriptorValue> mValues;
+    uint32_t mCapacity = 0;
+};
+
+struct MaterialSource_ {} static constexpr MaterialSource;
+struct LightSource_ {} static constexpr LightSource;
+struct CameraSource_ {} static constexpr CameraSource;
+struct EngineSource_ {} static constexpr EngineSource;
+
+using DescriptorSource = std::variant<MaterialSource_, LightSource_, CameraSource_, EngineSource_>;
+
+inline bool operator<(const DescriptorSource& lhs, const DescriptorSource& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+struct DescriptorRange {
+    Map<DescriptorSource, DescriptorSubrange> mSubranges;
+    uint32_t mMaxUnboundedSize = 0;
+};
+
+struct RootParameter {
+    Map<DescriptorRegisterSpace, DescriptorRange> mRanges;
+};
 
 struct RangeUnbounded {};
 
@@ -608,9 +676,9 @@ struct RangeBounded {
     uint32_t mCount = 0;
 };
 
-using DescriptorRange = std::variant<RangeBounded, RangeUnbounded>;
+using DescriptorArray = std::variant<RangeBounded, RangeUnbounded>;
 
-inline bool operator<(const DescriptorRange& lhs, const DescriptorRange& rhs) noexcept {
+inline bool operator<(const DescriptorArray& lhs, const DescriptorArray& rhs) noexcept {
     return lhs.index() < rhs.index();
 }
 
@@ -630,14 +698,14 @@ struct ShaderConstantBuffer {
     IdentityMap<ShaderConstant> mValues;
 };
 
-using DescriptorCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, DescriptorRange>;
-using DescriptorSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, DescriptorRange>;
-using DescriptorUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, DescriptorRange>;
-using DescriptorSSV = std::variant<SamplerState_, DescriptorRange>;
+using DescriptorCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, DescriptorArray>;
+using DescriptorSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, DescriptorArray>;
+using DescriptorUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, DescriptorArray>;
+using DescriptorSSV = std::variant<SamplerState_, DescriptorArray>;
 using DescriptorModel = std::variant<DescriptorCBV, DescriptorUAV, DescriptorSRV, DescriptorSSV>;
 
 struct Descriptor {
-    DescriptorType mType;
+    DescriptorRangeType mType;
     uint32_t mSpace = 0;
     DescriptorModel mModel;
     std::string mName;
@@ -654,9 +722,9 @@ struct DescriptorTable {
 };
 
 struct DescriptorCapacity {
-    DescriptorType mType;
+    DescriptorRangeType mType;
     uint32_t mSpace = 0;
-    DescriptorRange mCount = {};
+    DescriptorArray mCount = {};
 };
 
 inline bool operator<(const DescriptorCapacity&lhs, const DescriptorCapacity&rhs) noexcept {
@@ -668,18 +736,6 @@ inline bool operator<(const DescriptorCapacity&lhs, const DescriptorCapacity&rhs
 struct DescriptorTableCapacity {
     IdentityMap<DescriptorCapacity> mNumDescriptors;
 };
-
-struct DescriptorIndex {
-    UpdateEnum mUpdate = PerInstance;
-    RootSignatureType mType = Table;
-    RootAccessEnum mVisibility = {};
-};
-
-inline bool operator<(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
-    return
-        std::forward_as_tuple(lhs.mUpdate, lhs.mType, lhs.mVisibility) <
-        std::forward_as_tuple(rhs.mUpdate, rhs.mType, rhs.mVisibility);
-}
 
 struct MergeStages_ {} static constexpr MergeStages;
 

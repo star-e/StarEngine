@@ -28,10 +28,10 @@ void RootSignature::addConstant(const ShaderAttribute& attr, ShaderStageType sta
         return;
     }
 
-    RootAccessEnum stageID = getRootAccessEnum(stage);
-    DescriptorIndex index{ attr.mUpdateFrequency, getRootSignatureType(attr), stageID };
+    ShaderVisibilityType stageID = getShaderVisibilityType(stage);
+    DescriptorIndex index{ attr.mUpdateFrequency, getRootParameterType(attr), stageID };
     mConstantBuffers[index].mValues.emplace(
-        ShaderConstant{ static_cast<bool>(attr.mFlags & Unbounded), attr.mType, attr.mName });
+        ShaderConstant{ static_cast<bool>(attr.mFlags & UnboundedSize), attr.mType, attr.mName });
 }
 
 namespace {
@@ -42,8 +42,8 @@ uint32_t getUnboundedSpace(const DescriptorTable& table, const ShaderAttribute& 
     for (const auto& d : table.mDescriptors) {
         visit(overload(
             [&](const auto& desc) {
-                if (std::holds_alternative<DescriptorRange>(desc)) {
-                    const auto& range = std::get<DescriptorRange>(desc);
+                if (std::holds_alternative<DescriptorArray>(desc)) {
+                    const auto& range = std::get<DescriptorArray>(desc);
                     if (std::holds_alternative<RangeUnbounded>(range)) {
                         if (d.mName == attr.mName &&
                             d.mType == getDescriptorType(attr))
@@ -89,7 +89,7 @@ struct AddAttributeVisitor {
         auto& table = mRoot.mTables[mIndex];
         auto& cap = mRoot.mCapacities[mIndex];
 
-        if (mAttribute.mFlags & Unbounded) {
+        if (mAttribute.mFlags & UnboundedSize) {
             auto space = getUnboundedSpace(table, mAttribute);
             Descriptor d = getDescriptor(mAttribute, space);
             auto added = RootSignature::try_addDescriptor(d, table, cap);
@@ -106,13 +106,13 @@ struct AddAttributeVisitor {
 
 }
 
-void RootSignature::addDescriptor(const ShaderAttribute& attr, RootAccessEnum stage) {
+void RootSignature::addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage) {
     IsConstant visitor;
     if (visit(visitor, attr.mType)) {
         return;
     }
 
-    DescriptorIndex index{ attr.mUpdateFrequency, getRootSignatureType(attr), stage };
+    DescriptorIndex index{ attr.mUpdateFrequency, getRootParameterType(attr), stage };
 
     AddAttributeVisitor visitor2{ *this, index, attr };
     visit(visitor2, attr.mType);
@@ -182,7 +182,7 @@ void RootSignature::resizeCapacities(const std::map<DescriptorIndex, DescriptorT
                             [](RangeUnbounded, RangeBounded& v) {
                                 throw std::runtime_error("add array with unbounded, should never happen");
                             }
-                        ), range.mCount, std::get<DescriptorRange>(d));
+                        ), range.mCount, std::get<DescriptorArray>(d));
                     }
                 ), range1.mModel);
                 table.mDescriptors.replace(iter, range1);
@@ -209,7 +209,7 @@ void RootSignature::collectDescriptors(UpdateEnum update, RootSignature& rhs) co
 
 void RootSignature::reserveRegisters(UpdateEnum update, ShaderRegister& reg) const {
     for (const auto& [index, table] : mTables) {
-        if (index.mVisibility != RA_All)
+        if (!std::holds_alternative<std::monostate>(index.mVisibility))
             continue;
         if (index.mUpdate != update)
             continue;
@@ -221,7 +221,7 @@ void RootSignature::reserveRegisters(UpdateEnum update, ShaderRegister& reg) con
                         [&](const auto& v) {
                             reg.reserveAll(d.mType, d.mSpace);
                         },
-                        [&](const DescriptorRange& range) {
+                        [&](const DescriptorArray& range) {
                             visit(overload(
                                 [&](const RangeBounded& arr) {
                                     reg.reserveAll(d.mType, d.mSpace, arr.mCount);
@@ -238,7 +238,7 @@ void RootSignature::reserveRegisters(UpdateEnum update, ShaderRegister& reg) con
 
 void RootSignature::reserveCapacityRegisters(UpdateEnum update, ShaderRegister& reg) const {
     for (const auto& [index, cap] : mCapacities) {
-        if (index.mVisibility != RA_All)
+        if (!std::holds_alternative<std::monostate>(index.mVisibility))
             continue;
         if (index.mUpdate != update)
             continue;

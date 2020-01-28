@@ -249,7 +249,7 @@ void fillBufferByVertex(const MeshBufferLayout& layout,
                         readByVertex<PolygonSize, Unorm4>(pMesh, pMesh->GetElementVertexColor(slot), buffer, stride);
                         break;
                     default:
-                        throw std::invalid_argument("tangent Format not support");
+                        throw std::invalid_argument("color Format not support");
                     }
                 }
             ), e.mType);
@@ -412,7 +412,7 @@ void fillBufferByPoint(const MeshBufferLayout& layout,
                         readByPoint<PolygonSize, Unorm4>(pMesh, pMesh->GetElementVertexColor(slot), buffer, stride);
                         break;
                     default:
-                        throw std::invalid_argument("tangent Format not support");
+                        throw std::invalid_argument("color Format not support");
                     }
                 }
             ), e.mType);

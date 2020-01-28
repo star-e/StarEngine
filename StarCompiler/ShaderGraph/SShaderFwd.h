@@ -38,17 +38,6 @@ struct Content;
 
 enum ShaderStageEnum : uint32_t;
 
-struct OM_;
-struct PS_;
-struct GS_;
-struct DS_;
-struct TS_;
-struct HS_;
-struct VS_;
-struct CS_;
-
-using ShaderStageType = std::variant<OM_, PS_, GS_, DS_, TS_, HS_, VS_, CS_>;
-
 struct ShaderStruct;
 
 using ValueModel = std::variant<std::monostate, float4, float3, float2, float1, half4, half3, half2, half1, fixed4, fixed3, fixed2, fixed1, uint4, uint3, uint2, uint1, int4, int3, int2, int1, ShaderStruct>;
@@ -109,27 +98,48 @@ struct ShaderModule;
 struct ShaderSemanticValue;
 struct ShaderStageContent;
 
-using DescriptorType = std::variant<CBV_, UAV_, SRV_, SSV_>;
+using DescriptorRangeType = std::variant<CBV_, UAV_, SRV_, SSV_>;
 
+struct DescriptorRegisterSpace;
+struct Bounded_;
+struct Unbounded_;
+
+using Boundedness = std::variant<Bounded_, Unbounded_>;
+using ShaderCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_>;
+using ShaderSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_>;
+using ShaderUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_>;
+using ShaderSSV = std::variant<SamplerState_>;
+using ShaderDescriptor = std::variant<ShaderCBV, ShaderUAV, ShaderSRV, ShaderSSV>;
+
+struct DescriptorValue;
+struct DescriptorSubrange;
+struct MaterialSource_;
+struct LightSource_;
+struct CameraSource_;
+struct EngineSource_;
+
+using DescriptorSource = std::variant<MaterialSource_, LightSource_, CameraSource_, EngineSource_>;
+
+struct DescriptorRange;
+struct RootParameter;
 struct RangeUnbounded;
 struct RangeBounded;
 
-using DescriptorRange = std::variant<RangeBounded, RangeUnbounded>;
+using DescriptorArray = std::variant<RangeBounded, RangeUnbounded>;
 
 struct ShaderConstant;
 struct ShaderConstantBuffer;
 
-using DescriptorCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, DescriptorRange>;
-using DescriptorSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, DescriptorRange>;
-using DescriptorUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, DescriptorRange>;
-using DescriptorSSV = std::variant<SamplerState_, DescriptorRange>;
+using DescriptorCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, DescriptorArray>;
+using DescriptorSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, DescriptorArray>;
+using DescriptorUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, DescriptorArray>;
+using DescriptorSSV = std::variant<SamplerState_, DescriptorArray>;
 using DescriptorModel = std::variant<DescriptorCBV, DescriptorUAV, DescriptorSRV, DescriptorSSV>;
 
 struct Descriptor;
 struct DescriptorTable;
 struct DescriptorCapacity;
 struct DescriptorTableCapacity;
-struct DescriptorIndex;
 struct MergeStages_;
 
 using StageOptimization = std::variant<std::monostate, MergeStages_>;

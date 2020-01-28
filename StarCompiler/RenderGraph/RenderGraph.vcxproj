@@ -258,7 +258,6 @@
     <ClInclude Include="..\SGetVariantName.h" />
     <ClInclude Include="..\SIndent.h" />
     <ClInclude Include="..\SMathNames.h" />
-    <ClInclude Include="..\SMultiIndex.h" />
     <ClInclude Include="..\STextUtils.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SRenderGraph.h" />

@@ -19,10 +19,6 @@
 #pragma warning(push)
 #pragma warning(disable:4307)
 #include <boost/gil.hpp>
-#include <boost/gil/half.hpp>
-#include <boost/gil/extension/toolbox/color_spaces/swizzle.hpp>
+//#include <boost/gil/half.hpp>
+//#include <boost/gil/extension/toolbox/color_spaces/swizzle.hpp>
 #pragma warning(pop)
-
-namespace boost::gil {
-
-}

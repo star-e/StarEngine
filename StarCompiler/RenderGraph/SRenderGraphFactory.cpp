@@ -164,7 +164,7 @@ void RenderSolutionFactory::updateRenderGraph(const Shader::ShaderModules& modul
                                         if (std::holds_alternative<DepthRead_>(state.mRenderTargetState.mState) ||
                                             std::holds_alternative<ShaderResource_>(state.mRenderTargetState.mState))
                                         {
-                                            if (std::holds_alternative<Shader::PS_>(type)) {
+                                            if (std::holds_alternative<PS_>(type)) {
                                                 state.mRenderTargetState.mPixelShaderResource = true;
                                             } else {
                                                 state.mRenderTargetState.mNonPixelShaderResource = true;

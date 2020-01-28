@@ -48,62 +48,62 @@ struct AttributeDescriptorVisitor {
     }
 
     Descriptor operator()(const ConstantBuffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & Unbounded) ? DescriptorCBV{ RangeUnbounded() } : v;
+        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
         return Descriptor{ CBV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const Buffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & Unbounded) ? DescriptorCBV{ RangeUnbounded() } : v;
+        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
         return Descriptor{ CBV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const ByteAddressBuffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & Unbounded) ? DescriptorCBV{ RangeUnbounded() } : v;
+        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
         return Descriptor{ CBV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const StructuredBuffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & Unbounded) ? DescriptorCBV{ RangeUnbounded() } : v;
+        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
         return Descriptor{ CBV, mSpace, model, mAttribute.mName };
     }
 
     Descriptor operator()(const Texture1D_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const Texture1DArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const Texture2D_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const Texture2DArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const Texture2DMS_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const Texture2DMSArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const Texture3D_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const TextureCube_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
     Descriptor operator()(const TextureCubeArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & Unbounded) ? DescriptorSRV{ RangeUnbounded() } : v;
+        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
         return Descriptor{ SRV, mSpace, model, mAttribute.mName };
     }
 
     template<class T>
     Descriptor operator()(const T& v) {
-        DescriptorUAV model = (mAttribute.mFlags & Unbounded) ? DescriptorUAV{ RangeUnbounded() } : v;
+        DescriptorUAV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorUAV{ RangeUnbounded() } : v;
         return Descriptor{ UAV, mSpace, model, mAttribute.mName };
     }
 
@@ -117,82 +117,82 @@ struct AttributeDescriptorTypeVisitor {
     uint32_t mSpace = 0;
 
     template<class Scalar, int Rows, int Cols>
-    DescriptorType operator()(const Eigen::Matrix<Scalar, Rows, Cols>& v) {
+    DescriptorRangeType operator()(const Eigen::Matrix<Scalar, Rows, Cols>& v) {
         return CBV;
     }
 
-    DescriptorType operator()(const FloatRange& v) {
+    DescriptorRangeType operator()(const FloatRange& v) {
         return CBV;
     }
-    DescriptorType operator()(const HalfRange& v) {
+    DescriptorRangeType operator()(const HalfRange& v) {
         return CBV;
     }
 
-    DescriptorType operator()(const InputPatch_& v) {
+    DescriptorRangeType operator()(const InputPatch_& v) {
         throw std::invalid_argument("InputPatch not supported");
     }
-    DescriptorType operator()(const OutputPatch_& v) {
+    DescriptorRangeType operator()(const OutputPatch_& v) {
         throw std::invalid_argument("OutputPatch not supported");
     }
 
-    DescriptorType operator()(const ConstantBuffer_& v) {
+    DescriptorRangeType operator()(const ConstantBuffer_& v) {
         return CBV;
     }
-    DescriptorType operator()(const Buffer_& v) {
+    DescriptorRangeType operator()(const Buffer_& v) {
         return CBV;
     }
-    DescriptorType operator()(const ByteAddressBuffer_& v) {
+    DescriptorRangeType operator()(const ByteAddressBuffer_& v) {
         return CBV;
     }
-    DescriptorType operator()(const StructuredBuffer_& v) {
+    DescriptorRangeType operator()(const StructuredBuffer_& v) {
         return CBV;
     }
 
-    DescriptorType operator()(const Texture1D_& v) {
+    DescriptorRangeType operator()(const Texture1D_& v) {
         return SRV;
     }
-    DescriptorType operator()(const Texture1DArray_& v) {
+    DescriptorRangeType operator()(const Texture1DArray_& v) {
         return SRV;
     }
-    DescriptorType operator()(const Texture2D_& v) {
+    DescriptorRangeType operator()(const Texture2D_& v) {
         return SRV;
     }
-    DescriptorType operator()(const Texture2DArray_& v) {
+    DescriptorRangeType operator()(const Texture2DArray_& v) {
         return SRV;
     }
-    DescriptorType operator()(const Texture2DMS_& v) {
+    DescriptorRangeType operator()(const Texture2DMS_& v) {
         return SRV;
     }
-    DescriptorType operator()(const Texture2DMSArray_& v) {
+    DescriptorRangeType operator()(const Texture2DMSArray_& v) {
         return SRV;
     }
-    DescriptorType operator()(const Texture3D_& v) {
+    DescriptorRangeType operator()(const Texture3D_& v) {
         return SRV;
     }
-    DescriptorType operator()(const TextureCube_& v) {
+    DescriptorRangeType operator()(const TextureCube_& v) {
         return SRV;
     }
-    DescriptorType operator()(const TextureCubeArray_& v) {
+    DescriptorRangeType operator()(const TextureCubeArray_& v) {
         return SRV;
     }
 
     template<class T>
-    DescriptorType operator()(const T& v) {
+    DescriptorRangeType operator()(const T& v) {
         return UAV;
     }
 
-    DescriptorType operator()(const SamplerState_& v) {
+    DescriptorRangeType operator()(const SamplerState_& v) {
         return SSV;
     }
 };
 
 }
 
-RootSignatureType getRootSignatureType(const ShaderAttribute& attr) {
+RootParameterType getRootParameterType(const ShaderAttribute& attr) {
     auto type = getDescriptorType(attr);
 
     return visit(overload(
-        [&](CBV_) -> RootSignatureType {
+        [&](CBV_) -> RootParameterType {
             if (attr.mFlags & RootConstant) {
                 return Constants;
             } else if (attr.mFlags & RootLevel) {
@@ -201,7 +201,7 @@ RootSignatureType getRootSignatureType(const ShaderAttribute& attr) {
                 return Table;
             }
         },
-        [&](auto v) -> RootSignatureType {
+        [&](auto v) -> RootParameterType {
             if (attr.mFlags & RootLevel) {
                 return v;
             } else {
@@ -211,7 +211,7 @@ RootSignatureType getRootSignatureType(const ShaderAttribute& attr) {
     ), type);
 }
 
-DescriptorType getDescriptorType(const ShaderAttribute& attr) {
+DescriptorRangeType getDescriptorType(const ShaderAttribute& attr) {
     AttributeDescriptorTypeVisitor visitor{ attr, 0 };
     return visit(visitor, attr.mType);
 }
@@ -325,7 +325,7 @@ void validate(const ShaderAttribute& attr) {
         if (!std::holds_alternative<CBV_>(type)) {
             throw std::invalid_argument("only cbv can be root constant");
         }
-        if (attr.mFlags & Unbounded) {
+        if (attr.mFlags & UnboundedSize) {
             throw std::invalid_argument("unbounded resource cannot be root constant");
         }
     }

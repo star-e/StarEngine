@@ -24,6 +24,8 @@
 #include <fstream>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <boost/numeric/conversion/cast.hpp>
+
 #include <boost/format.hpp>
 
 #include <boost/serialization/array_wrapper.hpp>
@@ -31,7 +33,6 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/string.hpp>
-#include <boost/serialization/unordered_map.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 

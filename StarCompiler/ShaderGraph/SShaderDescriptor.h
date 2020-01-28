@@ -34,15 +34,15 @@ struct IsConstant {
 
 bool isUnbounded(const DescriptorModel& model) noexcept;
 
-DescriptorType getDescriptorType(const DescriptorModel& model);
+DescriptorRangeType getDescriptorType(const DescriptorModel& model);
 
-DescriptorRange getDescriptorRange(const DescriptorModel& model, uint32_t count) noexcept;
-Descriptor makeDescriptorRange(const DescriptorType& type, uint32_t space, const DescriptorRange& range);
+DescriptorArray getDescriptorRange(const DescriptorModel& model, uint32_t count) noexcept;
+Descriptor makeDescriptorRange(const DescriptorRangeType& type, uint32_t space, const DescriptorArray& range);
 
-RootAccessEnum getRootAccessEnum(ShaderStageType stage);
-ShaderStageType getShaderStageType(RootAccessEnum e);
+ShaderVisibilityType getShaderVisibilityType(ShaderStageType stage);
+ShaderStageType getShaderStageType(ShaderVisibilityType e);
 
-const char* getRootDescriptorName(const DescriptorType& type) noexcept;
-char getRegisterPrefix(const DescriptorType& type) noexcept;
+const char* getRootDescriptorName(const DescriptorRangeType& type) noexcept;
+char getRegisterPrefix(const DescriptorRangeType& type) noexcept;
 
 }

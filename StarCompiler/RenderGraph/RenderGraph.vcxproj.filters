@@ -49,9 +49,6 @@
     <ClInclude Include="..\SMathNames.h">
       <Filter>0.Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\SMultiIndex.h">
-      <Filter>0.Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\STextUtils.h">
       <Filter>0.Common</Filter>
     </ClInclude>

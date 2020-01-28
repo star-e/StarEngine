@@ -1308,11 +1308,23 @@ struct SOV_;
 struct Table_;
 struct Constants_;
 
-using RootSignatureType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
+using RootParameterType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
 
-enum RootAccessEnum : uint32_t;
+struct OM_;
+struct PS_;
+struct GS_;
+struct DS_;
+struct TS_;
+struct HS_;
+struct VS_;
+struct CS_;
+
+using ShaderStageType = std::variant<OM_, PS_, GS_, DS_, TS_, HS_, VS_, CS_>;
+using ShaderVisibilityType = std::variant<std::monostate, PS_, GS_, DS_, HS_, VS_>;
+
 enum UpdateEnum : uint32_t;
 
+struct DescriptorIndex;
 struct Matrix_;
 struct Float4_;
 struct UInt4_;

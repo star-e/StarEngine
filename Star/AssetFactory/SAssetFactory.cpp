@@ -53,13 +53,15 @@ struct AssetFactory::Impl final : public Core::Producer {
         desc.mElements = {
             { SV_Position, 0, Format::R32G32B32_SFLOAT },
             { NORMAL, 12, Format::R32G32B32_SFLOAT },
-            { TEXCOORD, 24, Format::R32G32_SFLOAT },
+            { TANGENT, 24, Format::R32G32B32_SFLOAT },
+            { TEXCOORD, 36, Format::R32G32_SFLOAT },
         };
-        desc.mVertexSize = 32;
+        desc.mVertexSize = 44;
         meshLayout.mIndex = {
-            { "vertex", { 0, 0} },
+            { "vertex", { 0, 0 } },
             { "normal", { 0, 1 } },
-            { "uv", { 0, 2} },
+            { "tangent", { 0, 2 } },
+            { "uv", { 0, 3 } },
         };
         mResources.mSettings.mIndex.emplace("StaticMesh", 0);
     }
@@ -649,7 +651,6 @@ public:
         }
 
         TextureImportSettings settings;
-        settings.mFormat = Format::S_BC3_UNORM_BLOCK;
         std::for_each(std::execution::par_unseq,
             mDatabase.mTextureInfo.begin(),
             mDatabase.mTextureInfo.end(),

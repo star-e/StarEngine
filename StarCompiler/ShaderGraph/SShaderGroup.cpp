@@ -156,28 +156,26 @@ std::string ShaderGroup::generateRootSignature() const {
     bool hasVS = false;
 
     for (const auto& [index, table] : mRootSignature.mTables) {
-        switch (index.mVisibility) {
-        case RA_All:
-            hasPS = hasGS = hasDS = hasHS = hasVS = true;
-            break;
-        case RA_PS:
-            hasPS = true;
-            break;
-        case RA_GS:
-            hasGS = true;
-            break;
-        case RA_DS:
-            hasDS = true;
-            break;
-        case RA_HS:
-            hasHS = true;
-            break;
-        case RA_VS:
-            hasVS = true;
-            break;
-        default:
-            throw std::runtime_error("unknown visibility");
-        }
+        visit(overload(
+            [&](std::monostate) {
+                hasPS = hasGS = hasDS = hasHS = hasVS = true;
+            },
+            [&](PS_) {
+                hasPS = true;
+            },
+            [&](GS_) {
+                hasGS = true;
+            },
+            [&](DS_) {
+                hasDS = true;
+            },
+            [&](HS_) {
+                hasHS = true;
+            },
+            [&](VS_) {
+                hasVS = true;
+            }
+        ), index.mVisibility);
     }
     if (!hasPS)
         flags |= ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
@@ -244,35 +242,26 @@ std::string ShaderGroup::generateRootSignature() const {
         const auto& index = p.first;
         const auto& table = p.second;
         auto outputVisibility = [&]() {
-            if (index.mVisibility != RA_All) {
-                oss << ", visibility = ";
-                int count = 0;
-                if (index.mVisibility == RA_PS) {
-                    if (count++)
-                        oss << " | ";
-                    oss << "SHADER_VISIBILITY_PIXEL";
+            visit(overload(
+                [&](std::monostate) {
+                    // output nothing
+                },
+                [&](PS_) {
+                    oss << ", visibility = SHADER_VISIBILITY_PIXEL";
+                },
+                [&](GS_) {
+                    oss << ", visibility = SHADER_VISIBILITY_GEOMETRY";
+                },
+                [&](DS_) {
+                    oss << ", visibility = SHADER_VISIBILITY_DOMAIN";
+                },
+                [&](HS_) {
+                    oss << ", visibility = SHADER_VISIBILITY_HULL";
+                },
+                [&](VS_) {
+                    oss << ", visibility = SHADER_VISIBILITY_VERTEX";
                 }
-                if (index.mVisibility == RA_GS) {
-                    if (count++)
-                        oss << " | ";
-                    oss << "SHADER_VISIBILITY_GEOMETRY";
-                }
-                if (index.mVisibility == RA_DS) {
-                    if (count++)
-                        oss << " | ";
-                    oss << "SHADER_VISIBILITY_DOMAIN";
-                }
-                if (index.mVisibility == RA_HS) {
-                    if (count++)
-                        oss << " | ";
-                    oss << "SHADER_VISIBILITY_HULL";
-                }
-                if (index.mVisibility == RA_VS) {
-                    if (count++)
-                        oss << " | ";
-                    oss << "SHADER_VISIBILITY_VERTEX";
-                }
-            }
+            ), index.mVisibility);
         };
 
         auto outputDetails = [&](const Descriptor& d) {
@@ -295,7 +284,7 @@ std::string ShaderGroup::generateRootSignature() const {
             },
             [&](auto type) {
                 for (const auto& d : table.mDescriptors) {
-                    if (DescriptorType(type) != getDescriptorType(d.mModel)) {
+                    if (DescriptorRangeType(type) != getDescriptorType(d.mModel)) {
                         throw std::runtime_error("descriptor type and model inconsistent");
                     }
                     auto outputDescriptor = [&]() {
@@ -309,7 +298,7 @@ std::string ShaderGroup::generateRootSignature() const {
                             [&](auto) {
                                 outputDescriptor();
                             },
-                            [&](const DescriptorRange& range) {
+                            [&](const DescriptorArray& range) {
                                 if (std::holds_alternative<RangeUnbounded>(range)) {
                                     throw std::runtime_error("root descriptor unbounded not supported");
                                 }
@@ -336,7 +325,7 @@ std::string ShaderGroup::generateRootSignature() const {
                         [&](auto) {
                             outputSSV();
                         },
-                        [&](const DescriptorRange& range) {
+                        [&](const DescriptorArray& range) {
                             if (std::holds_alternative<RangeUnbounded>(range)) {
                                 throw std::runtime_error("root descriptor unbounded not supported");
                             }
@@ -389,7 +378,7 @@ std::string ShaderGroup::generateRootSignature() const {
                                 [&](const auto&) {
                                     slots.increase(index.mVisibility, d.mType, d.mSpace);
                                 },
-                                [&](const DescriptorRange& r) {
+                                [&](const DescriptorArray& r) {
                                     visit(overload(
                                         [&](const RangeBounded& arr) {
                                             slots.increase(index.mVisibility, d.mType, d.mSpace, arr.mCount);

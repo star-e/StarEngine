@@ -19,21 +19,24 @@
 
 namespace Star::Graphics::Render::Shader {
 
-uint32_t ShaderRegister::get(RootAccessEnum vis, DescriptorType type, uint32_t space) {
+uint32_t ShaderRegister::get(ShaderVisibilityType vis, DescriptorRangeType type, uint32_t space) {
     return mSlots[vis][type][space];
 }
 
-uint32_t ShaderRegister::increase(RootAccessEnum vis, DescriptorType type, uint32_t space, uint32_t count) {
+uint32_t ShaderRegister::increase(ShaderVisibilityType vis, DescriptorRangeType type, uint32_t space, uint32_t count) {
     auto& slot = mSlots[vis][type][space];
     auto prev = slot;
     slot += count;
     return prev;
 }
 
-void ShaderRegister::reserveAll(DescriptorType type, uint32_t space, uint32_t count) {
-    uint32_t ps = mSlots[RA_PS][type][space];
-    for (uint vis = RA_PS; vis != RA_Count; ++vis) {
-        auto& map = mSlots[static_cast<RootAccessEnum>(vis)];
+void ShaderRegister::reserveAll(DescriptorRangeType type, uint32_t space, uint32_t count) {
+    uint32_t ps = mSlots[PS][type][space];
+
+    for (auto& [vis, map] : mSlots) {
+        if (std::holds_alternative<std::monostate>(vis)) {
+            continue;
+        }
         if (map[type][space] != ps) {
             throw std::runtime_error("register slot inconsistent");
         }

@@ -188,9 +188,9 @@ void ShaderProgram::buildDescriptors(const AttributeMap& attrs, RootSignature& r
         for (const auto& usage : node.mAttributes) {
             const auto& attr = at(attrs, get_key(usage));
             if (attr.mFlags & VisibleAll) {
-                rsg.addDescriptor(attr, RA_All);
+                rsg.addDescriptor(attr, std::monostate{});
             } else {
-                auto ra = getRootAccessEnum(stage);
+                auto ra = getShaderVisibilityType(stage);
                 rsg.addDescriptor(attr, ra);
             }
         }

@@ -178,7 +178,7 @@ void outputDescriptor(std::ostream& oss, std::string space,
                         << slots.get(index.mVisibility, d.mType, d.mSpace) << ");\n";
                     slots.increase(index.mVisibility, d.mType, d.mSpace);
                 },
-                [&](const DescriptorRange& r) {
+                [&](const DescriptorArray& r) {
                     throw std::runtime_error("should not reach here");
                 }
             ), v);
@@ -206,16 +206,16 @@ std::string HLSLGenerator::generateAttributes(const AttributeMap& attrs,
     for (const auto& t : group.mRootSignature.mTables) {
         const auto& index = t.first;
         const auto& table = t.second;
-        auto ra = getRootAccessEnum(stage);
-        if (index.mVisibility != RA_All && index.mVisibility != ra)
+        auto ra = getShaderVisibilityType(stage);
+        if (!std::holds_alternative<std::monostate>(index.mVisibility) && index.mVisibility != ra)
             continue;
 
         if (count++)
             oss << "\n";
 
         oss << "// " << getName(index.mUpdate);
-        if (index.mVisibility == RA_All) {
-            oss << ", " << getName(index.mVisibility);
+        if (std::holds_alternative<std::monostate>(index.mVisibility)) {
+            oss << ", all stages";
         }
         oss << "\n";
         auto output = [&](const Descriptor& d) {
@@ -225,7 +225,7 @@ std::string HLSLGenerator::generateAttributes(const AttributeMap& attrs,
                         [&](const auto&) {
                             outputDescriptor(oss, space, attrs, mProgram, &group, nullptr, index, d, slots);
                         },
-                        [&](const DescriptorRange& r) {
+                        [&](const DescriptorArray& r) {
                             visit(overload(
                                 [&](const RangeBounded& arr) {
                                     auto begSlot = slots.get(index.mVisibility, d.mType, d.mSpace);
@@ -242,9 +242,9 @@ std::string HLSLGenerator::generateAttributes(const AttributeMap& attrs,
                                     auto endSlot = begSlot + arr.mCount;
                                     if (current != endSlot && mDebug) {
                                         if (endSlot - current == 1) {
-                                            oss << "// " << getName(index.mVisibility) << ", register(" << getRegisterPrefix(d.mType) << current << ") not used\n";
+                                            oss << "// " << getVariantName(index.mVisibility) << ", register(" << getRegisterPrefix(d.mType) << current << ") not used\n";
                                         } else {
-                                            oss << "// " << getName(index.mVisibility) << ", register(" << getRegisterPrefix(d.mType) << current << "-" << endSlot << ") not used\n";
+                                            oss << "// " << getVariantName(index.mVisibility) << ", register(" << getRegisterPrefix(d.mType) << current << "-" << endSlot << ") not used\n";
                                         }
                                     }
                                     slots.increase(index.mVisibility, d.mType, d.mSpace, endSlot - current);

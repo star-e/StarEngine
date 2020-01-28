@@ -268,18 +268,14 @@ inline const char* getName(const VBV_& v) noexcept { return "VBV"; }
 inline const char* getName(const SOV_& v) noexcept { return "SOV"; }
 inline const char* getName(const Table_& v) noexcept { return "Table"; }
 inline const char* getName(const Constants_& v) noexcept { return "Constants"; }
-inline const char* getName(RootAccessEnum e) noexcept {
-    switch(e) {
-    case RA_All: return "RA_All";
-    case RA_PS: return "RA_PS";
-    case RA_GS: return "RA_GS";
-    case RA_DS: return "RA_DS";
-    case RA_HS: return "RA_HS";
-    case RA_VS: return "RA_VS";
-    case RA_Count: return "RA_Count";
-    }
-    return "";
-}
+inline const char* getName(const OM_& v) noexcept { return "OM"; }
+inline const char* getName(const PS_& v) noexcept { return "PS"; }
+inline const char* getName(const GS_& v) noexcept { return "GS"; }
+inline const char* getName(const DS_& v) noexcept { return "DS"; }
+inline const char* getName(const TS_& v) noexcept { return "TS"; }
+inline const char* getName(const HS_& v) noexcept { return "HS"; }
+inline const char* getName(const VS_& v) noexcept { return "VS"; }
+inline const char* getName(const CS_& v) noexcept { return "CS"; }
 inline const char* getName(UpdateEnum e) noexcept {
     switch(e) {
     case PerInstance: return "PerInstance";
@@ -290,6 +286,7 @@ inline const char* getName(UpdateEnum e) noexcept {
     }
     return "";
 }
+inline const char* getName(const DescriptorIndex& v) noexcept { return "DescriptorIndex"; }
 inline const char* getName(const Matrix_& v) noexcept { return "Matrix"; }
 inline const char* getName(const Float4_& v) noexcept { return "Float4"; }
 inline const char* getName(const UInt4_& v) noexcept { return "UInt4"; }

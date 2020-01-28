@@ -79,23 +79,55 @@ void generateImageMipMaps(std::byte* dstBuffer, uint32_t width, uint32_t height,
     size_t offset = 0;
     const uint32_t BPE = sizeof(DstPixel) * BlockX * BlockY;
     for (uint32_t k = 1; k != mipCount; ++k) {
-        size_t rowAlignment = boost::alignment::align_up(width, BlockX) * sizeof(DstPixel);
-        Expects(rowAlignment % AlignX == 0);
+        uint32_t width1 = boost::alignment::align_up(width, BlockX);
+        uint32_t height1 = boost::alignment::align_up(height, BlockY);
 
+        size_t rowAlignment = width1 * sizeof(DstPixel);
         auto srcView = interleaved_view(width, height, (const DstPixel*)(dstBuffer + offset), rowAlignment);
 
         offset += mip_size(width, height, BlockX, BlockY, BPE);
         Ensures(offset % AlignX == 0);
+
         width = half_size(width);
         height = half_size(height);
 
-        rowAlignment = boost::alignment::align_up(width, BlockX) * sizeof(DstPixel);
-        Expects(rowAlignment % AlignX == 0);
+        uint32_t width2 = boost::alignment::align_up(width, BlockX);
+        uint32_t height2 = boost::alignment::align_up(height, BlockY);
+
+        rowAlignment = width2 * sizeof(DstPixel);
 
         auto dstView = interleaved_view(width, height, (DstPixel*)(dstBuffer + offset), rowAlignment);
-
         resize_view(srcView, dstView, boost::gil::bilinear_sampler());
+
+        if (width2 == width && height2 == height) {
+            continue;
+        }
+
+        std::array<float, num_channels<DstPixel>::value> acc{};
+
+        float count = 0.0f;
+        for_each_pixel(dstView, [&](const DstPixel& pixel) {
+            for (size_t k = 0; k != num_channels<DstPixel>::value; ++k) {
+                acc[k] += pixel[k];
+            }
+            count += 1.0f;
+        });
+
+        DstPixel avg;
+        for (size_t k = 0; k != num_channels<DstPixel>::value; ++k) {
+            avg[k] = boost::numeric_cast<typename channel_type<DstPixel>::type>(acc[k] / count);
+        }
+
+        auto dstView2 = interleaved_view(width2, height2, (DstPixel*)(dstBuffer + offset), rowAlignment);
+        for (uint32_t i = 0; i != height2; ++i) {
+            for (uint32_t j = 0; j != width2; ++j) {
+                if (i < height && j < width)
+                    continue;
+                dstView2(j, i) = avg;
+            }
+        }
     }
+    Ensures(width == 1 && height == 1);
 }
 
 template<class Tag, class SrcPixel, size_t AlignX>
@@ -133,14 +165,24 @@ void prepareTextureForCompression(std::istream& is, uint32_t width, uint32_t hei
 }
 
 template<class Tag, class SrcPixel>
-void loadImage(std::istream& is, std::pmr::memory_resource* mr, uint32_t BlockX, uint32_t BlockY,
+void loadImage(std::istream& is, std::pmr::memory_resource* mr,
+    uint32_t width, uint32_t height,
+    uint32_t BlockX, uint32_t BlockY,
     const Asset::TextureImportSettings& info, TextureData& tex
 ) {
-    RESOURCE_DESC srcDesc{};
-    readImageInfo<Tag>(is, srcDesc);
-    uint32_t width = gsl::narrow_cast<uint32_t>(srcDesc.mWidth);
-    uint32_t height = gsl::narrow_cast<uint32_t>(srcDesc.mHeight);
-    // full mipchain
+    // dst desc
+    tex.mDesc.mDimension = RESOURCE_DIMENSION_TEXTURE2D;
+    tex.mDesc.mAlignment = 0u;
+    tex.mDesc.mWidth = width;
+    tex.mDesc.mHeight = height;
+    tex.mDesc.mDepthOrArraySize = 1u;
+    tex.mDesc.mMipLevels = 1;
+    tex.mDesc.mFormat = info.mFormat;
+    tex.mDesc.mSampleDesc = { 1u, 0u };
+    tex.mDesc.mLayout = TEXTURE_LAYOUT_UNKNOWN;
+    tex.mDesc.mFlags = {};
+
+    // src
     uint32_t mipCount = mip_count(boost::alignment::align_up(width, BlockX), boost::alignment::align_up(height, BlockY));
     uint32_t srcBPE = sizeof(SrcPixel) * BlockX * BlockY;
 
@@ -157,23 +199,17 @@ void loadImage(std::istream& is, std::pmr::memory_resource* mr, uint32_t BlockX,
         auto sz1 = texture_size(width, height, blockX, blockY, dstBPE);
         Expects(sz == sz1);
         tex.mBuffer.resize(sz);
-        srcDesc.mMipLevels = mipCount;
+        tex.mDesc.mMipLevels = mipCount;
     } else {
         auto sz = getMipSize(info.mFormat, width, height);
         auto sz1 = mip_size(width, height, blockX, blockY, dstBPE);
         tex.mBuffer.resize(sz);
     }
 
-    // make dst
-    tex.mDesc = srcDesc;
-    tex.mDesc.mFormat = info.mFormat;
-
     size_t srcOffset = 0;
     size_t dstOffset = 0;
     auto w = width;
     auto h = height;
-
-    Expects(tex.mDesc.mMipLevels == srcDesc.mMipLevels);
 
     // convert to target texture
     switch (info.mFormat) {
@@ -228,11 +264,28 @@ void loadImage(std::istream& is, std::pmr::memory_resource* mr, uint32_t BlockX,
 }
 
 void loadPNG(std::istream& is, std::pmr::memory_resource* mr, const TextureImportSettings& settings, TextureData& tex) {
-    loadImage<png_tag, rgba8_pixel_t>(is, mr, 4, 4, settings, tex);
+    const auto& img = read_image_info(is, png_tag())._info;
+    is.seekg(0);
+
+    if (settings.mFormat == Format::UNKNOWN) {
+        if (img._bit_depth != 8) {
+            throw std::runtime_error("png only support 8 bit depth");
+        }
+        auto info = settings;
+        if (img._num_channels < 4) {
+            info.mFormat = Format::S_BC1_SRGB_BLOCK;
+        } else {
+            info.mFormat = Format::S_BC3_SRGB_BLOCK;
+        }
+        loadImage<png_tag, rgba8_pixel_t>(is, mr,
+            gsl::narrow_cast<uint32_t>(img._width),
+            gsl::narrow_cast<uint32_t>(img._height),
+            4, 4, info, tex);
+    }
 }
 
 void loadTGA(std::istream& is, std::pmr::memory_resource* mr, const TextureImportSettings& settings, TextureData& tex) {
-    loadImage<targa_tag, rgba8_pixel_t>(is, mr, 4, 4, settings, tex);
+    throw std::runtime_error("tga not supported yet");
 }
 
 namespace {

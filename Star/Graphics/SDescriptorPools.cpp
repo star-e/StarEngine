@@ -34,7 +34,7 @@ DescriptorPool::DescriptorPool(
 
 DescriptorPool::~DescriptorPool() = default;
 
-DescriptorRange DescriptorPool::allocateRange() const {
+DescriptorBlock DescriptorPool::allocateRange() const {
     std::lock_guard<std::mutex> guard(mMutex);
 
     if (mFreeBlocks.empty()) {
@@ -45,7 +45,7 @@ DescriptorRange DescriptorPool::allocateRange() const {
     mFreeBlocks.pop_front();
 
     ++mAllocatedCount;
-    return DescriptorRange(*this, range.mBegin, range.mEnd);
+    return DescriptorBlock(*this, range.mBegin, range.mEnd);
 }
 
 void DescriptorPool::destroyBuffer(const std::pair<uint32_t, uint32_t>& block) const noexcept {
@@ -85,7 +85,7 @@ void DescriptorPool::reset(uint32_t offset, uint32_t descCount) {
 }
 
 // Persistent
-PersistentDescriptorBlock::PersistentDescriptorBlock(DescriptorRange range, BinSize sz)
+PersistentDescriptorBlock::PersistentDescriptorBlock(DescriptorBlock range, BinSize sz)
     : mRange(std::move(range))
     , mMask(set_least_n_bits(sz.mValue))
 {

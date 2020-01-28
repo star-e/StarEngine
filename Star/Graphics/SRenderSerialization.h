@@ -711,6 +711,63 @@ template<class Archive>
 void serialize(Archive& ar, Star::Graphics::Render::Constants_& v, const uint32_t version) {
 }
 
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::OM_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::OM_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::OM_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::PS_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::PS_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::PS_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::GS_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::GS_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::GS_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::DS_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::DS_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::DS_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::TS_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::TS_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::TS_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::HS_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::HS_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::HS_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::VS_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::VS_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::VS_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::CS_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::CS_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::CS_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::DescriptorIndex, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::DescriptorIndex, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::DescriptorIndex& v, const uint32_t version) {
+    ar & v.mUpdate;
+    ar & v.mType;
+    ar & v.mVisibility;
+}
+
 STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::Matrix_, object_serializable);
 STAR_CLASS_TRACKING(Star::Graphics::Render::Matrix_, track_never);
 template<class Archive>

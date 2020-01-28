@@ -28,22 +28,22 @@ namespace Graphics {
 
 class DescriptorPool;
 
-class STAR_GRAPHICS_API DescriptorRange {
+class STAR_GRAPHICS_API DescriptorBlock {
 public:
-    DescriptorRange() noexcept = default;
-    DescriptorRange(const DescriptorPool& pool, uint32_t begin, uint32_t end) noexcept
+    DescriptorBlock() noexcept = default;
+    DescriptorBlock(const DescriptorPool& pool, uint32_t begin, uint32_t end) noexcept
         : mBlock(begin, end), mPool(&pool)
     {
 
     }
-    DescriptorRange(DescriptorRange&& rhs) noexcept
+    DescriptorBlock(DescriptorBlock&& rhs) noexcept
         : mBlock(std::move(rhs.mBlock))
         , mPool(rhs.mPool)
     {
         rhs.mPool = nullptr;
     }
 
-    DescriptorRange& operator=(DescriptorRange&& rhs) noexcept {
+    DescriptorBlock& operator=(DescriptorBlock&& rhs) noexcept {
         reset();
         mPool = rhs.mPool;
         mBlock = std::move(rhs.mBlock);
@@ -51,7 +51,7 @@ public:
         return *this;
     }
 
-    ~DescriptorRange() noexcept {
+    ~DescriptorBlock() noexcept {
         reset();
     }
 
@@ -73,10 +73,10 @@ private:
     const DescriptorPool* mPool = nullptr;
 };
 
-CHECK_SIZE(DescriptorRange, 16);
+CHECK_SIZE(DescriptorBlock, 16);
 
 class STAR_GRAPHICS_API DescriptorPool {
-    friend class DescriptorRange;
+    friend class DescriptorBlock;
 public:
     typedef std::pmr::polymorphic_allocator<std::byte> allocator_type;
     allocator_type get_allocator() const noexcept {
@@ -87,7 +87,7 @@ public:
     DescriptorPool& operator=(const DescriptorPool&) = delete;
     ~DescriptorPool();
 
-    DescriptorRange allocateRange() const;
+    DescriptorBlock allocateRange() const;
 
     inline uint32_t getBlockSize() const noexcept {
         return mBlockSize;
@@ -120,7 +120,7 @@ private:
 #pragma warning(pop)
 };
 
-inline void DescriptorRange::reset() noexcept {
+inline void DescriptorBlock::reset() noexcept {
     if (mPool) {
         mPool->destroyBuffer(mBlock);
         mPool = nullptr;
@@ -137,7 +137,7 @@ public:
         uint32_t mValue;
     };
 
-    PersistentDescriptorBlock(DescriptorRange range, BinSize sz);
+    PersistentDescriptorBlock(DescriptorBlock range, BinSize sz);
     PersistentDescriptorBlock(PersistentDescriptorBlock&& rhs) noexcept;
     PersistentDescriptorBlock& operator=(PersistentDescriptorBlock&&) noexcept;
     ~PersistentDescriptorBlock();
@@ -166,7 +166,7 @@ private:
         mMask &= ~(uint64_t(1) << index);
     }
 
-    DescriptorRange mRange;
+    DescriptorBlock mRange;
     uint64_t mMask = 0;
 };
 
@@ -256,7 +256,7 @@ private:
 CHECK_SIZE(PersistentDescriptorPool, 64);
 
 struct CircularDescriptorBlock {
-    CircularDescriptorBlock(DescriptorRange&& range)
+    CircularDescriptorBlock(DescriptorBlock&& range)
         : mBlock(std::move(range))
         , mCurrent(mBlock.begin())
     {}
@@ -279,7 +279,7 @@ struct CircularDescriptorBlock {
         return res;
     }
 
-    DescriptorRange mBlock;
+    DescriptorBlock mBlock;
     uint32_t mCurrent = 0;
     uint32_t mCurrentSwapChain = 0;
 };
@@ -333,7 +333,7 @@ private:
     uint32_t mCurrent = 0;
 #pragma warning(push)
 #pragma warning(disable: 4251)
-    std::pmr::vector<DescriptorRange> mBlocks;
+    std::pmr::vector<DescriptorBlock> mBlocks;
 #pragma warning(pop)
 };
 

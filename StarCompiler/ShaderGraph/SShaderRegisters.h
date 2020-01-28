@@ -22,13 +22,13 @@ namespace Star::Graphics::Render::Shader {
 
 class ShaderRegister {
 public:
-    uint32_t get(RootAccessEnum stage, DescriptorType type, uint32_t space);
-    uint32_t increase(RootAccessEnum stage, DescriptorType type, uint32_t space, uint32_t count = 1);
-    void reserveAll(DescriptorType type, uint32_t space, uint32_t count = 1);
+    uint32_t get(ShaderVisibilityType stage, DescriptorRangeType type, uint32_t space);
+    uint32_t increase(ShaderVisibilityType stage, DescriptorRangeType type, uint32_t space, uint32_t count = 1);
+    void reserveAll(DescriptorRangeType type, uint32_t space, uint32_t count = 1);
 private:
     using SpaceMap = boost::container::flat_map<uint32_t, uint32_t>;
-    using TypeMap = boost::container::flat_map<DescriptorType, SpaceMap>;
-    boost::container::flat_map<RootAccessEnum, TypeMap> mSlots;
+    using TypeMap = boost::container::flat_map<DescriptorRangeType, SpaceMap>;
+    boost::container::flat_map<ShaderVisibilityType, TypeMap> mSlots;
 };
 
 }

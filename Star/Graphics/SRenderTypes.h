@@ -2871,21 +2871,47 @@ inline bool operator<(const SOV_&, const SOV_&) noexcept { return false; }
 struct Table_ {} static constexpr Table;
 struct Constants_ {} static constexpr Constants;
 
-using RootSignatureType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
+using RootParameterType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
 
-inline bool operator<(const RootSignatureType& lhs, const RootSignatureType& rhs) noexcept {
+inline bool operator<(const RootParameterType& lhs, const RootParameterType& rhs) noexcept {
     return lhs.index() < rhs.index();
 }
 
-enum RootAccessEnum : uint32_t {
-    RA_All = 0,
-    RA_PS = 1,
-    RA_GS = 2,
-    RA_DS = 3,
-    RA_HS = 4,
-    RA_VS = 5,
-    RA_Count = 6,
-};
+struct OM_ {} static constexpr OM;
+struct PS_ {} static constexpr PS;
+struct GS_ {} static constexpr GS;
+struct DS_ {} static constexpr DS;
+struct TS_ {} static constexpr TS;
+struct HS_ {} static constexpr HS;
+struct VS_ {} static constexpr VS;
+struct CS_ {} static constexpr CS;
+
+using ShaderStageType = std::variant<OM_, PS_, GS_, DS_, TS_, HS_, VS_, CS_>;
+
+inline bool operator<(const ShaderStageType& lhs, const ShaderStageType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+inline bool operator==(const ShaderStageType& lhs, const ShaderStageType& rhs) noexcept {
+    return lhs.index() == rhs.index();
+}
+
+inline bool operator!=(const ShaderStageType& lhs, const ShaderStageType& rhs) noexcept {
+    return !(lhs == rhs);
+}
+using ShaderVisibilityType = std::variant<std::monostate, PS_, GS_, DS_, HS_, VS_>;
+
+inline bool operator<(const ShaderVisibilityType& lhs, const ShaderVisibilityType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+inline bool operator==(const ShaderVisibilityType& lhs, const ShaderVisibilityType& rhs) noexcept {
+    return lhs.index() == rhs.index();
+}
+
+inline bool operator!=(const ShaderVisibilityType& lhs, const ShaderVisibilityType& rhs) noexcept {
+    return !(lhs == rhs);
+}
 
 enum UpdateEnum : uint32_t {
     PerInstance = 0,
@@ -2894,6 +2920,18 @@ enum UpdateEnum : uint32_t {
     PerFrame = 3,
     UpdateCount = 4,
 };
+
+struct DescriptorIndex {
+    UpdateEnum mUpdate = PerInstance;
+    RootParameterType mType = Table;
+    ShaderVisibilityType mVisibility;
+};
+
+inline bool operator<(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
+    return
+        std::forward_as_tuple(lhs.mUpdate, lhs.mType, lhs.mVisibility) <
+        std::forward_as_tuple(rhs.mUpdate, rhs.mType, rhs.mVisibility);
+}
 
 struct Matrix_ {} static constexpr Matrix;
 struct Float4_ {} static constexpr Float4;
