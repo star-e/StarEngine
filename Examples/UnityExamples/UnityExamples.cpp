@@ -54,7 +54,7 @@ int buildUnityShaders(const ShaderModules& modules, ShaderDatabase& db) {
 #include "UnityPBSLighting.cginc"
 #include "AutoLight.cginc"
 )";
-        PixelShader({ "color", half4(), SV_Target }) {
+        PixelShader({ "color", half4, SV_Target }) {
             // Shading
             Group(SUnityLightingStandard);
 

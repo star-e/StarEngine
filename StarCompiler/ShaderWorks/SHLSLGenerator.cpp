@@ -22,7 +22,6 @@
 #include <StarCompiler/ShaderGraph/SShaderRootSignature.h>
 #include <StarCompiler/ShaderGraph/SShaderDescriptor.h>
 #include <StarCompiler/ShaderGraph/SShaderNames.h>
-#include <StarCompiler/ShaderGraph/SShaderRegisters.h>
 #include <StarCompiler/Graphics/SRenderNames.h>
 
 namespace Star::Graphics::Render::Shader {
@@ -136,54 +135,196 @@ std::string HLSLGenerator::generateShader(const ShaderStageType& stage) const {
 
 namespace {
 
-void outputDescriptor(std::ostream& oss, std::string space,
-    const AttributeMap& attrs,
-    const ShaderProgram& program,
-    const ShaderGroup* pGroup, const RootSignature* pRSG,
-    const DescriptorIndex& index, const Descriptor& d,
-    ShaderRegister& slots
+template<class T>
+void outputAttribute(std::ostream& oss, std::string& space,
+    const ShaderAttribute& attr, T tag, uint32_t& slotID, uint32_t spaceID
+) {
+    oss << getName(tag);
+    if (!std::holds_alternative<std::monostate>(attr.mModel)) {
+        oss << "<" << getModelName(attr.mModel, HLSL) << ">";
+    }
+    oss << " m" << attr.mName;
+    // output array
+    visit(overload(
+        [&](Bounded_) {
+            visit(overload(
+                [](DefaultView_) {
+                    // do nothing
+                },
+                [&](const TextureView& view) {
+                    visit(overload(
+                        [&](const auto&) {
+                            // do nothing
+                        },
+                        [&](const ArrayRange& range) {
+                            oss << "[" << range.mArraySize << "]";
+                        },
+                        [&](const CubeRange& range) {
+                            oss << "[" << range.mNumCubes << "]";
+                        }
+                    ), view.mArrayOrDepthView);
+                }
+            ), attr.mData);
+        },
+        [&](Unbounded_) {
+            oss << "[]";
+        }
+    ), attr.mDescriptor.mBoundedness);
+
+    // output register, space
+    oss << " : register(" << getRegisterPrefix(attr.mDescriptor.mDescriptorType)
+        << slotID;
+    if (spaceID) {
+        oss << ", space" << spaceID;
+    }
+    oss << ");\n";
+
+    // advance descriptor
+    visit(overload(
+        [&](Bounded_) {
+            slotID += getDescriptorCapacity(attr);
+        },
+        [&](Unbounded_) {
+            slotID = -1;
+        }
+    ), attr.mDescriptor.mBoundedness);
+}
+
+void outputAttribute(std::ostream& oss, std::string& space,
+    const ShaderAttribute& attr, uint32_t& slotID, uint32_t spaceID,
+    const ShaderGroup& parent,
+    const DescriptorIndex& index,
+    const RootSignature* pRSG = nullptr
 ) {
     visit(overload(
-        [&](const auto& v) {
-            visit(overload(
-                [&](ConstantBuffer_) {
-                    oss << "cbuffer " << getName(index.mUpdate) << " : register(b"
-                        << slots.get(index.mVisibility, d.mType, d.mSpace) << ") {\n";
-                    {
-                        INDENT();
-                        if (pGroup) {
-                            const auto& cb = pGroup->getConstantBuffer(index);
-                            for (const auto& c : cb.mValues) {
-                                oss << space << getHLSLName(c.mType) << " m" << c.mName << ";\n";
-                            }
-                        } else if (pRSG) {
-                            const auto& cb = pRSG->mConstantBuffers.at(index);
-                            for (const auto& c : cb.mValues) {
-                                oss << space << getHLSLName(c.mType) << " m" << c.mName << ";\n";
-                            }
-                        } else {
-                            throw std::runtime_error("constant buffer not found");
-                        }
+        [&](CBuffer_) {
+            oss << "cbuffer " << getName(index.mUpdate) << " : register(b"
+                << slotID;
+            if (spaceID) {
+                oss << ", space" << spaceID;
+            }
+            oss << ") {\n";
+            {
+                INDENT();
+                if (pRSG) {
+                    const auto& cb = pRSG->mDatabase.mConstantBuffers.at(index);
+                    for (const auto& c : cb.mValues) {
+                        oss << space << getHLSLName(c.mType) << " m" << c.mName << ";\n";
                     }
-                    oss << "};\n";
-                    slots.increase(index.mVisibility, d.mType, d.mSpace);
-                },
-                [&](const auto& v) {
-                    const auto& attr = at<Index::Name>(attrs, d.mName);
-                    oss << getName(v);
-                    if (!std::holds_alternative<std::monostate>(attr.mModel)) {
-                        oss << "<" << getModelName(attr.mModel, HLSL) << ">";
+                } else {
+                    const auto& cb = parent.getConstantBuffer(index);
+                    for (const auto& c : cb.mValues) {
+                        oss << space << getHLSLName(c.mType) << " m" << c.mName << ";\n";
                     }
-                    oss << " m" << d.mName << " : register(" << getRegisterPrefix(d.mType)
-                        << slots.get(index.mVisibility, d.mType, d.mSpace) << ");\n";
-                    slots.increase(index.mVisibility, d.mType, d.mSpace);
-                },
-                [&](const DescriptorArray& r) {
-                    throw std::runtime_error("should not reach here");
                 }
-            ), v);
+            }
+            oss << "};\n";
+            slotID += getDescriptorCapacity(attr);
+        },
+        [&](Buffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](ByteAddressBuffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](StructuredBuffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](Texture1D_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](Texture1DArray_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](Texture2D_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](Texture2DArray_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](Texture2DMS_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](Texture2DMSArray_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](Texture3D_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](TextureCube_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](TextureCubeArray_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](AppendStructuredBuffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](ConsumeStructuredBuffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWBuffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWByteAddressBuffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWStructuredBuffer_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWTexture1D_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWTexture1DArray_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWTexture2D_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWTexture2DArray_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](RWTexture3D_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [&](SamplerState_ tag) {
+            outputAttribute(oss, space, attr, tag, slotID, spaceID);
+        },
+        [](const auto&) {
+            throw std::runtime_error("invalid shader attribute");
         }
-    ), d.mModel);
+    ), attr.mType);
+}
+
+void outputAttributes(std::ostream& oss, std::string& space, const ShaderGroup& parent,
+    const DescriptorList& list, const DescriptorIndex& index,
+    const RootSignature* pRSG = nullptr
+) {
+    for (const auto& rangePair : list.mRanges) {
+        const auto& type = rangePair.first;
+        const auto& range = rangePair.second;
+        Expects(!std::holds_alternative<std::monostate>(index.mVisibility));
+
+        auto slotID = range.mStart;
+        auto spaceID = range.mSpace;
+        for (const auto& subrangePair : range.mSubranges) {
+            const auto& source = subrangePair.first;
+            const auto& subrange = subrangePair.second;
+            oss << "// " << getVariantName(source) << "\n";
+            for (const auto& attr : subrange.mAttributes) {
+                outputAttribute(oss, space, attr, slotID, spaceID, parent, index, pRSG);
+            }
+        }
+        Ensures(slotID - range.mStart <= range.mCount);
+    }
+    for (const auto& unboundedPair : list.mUnboundedDescriptors) {
+        const auto& type = unboundedPair.first;
+        const auto& unbounded = unboundedPair.second;
+        oss << "// " << getVariantName(unbounded.mAttribute.mDescriptor.mSource) << "\n";
+        auto slotID = unbounded.mStart;
+        auto spaceID = unbounded.mSpace;
+        outputAttribute(oss, space, unbounded.mAttribute, slotID, spaceID, parent, index, pRSG);
+    }
 }
 
 }
@@ -191,84 +332,67 @@ void outputDescriptor(std::ostream& oss, std::string space,
 std::string HLSLGenerator::generateAttributes(const AttributeMap& attrs,
     const ShaderStageType& stage, const ShaderGroup& currGroup, const RootSignature& rsg
 ) const {
-    const auto& group = currGroup.getRootSignatureShaderGroup();
-    ShaderRegister slots;
-    for (uint i = group.mUpdateFrequency; i != UpdateCount; ++i) {
-        group.mRootSignature.reserveRegisters(static_cast<UpdateEnum>(i), slots);
-    }
-    for (uint i = PerInstance; i != group.mUpdateFrequency; ++i) {
-        rsg.reserveRegisters(static_cast<UpdateEnum>(i), slots);
-    }
+    const auto& rsgGroup = currGroup.getRootSignatureShaderGroup();
 
     std::ostringstream oss;
     std::string space;
     int count = 0;
-    for (const auto& t : group.mRootSignature.mTables) {
-        const auto& index = t.first;
-        const auto& table = t.second;
-        auto ra = getShaderVisibilityType(stage);
-        if (!std::holds_alternative<std::monostate>(index.mVisibility) && index.mVisibility != ra)
-            continue;
-
-        if (count++)
-            oss << "\n";
-
-        oss << "// " << getName(index.mUpdate);
-        if (std::holds_alternative<std::monostate>(index.mVisibility)) {
-            oss << ", all stages";
-        }
-        oss << "\n";
-        auto output = [&](const Descriptor& d) {
-            visit(overload(
-                [&](const auto& v) {
-                    visit(overload(
-                        [&](const auto&) {
-                            outputDescriptor(oss, space, attrs, mProgram, &group, nullptr, index, d, slots);
-                        },
-                        [&](const DescriptorArray& r) {
-                            visit(overload(
-                                [&](const RangeBounded& arr) {
-                                    auto begSlot = slots.get(index.mVisibility, d.mType, d.mSpace);
-                                    auto iter = rsg.mTables.find(index);
-                                    if (iter != rsg.mTables.end()) {
-                                        for (const auto& d2 : iter->second.mDescriptors) {
-                                            if (d2.mType != d.mType || d2.mSpace != d.mSpace) {
-                                                throw std::runtime_error("program descriptor inconsistent");
-                                            }
-                                            outputDescriptor(oss, space, attrs, mProgram, nullptr, &rsg, index, d2, slots);
-                                        }
-                                    }
-                                    auto current = slots.get(index.mVisibility, d.mType, d.mSpace);
-                                    auto endSlot = begSlot + arr.mCount;
-                                    if (current != endSlot && mDebug) {
-                                        if (endSlot - current == 1) {
-                                            oss << "// " << getVariantName(index.mVisibility) << ", register(" << getRegisterPrefix(d.mType) << current << ") not used\n";
-                                        } else {
-                                            oss << "// " << getVariantName(index.mVisibility) << ", register(" << getRegisterPrefix(d.mType) << current << "-" << endSlot << ") not used\n";
-                                        }
-                                    }
-                                    slots.increase(index.mVisibility, d.mType, d.mSpace, endSlot - current);
-                                },
-                                [](RangeUnbounded) {
-                                    throw std::runtime_error("not supported yet");
-                                }
-                            ), r);
-                        }
-                    ), v);
-                }
-            ), d.mModel);
-        };
-
-        visit(overload(
-            [&](Constants_) {
-                throw std::invalid_argument("root signature Constants not supported yet");
-            },
-            [&](auto) {
-                for (const auto& d : table.mDescriptors) {
-                    output(d);
-                }
+    for (int i = UpdateEnum::UpdateCount; i --> static_cast<int>(rsgGroup.mUpdateFrequency);) {
+        for (const auto& collectionPair : rsgGroup.mRootSignature.mDatabase.mDescriptors) {
+            const auto& index = collectionPair.first;
+            const auto& collection = collectionPair.second;
+            if (index.mUpdate != i) {
+                continue;
             }
-        ), index.mType);
+            if (index.mVisibility != getShaderVisibilityType(stage)) {
+                continue;
+            }
+
+            if (count++)
+                oss << "\n";
+
+            oss << "// " << getName(index.mUpdate) << "\n";
+            for (const auto& listPair : collection.mResourceViewLists) {
+                const auto& spaceName = listPair.first;
+                const auto& list = listPair.second;
+                outputAttributes(oss, space, rsgGroup, list, index);
+            }
+
+            for (const auto& listPair : collection.mSamplerLists) {
+                const auto& spaceName = listPair.first;
+                const auto& list = listPair.second;
+                outputAttributes(oss, space, rsgGroup, list, index);
+            }
+        }
+    }
+
+    for (int i = rsgGroup.mUpdateFrequency; i --> 0;) {
+        for (const auto& collectionPair : rsg.mDatabase.mDescriptors) {
+            const auto& index = collectionPair.first;
+            const auto& collection = collectionPair.second;
+            if (index.mUpdate != i) {
+                continue;
+            }
+            if (index.mVisibility != getShaderVisibilityType(stage)) {
+                continue;
+            }
+
+            if (count++)
+                oss << "\n";
+
+            oss << "// " << getName(index.mUpdate) << "\n";
+            for (const auto& listPair : collection.mResourceViewLists) {
+                const auto& spaceName = listPair.first;
+                const auto& list = listPair.second;
+                outputAttributes(oss, space, rsgGroup, list, index, &rsg);
+            }
+
+            for (const auto& listPair : collection.mSamplerLists) {
+                const auto& spaceName = listPair.first;
+                const auto& list = listPair.second;
+                outputAttributes(oss, space, rsgGroup, list, index, &rsg);
+            }
+        }
     }
 
     return oss.str();

@@ -25,9 +25,9 @@ namespace Star::Graphics::Render::Shader {
 namespace {
 
 struct UnityIsPropertyVisitor {
-    bool operator()(const uint4&) const { return false; }
-    bool operator()(const uint2&) const { return false; }
-    bool operator()(const uint1&) const { return false; }
+    bool operator()(const uint4_&) const { return false; }
+    bool operator()(const uint2_&) const { return false; }
+    bool operator()(const uint1_&) const { return false; }
 
     bool operator()(InputPatch_) const { return false; }
     bool operator()(OutputPatch_) const { return false; }
@@ -62,20 +62,20 @@ struct UnityIsPropertyVisitor {
 };
 
 struct UnityPropertyNameVisitor {
-    std::string operator()(const matrix& v) const { return "Matrix"; }
-    std::string operator()(const float4& v) const { return "Vector"; }
-    std::string operator()(const int4& v) const { return "Int4"; }
+    std::string operator()(const matrix_& v) const { return "Matrix"; }
+    std::string operator()(const float4_& v) const { return "Vector"; }
+    std::string operator()(const int4_& v) const { return "Int4"; }
 
-    std::string operator()(const float2& v) const { return "Float2"; }
-    std::string operator()(const int2& v) const { return "Int2"; }
-    std::string operator()(const half4& v) const { return "Vector"; }
+    std::string operator()(const float2_& v) const { return "Float2"; }
+    std::string operator()(const int2_& v) const { return "Int2"; }
+    std::string operator()(const half4_& v) const { return "Vector"; }
 
-    std::string operator()(const float1& v) const { return "Float"; }
-    std::string operator()(const int1& v) const { return "Int"; }
-    std::string operator()(const half2& v) const { return "Float2"; }
-    std::string operator()(const fixed4& v) const { return "Color"; }
+    std::string operator()(const float1_& v) const { return "Float"; }
+    std::string operator()(const int1_& v) const { return "Int"; }
+    std::string operator()(const half2_& v) const { return "Float2"; }
+    std::string operator()(const fixed4_& v) const { return "Color"; }
 
-    std::string operator()(const half1& v) const { return "Float"; }
+    std::string operator()(const half1_& v) const { return "Float"; }
 
     //std::string operator()(const Texture1D_& v) const { return "1D"; }
     std::string operator()(const Texture2D_& v) const { return "2D"; }
@@ -201,20 +201,20 @@ struct UnityPropertyDefaultValueVisitor {
 };
 
 struct UnityHLSLNameVisitor {
-    const char* operator()(const matrix& v) const { return "matrix"; }
-    const char* operator()(const float4& v) const { return "float4"; }
-    const char* operator()(const int4& v) const { return "int4"; }
+    const char* operator()(const matrix_& v) const { return "matrix"; }
+    const char* operator()(const float4_& v) const { return "float4"; }
+    const char* operator()(const int4_& v) const { return "int4"; }
 
-    const char* operator()(const float2& v) const { return "float2"; }
-    const char* operator()(const int2& v) const { return "int2"; }
-    const char* operator()(const half4& v) const { return "half4"; }
+    const char* operator()(const float2_& v) const { return "float2"; }
+    const char* operator()(const int2_& v) const { return "int2"; }
+    const char* operator()(const half4_& v) const { return "half4"; }
 
-    const char* operator()(const float1& v) const { return "float"; }
-    const char* operator()(const int1& v) const { return "int"; }
-    const char* operator()(const half2& v) const { return "half2"; }
-    const char* operator()(const fixed4& v) const { return "fixed4"; }
+    const char* operator()(const float1_& v) const { return "float"; }
+    const char* operator()(const int1_& v) const { return "int"; }
+    const char* operator()(const half2_& v) const { return "half2"; }
+    const char* operator()(const fixed4_& v) const { return "fixed4"; }
 
-    const char* operator()(const half1& v) const { return "half"; }
+    const char* operator()(const half1_& v) const { return "half"; }
 
     const char* operator()(const Texture1D_& v) const { return "sampler1D"; }
     const char* operator()(const Texture2D_& v) const { return "sampler2D"; }
@@ -374,11 +374,11 @@ std::string UnityShaderBuilder::generateProperties(
             }
             if (attr.mFlags & Unity::HDR) {
                 oss << "[HDR] ";
-                value = fixed4();
+                value = fixed4;
             }
             if (attr.mFlags & Unity::Gamma) {
                 oss << "[Gamma] ";
-                value = fixed4();
+                value = fixed4;
             }
 
             std::string editorName = visit(UnityPropertyNameVisitor(), value);
@@ -672,7 +672,7 @@ std::string UnityShaderBuilder::generateAttributes(
         if (attr.mFlags & Unity::BuiltIn)
             continue;
 
-        if (instancing && attr.mUpdateFrequency == PerInstance) {
+        if (instancing && attr.mDescriptor.mUpdate == PerInstance) {
             ++instanced;
             continue;
         }
@@ -710,7 +710,7 @@ std::string UnityShaderBuilder::generateAttributes(
         oss << "\n";
         oss << "UNITY_INSTANCING_BUFFER_START(Props)\n";
         for (const auto& attr : attrs) {
-            if (!(attr.mUpdateFrequency == PerInstance))
+            if (!(attr.mDescriptor.mUpdate == PerInstance))
                 continue;
 
             if (attr.mFlags & Unity::Declared)

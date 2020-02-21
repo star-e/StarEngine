@@ -187,16 +187,16 @@ void validateShaderValueStageOutput(ShaderStageEnum all, const ShaderStageType& 
 
 const char* getModelName(const ValueModel& v, Language l) noexcept {
 #define GET_NAME(TYPE, NAME) \
-[](const TYPE##4& v) {\
+[](const TYPE##4_& v) {\
     return BOOST_STRINGIZE(BOOST_PP_CAT(NAME, 4));\
 },\
-[](const TYPE##3& v) {\
+[](const TYPE##3_& v) {\
     return BOOST_STRINGIZE(BOOST_PP_CAT(NAME, 3));\
 },\
-[](const TYPE##2& v) {\
+[](const TYPE##2_& v) {\
     return BOOST_STRINGIZE(BOOST_PP_CAT(NAME, 2)); \
 },\
-[](const TYPE##1& v) {\
+[](const TYPE##1_& v) {\
     return BOOST_STRINGIZE(NAME); \
 }
     return visit(overload(

@@ -23,6 +23,11 @@ namespace Star {
 
 inline void updateLogFolder(std::string_view foldername, int numMax = 10) {
     using namespace std::filesystem;
+
+    if (!exists(std::filesystem::path(foldername))) {
+        create_directories(foldername);
+    }
+
     std::map<file_time_type, path> files;
     
     int count = 0;

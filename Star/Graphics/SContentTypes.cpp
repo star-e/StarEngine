@@ -226,7 +226,8 @@ ShaderSubpassData::ShaderSubpassData(const allocator_type& alloc)
     : mProgram(alloc)
     , mInputLayout(alloc)
     , mVertexLayouts(alloc)
-    , mTextures(alloc)
+    , mConstantBuffers(alloc)
+    , mDescriptors(alloc)
 {}
 
 ShaderSubpassData::ShaderSubpassData(ShaderSubpassData const& rhs, const allocator_type& alloc)
@@ -234,7 +235,8 @@ ShaderSubpassData::ShaderSubpassData(ShaderSubpassData const& rhs, const allocat
     , mProgram(rhs.mProgram, alloc)
     , mInputLayout(rhs.mInputLayout, alloc)
     , mVertexLayouts(rhs.mVertexLayouts, alloc)
-    , mTextures(rhs.mTextures, alloc)
+    , mConstantBuffers(rhs.mConstantBuffers, alloc)
+    , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
 ShaderSubpassData::ShaderSubpassData(ShaderSubpassData&& rhs, const allocator_type& alloc)
@@ -242,7 +244,8 @@ ShaderSubpassData::ShaderSubpassData(ShaderSubpassData&& rhs, const allocator_ty
     , mProgram(std::move(rhs.mProgram), alloc)
     , mInputLayout(std::move(rhs.mInputLayout), alloc)
     , mVertexLayouts(std::move(rhs.mVertexLayouts), alloc)
-    , mTextures(std::move(rhs.mTextures), alloc)
+    , mConstantBuffers(std::move(rhs.mConstantBuffers), alloc)
+    , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
 ShaderSubpassData::~ShaderSubpassData() = default;
@@ -358,6 +361,27 @@ ShaderData::ShaderData(ShaderData&& rhs, const allocator_type& alloc)
 
 ShaderData::~ShaderData() = default;
 
+ConstantMap::allocator_type ConstantMap::get_allocator() const noexcept {
+    return allocator_type(mIndex.get_allocator().resource());
+}
+
+ConstantMap::ConstantMap(const allocator_type& alloc)
+    : mIndex(alloc)
+    , mBuffer(alloc)
+{}
+
+ConstantMap::ConstantMap(ConstantMap const& rhs, const allocator_type& alloc)
+    : mIndex(rhs.mIndex, alloc)
+    , mBuffer(rhs.mBuffer, alloc)
+{}
+
+ConstantMap::ConstantMap(ConstantMap&& rhs, const allocator_type& alloc)
+    : mIndex(std::move(rhs.mIndex), alloc)
+    , mBuffer(std::move(rhs.mBuffer), alloc)
+{}
+
+ConstantMap::~ConstantMap() = default;
+
 MaterialData::allocator_type MaterialData::get_allocator() const noexcept {
     return allocator_type(mShader.get_allocator().resource());
 }
@@ -365,29 +389,29 @@ MaterialData::allocator_type MaterialData::get_allocator() const noexcept {
 MaterialData::MaterialData(const allocator_type& alloc)
     : mShader(alloc)
     , mTextures(alloc)
-    , mConstantBuffer(alloc)
+    , mConstantMap(alloc)
 {}
 
 MaterialData::MaterialData(MaterialData const& rhs, const allocator_type& alloc)
     : mShader(rhs.mShader, alloc)
     , mTextures(rhs.mTextures, alloc)
-    , mConstantBuffer(rhs.mConstantBuffer, alloc)
+    , mConstantMap(rhs.mConstantMap, alloc)
 {}
 
 MaterialData::MaterialData(MaterialData&& rhs, const allocator_type& alloc)
     : mShader(std::move(rhs.mShader), alloc)
     , mTextures(std::move(rhs.mTextures), alloc)
-    , mConstantBuffer(std::move(rhs.mConstantBuffer), alloc)
+    , mConstantMap(std::move(rhs.mConstantMap), alloc)
 {}
 
 MaterialData::~MaterialData() = default;
 
 DrawCallData::allocator_type DrawCallData::get_allocator() const noexcept {
-    return allocator_type(mConstantBuffer.get_allocator().resource());
+    return allocator_type(mConstantMap.get_allocator().resource());
 }
 
 DrawCallData::DrawCallData(const allocator_type& alloc)
-    : mConstantBuffer(alloc)
+    : mConstantMap(alloc)
 {}
 
 DrawCallData::DrawCallData(DrawCallData const& rhs, const allocator_type& alloc)
@@ -396,7 +420,7 @@ DrawCallData::DrawCallData(DrawCallData const& rhs, const allocator_type& alloc)
     , mMaterial(rhs.mMaterial)
     , mInstanceSize(rhs.mInstanceSize)
     , mInstanceCount(rhs.mInstanceCount)
-    , mConstantBuffer(rhs.mConstantBuffer, alloc)
+    , mConstantMap(rhs.mConstantMap, alloc)
 {}
 
 DrawCallData::DrawCallData(DrawCallData&& rhs, const allocator_type& alloc)
@@ -405,7 +429,7 @@ DrawCallData::DrawCallData(DrawCallData&& rhs, const allocator_type& alloc)
     , mMaterial(std::move(rhs.mMaterial))
     , mInstanceSize(std::move(rhs.mInstanceSize))
     , mInstanceCount(std::move(rhs.mInstanceCount))
-    , mConstantBuffer(std::move(rhs.mConstantBuffer), alloc)
+    , mConstantMap(std::move(rhs.mConstantMap), alloc)
 {}
 
 DrawCallData::~DrawCallData() = default;
@@ -463,17 +487,17 @@ ContentSettings::allocator_type ContentSettings::get_allocator() const noexcept 
 
 ContentSettings::ContentSettings(const allocator_type& alloc)
     : mVertexLayouts(alloc)
-    , mIndex(alloc)
+    , mVertexLayoutIndex(alloc)
 {}
 
 ContentSettings::ContentSettings(ContentSettings const& rhs, const allocator_type& alloc)
     : mVertexLayouts(rhs.mVertexLayouts, alloc)
-    , mIndex(rhs.mIndex, alloc)
+    , mVertexLayoutIndex(rhs.mVertexLayoutIndex, alloc)
 {}
 
 ContentSettings::ContentSettings(ContentSettings&& rhs, const allocator_type& alloc)
     : mVertexLayouts(std::move(rhs.mVertexLayouts), alloc)
-    , mIndex(std::move(rhs.mIndex), alloc)
+    , mVertexLayoutIndex(std::move(rhs.mVertexLayoutIndex), alloc)
 {}
 
 ContentSettings::~ContentSettings() = default;

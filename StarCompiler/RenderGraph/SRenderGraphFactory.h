@@ -19,12 +19,14 @@
 #include <StarCompiler/RenderGraph/SRenderGraphTypes.h>
 #include <StarCompiler/RenderGraph/SRenderGraph.h>
 #include <StarCompiler/ShaderGraph/SShaderGroups.h>
+#include <StarCompiler/ShaderGraph/SShaderTypes.h>
+#include <StarCompiler/ShaderGraph/SShaderDatabase.h>
 
-namespace Star {
+namespace Star::Graphics::Render {
 
-namespace Graphics {
-
-namespace Render {
+namespace Shader {
+class ShaderModules;
+}
 
 class RenderSolutionFactory {
 public:
@@ -43,13 +45,15 @@ public:
 
     void addPipeline(GraphicsRenderNodeGraph&& graph);
 
-    int compile();
     void validateGraphs() const;
 
     void buildShaderGroup(Shader::ShaderGroups& shaderWorks) const;
     void updateRenderGraph(const Shader::ShaderModules& modules, const Shader::ShaderGroups& shaderWorks);
 
-    void build(std::string solutionName, RenderSolution& renderWorks, std::ostringstream& oss) const;
+    void compile(std::string solutionName, RenderSolution& renderWorks) const;
+
+    void collectAttributes(const Shader::ShaderModules& modules, Shader::AttributeDatabase& database) const;
+    void build(const Shader::AttributeDatabase& attrs, std::string solutionName, RenderSolution& renderWorks, std::ostringstream& oss) const;
 
     void addContentOrdered(const UnorderedRenderQueue& content,
         std::string_view pipelineName, std::string_view passName,
@@ -88,10 +92,25 @@ public:
     uint32_t mBackBufferCount = 3;
     std::vector<std::string> mGraphOrder;
     Map<std::string, GraphicsRenderNodeGraph> mNodeGraphs;
+    const Shader::ShaderGroups* mShaderGroups = nullptr;
 };
 
-}
+class RenderGraphFactory {
+public:
+    void buildShaderGroupFromSolutions();
+    void bindShadersToShaderGroups();
 
-}
+    void completeFactories();
+    void buildRootSignatureAndDescriptors();
+
+    void buildRenderGraphData(RenderSwapChain& renderGraphData) const;
+    void buildAttributeDatabase(Shader::AttributeDatabase& attributes) const;
+
+    const Shader::ShaderModules& mShaderModules;
+    std::filesystem::path mFolder;
+    Map<std::string, RenderSolutionFactory> mSolutionFactories;
+    Shader::ShaderGroups mShaderGroups;
+    Shader::ShaderDatabase mShaderDatabase;
+};
 
 }

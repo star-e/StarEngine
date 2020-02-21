@@ -110,7 +110,7 @@ void compileShaders(const ShaderGroups& shaderWorks,
     filename2.reserve(500);
     for (const auto& [bundleName, bundle] : shaderWorks.mSolutions) {
         for (const auto& [pipelineName, pipeline] : bundle) {
-            for (uint i = 0; i != UpdateCount; ++i) {
+            for (uint32_t i = 0; i != UpdateCount; ++i) {
                 for (const auto& [name, group] : pipeline[i]) {
                     filename += camelToUnderscore(name);
                     if (group.mGenerateRootSignature) {

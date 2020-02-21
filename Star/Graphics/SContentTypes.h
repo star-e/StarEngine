@@ -93,7 +93,7 @@ struct STAR_GRAPHICS_API MeshBufferLayout {
     ~MeshBufferLayout();
 
     std::pmr::vector<VertexBufferDesc> mBuffers;
-    PmrStringMap<VertexElementIndex> mIndex;
+    PmrMap<std::pmr::string, VertexElementIndex> mIndex;
     INDEX_BUFFER_STRIP_CUT_VALUE mStripCutValue = INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
     PRIMITIVE_TOPOLOGY_TYPE mPrimitiveTopologyType = PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 };
@@ -222,7 +222,8 @@ struct STAR_GRAPHICS_API ShaderSubpassData {
     ShaderProgramData mProgram;
     ShaderInputLayout mInputLayout;
     std::pmr::vector<uint32_t> mVertexLayouts;
-    std::pmr::vector<std::pmr::string> mTextures;
+    std::pmr::vector<ShaderConstantBuffer> mConstantBuffers;
+    std::pmr::vector<ShaderDescriptorCollection> mDescriptors;
 };
 
 struct STAR_GRAPHICS_API ShaderPassData {
@@ -246,7 +247,7 @@ struct STAR_GRAPHICS_API ShaderLevelData {
     ShaderLevelData(ShaderLevelData const& rhs, const allocator_type& alloc);
     ~ShaderLevelData();
 
-    PmrStringMap<ShaderPassData> mPasses;
+    PmrMap<std::pmr::string, ShaderPassData> mPasses;
 };
 
 struct STAR_GRAPHICS_API ShaderQueueData {
@@ -270,7 +271,7 @@ struct STAR_GRAPHICS_API ShaderPipelineData {
     ShaderPipelineData(ShaderPipelineData const& rhs, const allocator_type& alloc);
     ~ShaderPipelineData();
 
-    PmrStringMap<ShaderQueueData> mQueues;
+    PmrMap<std::pmr::string, ShaderQueueData> mQueues;
 };
 
 struct STAR_GRAPHICS_API ShaderSolutionData {
@@ -282,7 +283,7 @@ struct STAR_GRAPHICS_API ShaderSolutionData {
     ShaderSolutionData(ShaderSolutionData const& rhs, const allocator_type& alloc);
     ~ShaderSolutionData();
 
-    PmrStringMap<ShaderPipelineData> mPipelines;
+    PmrMap<std::pmr::string, ShaderPipelineData> mPipelines;
 };
 
 struct STAR_GRAPHICS_API ShaderData {
@@ -295,7 +296,25 @@ struct STAR_GRAPHICS_API ShaderData {
     ~ShaderData();
 
     std::pmr::string mName;
-    PmrStringMap<ShaderSolutionData> mSolutions;
+    PmrMap<std::pmr::string, ShaderSolutionData> mSolutions;
+};
+
+struct ConstantDescriptor {
+    uint16_t mOffset = 0;
+    uint16_t mSize = 0;
+};
+
+struct STAR_GRAPHICS_API ConstantMap {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ConstantMap(const allocator_type& alloc);
+    ConstantMap(ConstantMap&& rhs, const allocator_type& alloc);
+    ConstantMap(ConstantMap const& rhs, const allocator_type& alloc);
+    ~ConstantMap();
+
+    PmrFlatMap<uint32_t, ConstantDescriptor> mIndex;
+    AlignedBuffer16 mBuffer;
 };
 
 struct STAR_GRAPHICS_API MaterialData {
@@ -308,8 +327,8 @@ struct STAR_GRAPHICS_API MaterialData {
     ~MaterialData();
 
     std::pmr::string mShader;
-    PmrFlatStringMap<MetaID> mTextures;
-    ConstantBuffer mConstantBuffer;
+    PmrFlatMap<uint32_t, MetaID> mTextures;
+    ConstantMap mConstantMap;
 };
 
 struct FullScreenTriangle_ {} static constexpr FullScreenTriangle;
@@ -330,7 +349,7 @@ struct STAR_GRAPHICS_API DrawCallData {
     MetaID mMaterial;
     uint16_t mInstanceSize;
     uint16_t mInstanceCount;
-    ConstantBuffer mConstantBuffer;
+    ConstantMap mConstantMap;
 };
 
 struct BasicTransform {
@@ -412,7 +431,7 @@ struct STAR_GRAPHICS_API ContentSettings {
     ~ContentSettings();
 
     std::pmr::vector<MeshBufferLayout> mVertexLayouts;
-    PmrStringMap<uint32_t> mIndex;
+    PmrMap<std::pmr::string, uint32_t> mVertexLayoutIndex;
 };
 
 struct DrawCall_ {} static constexpr DrawCall;
@@ -453,7 +472,7 @@ struct STAR_GRAPHICS_API RenderGraphData {
     ~RenderGraphData();
 
     RenderSwapChain mRenderGraph;
-    PmrFlatStringMap<MetaID> mShaderIndex;
+    PmrFlatMap<std::pmr::string, MetaID> mShaderIndex;
 };
 
 struct STAR_GRAPHICS_API Resources {
@@ -466,12 +485,12 @@ struct STAR_GRAPHICS_API Resources {
     ~Resources();
 
     ContentSettings mSettings;
-    PmrUnorderedUUIDMap<MeshData> mMeshes;
-    PmrUnorderedUUIDMap<TextureData> mTextures;
-    PmrUnorderedUUIDMap<ShaderData> mShaders;
-    PmrUnorderedUUIDMap<MaterialData> mMaterials;
-    PmrUnorderedUUIDMap<ContentData> mContents;
-    PmrUnorderedUUIDMap<RenderGraphData> mRenderGraphs;
+    std::pmr::unordered_map<MetaID, MeshData> mMeshes;
+    std::pmr::unordered_map<MetaID, TextureData> mTextures;
+    std::pmr::unordered_map<MetaID, ShaderData> mShaders;
+    std::pmr::unordered_map<MetaID, MaterialData> mMaterials;
+    std::pmr::unordered_map<MetaID, ContentData> mContents;
+    std::pmr::unordered_map<MetaID, RenderGraphData> mRenderGraphs;
 };
 
 } // namespace Render

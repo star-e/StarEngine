@@ -32,13 +32,16 @@ public:
 
     void collectConstantBuffers();
     void collectDescriptors(const AttributeMap& attrs);
+    void collectAttributes(const AttributeMap& attrs, AttributeDatabase& database) const;
+
+    void buildRegisters();
 
     bool hasChildGenerateRootSignature() const;
 
     bool hasIA() const;
     std::string generateRootSignature() const;
 
-    const ShaderConstantBuffer& getConstantBuffer(const DescriptorIndex& index) const;
+    const ConstantBuffer& getConstantBuffer(const DescriptorIndex& index) const;
 
     void getShaderPrefix(std::string& prefix) const;
     void getShaderPrefixSlash(std::string& prefix) const;

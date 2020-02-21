@@ -18,6 +18,7 @@
 #include "SDX12Utils.h"
 #include <boost/range/combine.hpp>
 #include <Star/Graphics/SRenderNames.h>
+#include <Star/Graphics/SRenderGraphNames.h>
 #include "SDX12UploadBuffer.h"
 #include <Star/Graphics/SRenderFormatTextureUtils.h>
 #include "SDX12ShaderDescriptorHeap.h"
@@ -218,7 +219,38 @@ void resizeData(DX12ShaderData& prototype, const ShaderData& prototypeData) {
                             auto& subpass = variant.mSubpasses.emplace_back();
                             subpass.mVertexLayoutIndex.reserve(subpassData.mVertexLayouts.size());
                             subpass.mStates.resize(subpassData.mVertexLayouts.size());
-                            subpass.mTextures.resize(subpass.mTextures.size());
+                            // descriptors
+                            //subpass.mDescriptors.reserve(subpassData.mDescriptors.size());
+                            //for (const auto& collectionData : subpassData.mDescriptors) {
+                            //    auto& collection = subpass.mDescriptors.emplace_back();
+                            //    collection.mResourceViewLists.reserve(collectionData.mResourceViewLists.size());
+                            //    for (const auto& listData : collectionData.mResourceViewLists) {
+                            //        auto& list = collection.mResourceViewLists.emplace_back();
+                            //        list.mRanges.reserve(listData.mRanges.size());
+                            //        for (const auto& rangeData : listData.mRanges) {
+                            //            auto& range = list.mRanges.emplace_back();
+                            //            range.mSubranges.reserve(rangeData.mSubranges.size());
+                            //            for (const auto& subrangeData : rangeData.mSubranges) {
+                            //                range.mSubranges.emplace_back();
+                            //            }
+                            //        }
+                            //        list.mUnboundedDescriptors.resize(listData.mUnboundedDescriptors.size());
+                            //    }
+
+                            //    collection.mSamplerLists.reserve(collectionData.mSamplerLists.size());
+                            //    for (const auto& listData : collectionData.mSamplerLists) {
+                            //        auto& list = collection.mSamplerLists.emplace_back();
+                            //        list.mRanges.reserve(listData.mRanges.size());
+                            //        for (const auto& rangeData : listData.mRanges) {
+                            //            auto& range = list.mRanges.emplace_back();
+                            //            range.mSubranges.reserve(rangeData.mSubranges.size());
+                            //            for (const auto& subrangeData : rangeData.mSubranges) {
+                            //                range.mSubranges.emplace_back();
+                            //            }
+                            //        }
+                            //        list.mUnboundedDescriptors.resize(listData.mUnboundedDescriptors.size());
+                            //    }
+                            //}
                         }
                     }
                 }
@@ -243,7 +275,7 @@ void reserveIndex(DX12ShaderData& prototype) {
 }
 
 template<class Flatmap, class Index>
-void emplaceIndex(Flatmap& flatmap, Index& index, const PmrStringMap<RenderSubpassDesc>& renderIndex) {
+void emplaceIndex(Flatmap& flatmap, Index& index, const PmrMap<std::pmr::string, RenderSubpassDesc>& renderIndex) {
     size_t i = 0;
     for (const auto& v : index) {
         const auto& name = v.first;
@@ -254,7 +286,7 @@ void emplaceIndex(Flatmap& flatmap, Index& index, const PmrStringMap<RenderSubpa
 }
 
 template<class Flatmap, class Index>
-void emplaceIndex(Flatmap& flatmap, Index& index, const PmrStringMap<uint32_t>& renderIndex) {
+void emplaceIndex(Flatmap& flatmap, Index& index, const PmrMap<std::pmr::string, uint32_t>& renderIndex) {
     size_t i = 0;
     for (const auto& v : index) {
         const auto& name = v.first;
@@ -307,7 +339,8 @@ void createShaderResources(const DX12RenderSolution& renderSolution, const DX12R
     DX12ShaderSubpassData& subpass, const ShaderSubpassData& subpassData,
     const ContentSettings& settings, ID3D12Device* pDevice, std::pmr::monotonic_buffer_resource* mr
 ) {
-    subpass.mTextures = subpassData.mTextures;
+    subpass.mConstantBuffers = subpassData.mConstantBuffers;
+    subpass.mDescriptors = subpassData.mDescriptors;
     // shader programs
     HRESULT hr = S_OK;
     if (!subpassData.mProgram.mPS.empty()) {
@@ -333,7 +366,7 @@ void createShaderResources(const DX12RenderSolution& renderSolution, const DX12R
         pElemDescs->clear();
 
         for (const auto& [semantic, inputs] : subpassData.mInputLayout.mSemantics) {
-            uint semanticID = 0;
+            uint32_t semanticID = 0;
             for (const auto& input : inputs) {
                 const auto& [bufferID, elementID] = meshLayout.mIndex.at(input);
                 const auto& descData = meshLayout.mBuffers.at(bufferID).mElements.at(elementID);
@@ -374,7 +407,7 @@ void createShaderResources(const DX12RenderSolution& renderSolution, const DX12R
         // Mesh
         if (!subpassData.mInputLayout.mSemantics.empty()) {
             desc.InputLayout.pInputElementDescs = pElemDescs->data();
-            desc.InputLayout.NumElements = (uint)pElemDescs->size();
+            desc.InputLayout.NumElements = (uint32_t)pElemDescs->size();
             desc.IBStripCutValue = getDX12(meshLayout.mStripCutValue);
             desc.PrimitiveTopologyType = getDX12(meshLayout.mPrimitiveTopologyType);
         } else {
@@ -384,7 +417,7 @@ void createShaderResources(const DX12RenderSolution& renderSolution, const DX12R
         }
 
         // Render Graph
-        desc.NumRenderTargets = (uint)renderSubpass.mOutputAttachments.size();
+        desc.NumRenderTargets = (uint32_t)renderSubpass.mOutputAttachments.size();
         for (size_t i = 0; i != renderSubpass.mOutputAttachments.size(); ++i) {
             auto rtvID = renderSubpass.mOutputAttachments[i].mDescriptor.mHandle;
             desc.RTVFormats[i] = getDXGIFormat(renderSolution.mRTVs[rtvID].mFormat);
@@ -504,43 +537,99 @@ std::pair<DX12MaterialData*, bool> try_createDX12MaterialData(CreationContext& c
                                         const auto& pass = variant.mSubpasses[passID];
                                         auto& materialPass = materialVariant.mSubpasses.emplace_back();
                                         
-                                        if (pass.mTextures.empty())
-                                            continue;
+                                        materialPass.mCollections.reserve(pass.mDescriptors.size());
+                                        for (const auto& collection : pass.mDescriptors) {
+                                            Expects(collection.mIndex.mUpdate <= UpdateEnum::PerBatch);
+                                            auto& materialCollection = materialPass.mCollections.emplace_back();
+                                            materialCollection.mIndex = collection.mIndex;
+                                            materialCollection.mResourceViewLists.reserve(collection.mResourceViewLists.size());
+                                            materialCollection.mSamplerLists.reserve(collection.mSamplerLists.size());
 
-                                        auto descCount = gsl::narrow_cast<uint32_t>(pass.mTextures.size());
-                                        auto range = context.mDescriptorHeap->allocatePersistent(descCount);
-                                        materialPass.mPersistentCpuOffsetSRV = range.first.mCpuHandle;
-                                        materialPass.mPersistentGpuOffsetSRV = range.first.mGpuHandle;
-                                        materialPass.mPersistentCountSRV = descCount;
+                                            for (const auto& list : collection.mResourceViewLists) {
+                                                auto& materialList = materialCollection.mResourceViewLists.emplace_back();
+                                                materialList.mSlot = list.mSlot;
+                                                Expects(list.mCapacity);
+                                                materialList.mCapacity = list.mCapacity;
+                                                if (std::holds_alternative<Persistent_>(collection.mIndex.mPersistency)) {
+                                                    auto descs = context.mDescriptorHeap->allocatePersistent(materialList.mCapacity);
+                                                    materialList.mGpuOffset = descs.first.mGpuHandle;
+                                                    materialList.mCpuOffset = descs.first.mCpuHandle;
+                                                    uint32_t offset = 0;
+                                                    for (const auto& range : list.mRanges) {
+                                                        size_t i = 0;
+                                                        for (const auto& subrange : range.mSubranges) {
+                                                            visit(overload(
+                                                                [&](EngineSource_) {
+                                                                    for (const auto& attr : subrange.mDescriptors) {
+                                                                        ++i;
+                                                                    }
+                                                                },
+                                                                [&](MaterialSource_) {
+                                                                    for (const auto& attr : subrange.mDescriptors) {
+                                                                        auto visitor = overload(
+                                                                            [&](Texture2D_) {
+                                                                                DX12TextureData* pTex = nullptr;
+                                                                                auto iter = material.mMaterialData->mTextures.find(attr.mID);
+                                                                                if (iter != material.mMaterialData->mTextures.end()) {
+                                                                                    const auto& texID = iter->second;
+                                                                                    for (const auto& tex : material.mTextures) {
+                                                                                        Expects(tex);
+                                                                                        if (texID == tex->mMetaID) {
+                                                                                            pTex = tex.get();
+                                                                                            break;
+                                                                                        }
+                                                                                    }
+                                                                                } else {
+                                                                                    pTex = &resources.mDefaultTextures.at(White);
+                                                                                }
 
-                                        size_t i = 0;
-                                        for (const auto& attribute : pass.mTextures) {
-                                            DX12TextureData* pTex = nullptr;
-                                            auto iter = material.mMaterialData->mTextures.find(attribute);
-                                            if (iter != material.mMaterialData->mTextures.end()) {
-                                                const auto& texID = iter->second;
-                                                for (const auto& tex : material.mTextures) {
-                                                    Expects(tex);
-                                                    if (texID == tex->mMetaID) {
-                                                        pTex = tex.get();
-                                                        break;
+                                                                                Expects(pTex);
+                                                                                D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{
+                                                                                    pTex->mFormat,
+                                                                                    D3D12_SRV_DIMENSION_TEXTURE2D,
+                                                                                    D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+                                                                                };
+
+                                                                                viewDesc.Texture2D = D3D12_TEX2D_SRV{ 0, (uint32_t)-1, 0, 0.f };
+
+                                                                                context.mDevice->CreateShaderResourceView(pTex->mTexture.get(),
+                                                                                    &viewDesc, descs[i].mCpuHandle);
+                                                                            },
+                                                                            [&](auto) {
+                                                                                throw std::runtime_error("currently only support Texture2D");
+                                                                            }
+                                                                        );
+
+                                                                        visit(overload(
+                                                                            [&](std::monostate) {
+                                                                                visit(visitor, attr.mAttributeType);
+                                                                            },
+                                                                            [&](Descriptor::BaseColor_ t) {
+                                                                                visit(visitor, attr.mAttributeType);
+                                                                            },
+                                                                            [&](Descriptor::ConstantBuffer_) {
+                                                                            },
+                                                                            [&](Descriptor::LinearSampler_) {
+                                                                            }
+                                                                        ), attr.mDataType);
+                                                                        ++i;
+                                                                    }
+                                                                }
+                                                            ), subrange.mSource);
+                                                        }
+                                                        offset += range.mCapacity;
                                                     }
+                                                    for (const auto& unbounded : list.mUnboundedDescriptors) {
+                                                        throw std::runtime_error("material resource view list unbounded not supported yet");
+                                                    }
+                                                } else {
+                                                    materialList.mRanges = list.mRanges;
                                                 }
-                                            } else {
-                                                pTex = &resources.mDefaultTextures.at(White);
                                             }
-
-                                            Expects(pTex);
-                                            D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{
-                                                pTex->mFormat,
-                                                D3D12_SRV_DIMENSION_TEXTURE2D,
-                                                D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-                                            };
-
-                                            viewDesc.Texture2D = D3D12_TEX2D_SRV{ 0, (uint32_t)-1, 0, 0.f };
-
-                                            context.mDevice->CreateShaderResourceView(pTex->mTexture.get(),
-                                                &viewDesc, range[i].mCpuHandle);
+                                            for (const auto& list : collection.mSamplerLists) {
+                                                auto& materialList = materialCollection.mSamplerLists.emplace_back();
+                                                throw std::runtime_error("material sampler list not supported yet");
+                                            }
                                         }
                                     } // subpasses
                                 } // passes
@@ -607,7 +696,7 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                         pass.mScissorRects = passData.mScissorRects;
                         pass.mFramebuffers = passData.mFramebuffers;
                         pass.mDependencies = passData.mDependencies;
-
+                        
                         for (const auto& subpassData : passData.mSubpasses) {
                             auto& subpass = pass.mSubpasses.emplace_back();
                             subpass.mSampleDesc = getDXGI(subpassData.mSampleDesc);
@@ -619,6 +708,8 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                             subpass.mSRVs = subpassData.mSRVs;
                             subpass.mUAVs = subpassData.mUAVs;
                             subpass.mPostViewTransitions = subpassData.mPostViewTransitions;
+                            subpass.mConstantBuffers = subpassData.mConstantBuffers;
+                            subpass.mDescriptors = subpassData.mDescriptors;
 
                             if (!subpassData.mRootSignature.empty()) {
                                 V(context.mDevice->CreateRootSignature(0,
@@ -631,7 +722,7 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                 }
             }
         });
-            
+
         resources.mRenderGraphs.modify(iter, [&](DX12RenderGraphData& render) {
             Ensures(render.mRenderGraphData);
             auto& renderData = *render.mRenderGraphData;

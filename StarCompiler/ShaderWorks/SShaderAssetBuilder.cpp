@@ -21,6 +21,8 @@
 #include <StarCompiler/ShaderWorks/SHLSLGenerator.h>
 #include <StarCompiler/ShaderGraph/SShaderState.h>
 #include <StarCompiler/STextUtils.h>
+#include <Star/Graphics/SRenderGraphReflection.h>
+#include <Star/Graphics/SRenderUtils.h>
 
 namespace Star::Graphics::Render::Shader {
 
@@ -159,7 +161,8 @@ void ShaderAssetBuilder::build(Resources& resources) const {
 }
 
 void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modules,
-    const ShaderGroups& sw, ShaderData& prototypeData, bool bCompile
+    const ShaderGroups& sw, const AttributeDatabase& attrs,
+    ShaderData& prototypeData, bool bCompile
 ) {
     prototypeData.mName = prototype.mName;
     for (const auto& [bundleName, bundle] : prototype.mSolutions) {
@@ -216,37 +219,118 @@ void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modu
                             subpassData.mState.mRasterizerState = getRenderType(subpass.mShaderState.mRasterizerState);
                             subpassData.mState.mDepthStencilState = getRenderType(subpass.mShaderState.mDepthStencilState);
 
-                            for (const auto& table : rsg.mTables) {
-                                if (table.first.mUpdate != UpdateEnum::PerBatch) {
-                                    continue;
+                            // root signature descriptors
+                            Expects(group.mGenerateRootSignature);
+                            for (int i = group.mUpdateFrequency; i --> 0;) {
+                                // build material constant buffer
+                                for (const auto& srcConstantBufferPair : rsg.mDatabase.mConstantBuffers) {
+                                    const auto& index = srcConstantBufferPair.first;
+                                    const auto& srcConstantBuffer = srcConstantBufferPair.second;
+
+                                    if (index.mUpdate != i) {
+                                        continue;
+                                    }
+
+                                    auto& constantBuffer = subpassData.mConstantBuffers.emplace_back();
+                                    constantBuffer.mIndex = index;
+                                    constantBuffer.mConstants.reserve(srcConstantBuffer.mValues.size());
+                                    Expects(constantBuffer.mSize == 0);
+                                    for (const auto& src : srcConstantBuffer.mValues) {
+                                        Expects(!src.mName.empty());
+                                        const auto& attr = at(attrs.mAttributes, src.mName);
+                                        auto& dst = constantBuffer.mConstants.emplace_back();
+                                        visit(overload(
+                                            [&](EngineSource_) {
+                                                getType(src.mName, dst.mDataType);
+                                            },
+                                            [&](MaterialSource_) {
+                                                try_getType(src.mName, dst.mDataType);
+                                            }
+                                        ), attr.mSource);
+                                        dst.mSource = attr.mSource;
+                                        dst.mID = gsl::narrow<uint32_t>(attrs.mIndex.at(src.mName));
+                                        auto sz = getSize(src.mType);
+                                        Ensures(sz);
+                                        constantBuffer.mSize += sz;
+                                    }
                                 }
-                                visit(overload(
-                                    [](Constants_) {
-                                        throw std::runtime_error("root constants not supported yet");
-                                    },
-                                    [](CBV_) {
-                                        throw std::runtime_error("root cbv not supported yet");
-                                    },
-                                    [](UAV_) {
-                                        throw std::runtime_error("root uav not supported yet");
-                                    },
-                                    [](SRV_) {
-                                        throw std::runtime_error("root srv not supported yet");
-                                    },
-                                    [&](Table_) {
-                                        for (const auto& d : table.second.mDescriptors) {
-                                            if (std::holds_alternative<SRV_>(d.mType)) {
-                                                Expects(!d.mName.empty());
-                                                subpassData.mTextures.emplace_back(d.mName);
+                                // build material descriptor tables
+                                for (const auto& parentCollectionPair : group.mRootSignature.mDatabase.mDescriptors) {
+                                    const auto& index = parentCollectionPair.first;
+                                    const auto& parentCollection = parentCollectionPair.second;
+                                    if (index.mUpdate != i) {
+                                        continue;
+                                    }
+
+                                    auto& collection = subpassData.mDescriptors.emplace_back();
+                                    collection.mIndex = index;
+                                    collection.mResourceViewLists.reserve(parentCollection.mResourceViewLists.size());
+                                    collection.mSamplerLists.reserve(parentCollection.mSamplerLists.size());
+
+                                    auto buildAttributes = [&index, &attrs](std::string_view space, ShaderDescriptorList& list, const DescriptorList& parentList, const RootSignature& rsg) {
+                                        list.mRanges.reserve(parentList.mRanges.size());
+                                        for (const auto& parentRangePair : parentList.mRanges) {
+                                            const auto& type = parentRangePair.first;
+                                            const auto& parentRange = parentRangePair.second;
+                                            auto& range = list.mRanges.emplace_back();
+                                            range.mType = type;
+                                            range.mCapacity = parentRange.mCapacity;
+                                            list.mCapacity += range.mCapacity;
+                                            Expects(parentRange.mSubranges.empty());
+
+                                            auto* pRange = rsg.mDatabase.findRange(index, space, type);
+                                            if (pRange) {
+                                                Expects(!pRange->mSubranges.empty());
+                                                range.mSubranges.reserve(pRange->mSubranges.size());
+                                                for (const auto& [source, shaderSubrange] : pRange->mSubranges) {
+                                                    auto& subrange = range.mSubranges.emplace_back();
+                                                    subrange.mSource = source;
+                                                    subrange.mDescriptors.reserve(shaderSubrange.mAttributes.size());
+                                                    for (const auto& attr : shaderSubrange.mAttributes) {
+                                                        auto& d = subrange.mDescriptors.emplace_back();
+                                                        d.mAttributeType = attr.mType;
+                                                        getType(attr.mName, d.mDataType);
+                                                        if (attr.mName.empty()) {
+                                                            Expects(std::holds_alternative<CBuffer_>(attr.mType));
+                                                            Expects(std::holds_alternative<Descriptor::ConstantBuffer_>(d.mDataType));
+                                                        } else {
+                                                            Expects(!std::holds_alternative<Descriptor::ConstantBuffer_>(d.mDataType));
+                                                            d.mID = gsl::narrow<uint32_t>(attrs.mIndex.at(attr.mName));
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
-                                    },
-                                    [](SSV_) {
-                                        // do nothing
+
+                                        for (const auto& parentUnboundedPair : parentList.mUnboundedDescriptors) {
+                                            const auto& type = parentUnboundedPair.first;
+                                            const auto& parentUnbounded = parentUnboundedPair.second;
+                                            auto* pUnbounded = rsg.mDatabase.findUnbounded(index, space, type);
+                                            if (pUnbounded) {
+                                                auto& unbounded = list.mUnboundedDescriptors.emplace_back();
+                                                unbounded.mType = type;
+                                                unbounded.mAttribute = pUnbounded->mAttribute.mName;
+                                            }
+                                        }
+                                    };
+                                    for (const auto& parentListPair : parentCollection.mResourceViewLists) {
+                                        const auto& space = parentListPair.first;
+                                        const auto& parentList = parentListPair.second;
+                                        auto& list = collection.mResourceViewLists.emplace_back();
+                                        list.mSlot = parentList.mSlot;
+                                        buildAttributes(space, list, parentList, rsg);
                                     }
-                                ), table.first.mType);
+                                    for (const auto& parentListPair : parentCollection.mSamplerLists) {
+                                        const auto& space = parentListPair.first;
+                                        const auto& parentList = parentListPair.second;
+                                        auto& list = collection.mSamplerLists.emplace_back();
+                                        list.mSlot = parentList.mSlot;
+                                        buildAttributes(space, list, parentList, rsg);
+                                    }
+                                }
                             }
 
+                            // shaders
                             for (const auto& [stageID, stage] : subpass.mProgram.mShaders) {
                                 std::ostringstream oss;
                                 std::string space;

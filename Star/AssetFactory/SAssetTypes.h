@@ -79,7 +79,7 @@ struct MaterialInfo {
     MetaID mMetaID;
     std::string mName;
     std::string mShader;
-    StringMap<MetaID> mTextures;
+    Map<std::string, MetaID> mTextures;
 };
 
 struct ContentInfo {

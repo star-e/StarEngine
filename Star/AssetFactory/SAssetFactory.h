@@ -68,14 +68,13 @@ public:
 
     // render graph
     bool try_createRenderGraph(std::string_view assetPath, std::string_view name, uint32_t width, uint32_t height);
-    void editRenderGraph(std::string_view assetPath);
+    void editRenderGraph(std::string_view assetPath, std::string_view shaderFolder);
     std::pair<Graphics::Render::RenderSolutionFactory&, bool> try_createRenderSolution(std::string_view renderGraph, std::string_view solution);
-    void consolidateRenderGraph(std::string_view assetPath);
-    void createShaders(std::string_view renderGraph, std::string_view folder, const Graphics::Render::Shader::ShaderDatabase& db);
+    Graphics::Render::Shader::ShaderDatabase& setupRenderGraph(std::string_view assetPath);
     void addContent(std::string_view contentPath, std::string_view renderGraphPath, std::string_view solution,
         std::string_view pipeline, std::string_view queue);
 
-    void compileRenderGraph(std::string_view renderGraph);
+    void saveRenderGraph(std::string_view renderGraph);
 
     void build() const;
 private:

@@ -24,35 +24,36 @@ using namespace DSL;
 
 void createBasicModules(ShaderModules& modules) {
     ADD_ATTRIBUTES({
-        { "Time", float4(), PerFrame, Unity::BuiltIn },
+        { "Time", float4, TypeFrame, Unity::BuiltIn },
+        { "Exposure", float1, TypeFrame, Unity::BuiltIn },
 
-        { "View", matrix(), PerPass, Unity::BuiltIn },
-        { "Proj", matrix(), PerPass, Unity::BuiltIn },
+        { "View", matrix, TypePass, Unity::BuiltIn },
+        { "Proj", matrix, TypePass, Unity::BuiltIn },
 
-        { "World", matrix(), PerInstance, Unity::BuiltIn },
-        { "WorldInvT", matrix(), PerInstance, Unity::BuiltIn },
-        { "WorldView", matrix(), PerInstance, Unity::BuiltIn },
+        { "World", matrix, TypeInstance, Unity::BuiltIn },
+        { "WorldInvT", matrix, TypeInstance, Unity::BuiltIn },
+        { "WorldView", matrix, TypeInstance, Unity::BuiltIn },
 
-        { "PointSampler", SamplerState, PerFrame, RootLevel },
-        { "LinearSampler", SamplerState, PerFrame, RootLevel },
+        { "PointSampler", SamplerState, TypeStaticSampler },
+        { "LinearSampler", SamplerState, TypeStaticSampler },
 
-        { "BaseColor", Texture2D },
-        { "WorldNormalMap", Texture2D },
+        { "Normal", half3, Texture2D, TypePass },
+        { "Albedo", half3, Texture2D, TypePass },
+        { "Radiance", half3, Texture2D, TypePass },
+        { "DepthStencil", float1, Texture2D, TypePass },
 
-        { "Normal", Texture2D, PerPass },
-        { "Albedo", Texture2D, PerPass },
-        { "Radiance", Texture2D, PerPass },
-        { "DepthStencil", Texture2D, PerPass },
+        { "BaseColor", half4, Texture2D, TypeMaterial },
+        { "WorldNormalMap", half3, Texture2D, TypeMaterial },
     });
 
     ADD_MODULE(Empty, Inline);
 
     ADD_MODULE(FullQuadClipPos, Inline,
         Outputs{
-            { "clipPos", float4(), SV_Position },
+            { "clipPos", float4, SV_Position },
         },
         Inputs{
-            { "vertexID", uint1(), SV_VertexID }
+            { "vertexID", uint1, SV_VertexID }
         },
         Content{ R"(clipPos.x = (float)(vertexID / 2) * 4.0f - 1.0f;
 clipPos.y = (float)(vertexID % 2) * 4.0f - 1.0f;
@@ -62,10 +63,10 @@ clipPos.w = 1.0f;
 
     ADD_MODULE(FullQuadUV, Inline,
         Outputs{
-            { "uv", float2(), TEXCOORD }
+            { "uv", float2, TEXCOORD }
         },
         Inputs{
-            { "vertexID", uint1(), SV_VertexID }
+            { "vertexID", uint1, SV_VertexID }
         },
         Content{ R"(uv.x = (float)(vertexID / 2) * 2.0f;
 uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
@@ -73,15 +74,15 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
 
     ADD_MODULE(ClipPos, Inline,
         Attributes{
-            { "WorldView", matrix() },
-            { "View", matrix() },
-            { "Proj", matrix() },
+            { "WorldView", matrix },
+            { "View", matrix },
+            { "Proj", matrix },
         },
         Outputs{
-            { "clipPos", float4(), SV_Position }
+            { "clipPos", float4, SV_Position }
         },
         Inputs{
-            { "vertex", float4(), POSITION }
+            { "vertex", float4, POSITION }
         },
         Contents{
             { "clipPos = mul(Proj, mul(WorldView, vertex));\n" },
@@ -91,13 +92,13 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
 
     ADD_MODULE(WorldPos, Inline,
         Attributes{
-            { "World", matrix() },
+            { "World", matrix },
         },
         Outputs{
-            { "worldPos", float3(), TEXCOORD }
+            { "worldPos", float3, TEXCOORD }
         },
         Inputs{
-            { "vertex", float4(), POSITION }
+            { "vertex", float4, POSITION }
         },
         Content{ R"(worldPos = mul(World, vertex).xyz;
 )" }
@@ -105,13 +106,13 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
     
     ADD_MODULE(WorldGeometryNormal, Inline,
         Attributes{
-            { "WorldInvT", matrix() },
+            { "WorldInvT", matrix },
         },
         Outputs{
-            { "worldNormal", half3(), TEXCOORD }
+            { "worldNormal", half3, TEXCOORD }
         },
         Inputs{
-            { "normal", half4(), NORMAL }
+            { "normal", half4, NORMAL }
         },
         Content{ R"(worldNormal = normalize(mul((float3x3)WorldInvT, normal.xyz));
 )" }
@@ -119,10 +120,10 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
 
     ADD_MODULE(VisualizeWorldNormal, Inline,
         Outputs{
-            { "color", half4() },
+            { "color", half4 },
         },
         Inputs{
-            { "worldNormal", half3() }
+            { "worldNormal", half3 }
         },
         Content{ R"(color = half4(0.5f * (worldNormal.xyz + 1.0f), 1.0f);
 )" }
@@ -130,10 +131,10 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
 
     ADD_MODULE(ScreenGreen, Inline,
         Attributes{
-            { "Time", float4() },
+            { "Time", float4 },
         },
         Outputs{
-            { "color", half4()  }
+            { "color", half4  }
         },
         Content{ R"(color = half4(0.0h, 0.5h + 0.5h * fmod(Time.x, 8.0f), 0.0h, 1.0h);
 )" }
@@ -145,10 +146,10 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
             { "PointSampler", SamplerState },
         },
         Outputs{
-            { "color", half4()  }
+            { "color", half4  }
         },
         Inputs{
-            { "uv", float2(), TEXCOORD }
+            { "uv", float2, TEXCOORD }
         },
         Content{ R"(color = half4(Radiance.Sample(PointSampler, uv).xyz, 1.0h);
 )" }
@@ -162,12 +163,12 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
             { "PointSampler", SamplerState },
         },
         Outputs{
-            { "albedo", half3() },
-            { "worldNormal", half3() },
-            { "depth", float1() },
+            { "albedo", half3 },
+            { "worldNormal", half3 },
+            { "depth", float1 },
         },
         Inputs{
-            { "uv", float2(), TEXCOORD },
+            { "uv", float2, TEXCOORD },
         },
         Content{ R"(albedo = Albedo.Sample(PointSampler, uv).xyz;
 worldNormal = Normal.Sample(PointSampler, uv).xyz;
@@ -177,12 +178,12 @@ depth = DepthStencil.Sample(PointSampler, uv).x;
 
     ADD_MODULE(DeferredLambertian, Inline,
         Outputs{
-            { "color", half4() },
+            { "color", half4 },
         },
         Inputs{
-            { "albedo", half3() },
-            { "worldNormal", half3() },
-            { "depth", float1() },
+            { "albedo", half3 },
+            { "worldNormal", half3 },
+            { "depth", float1 },
         },
         Content{ R"(color = half4(albedo * normalize(dot(worldNormal, half3(1, 1, 1))) * depth, 1.0h);
 )" }
@@ -190,13 +191,13 @@ depth = DepthStencil.Sample(PointSampler, uv).x;
 
     ADD_MODULE(PackGBuffers, Inline,
         Outputs{
-            { "color0", half4() },
-            { "color1", half4() },
+            { "color0", half4 },
+            { "color1", half4 },
         },
         Inputs{
-            { "baseColor", half3()  },
-            { "transparency", half1(), {} },
-            { "worldNormal", half3()  },
+            { "baseColor", half3  },
+            { "transparency", half1, {} },
+            { "worldNormal", half3  },
         },
         Content{ R"(color0 = half4(baseColor, transparency);
 color1 = half4(worldNormal, 1.0h);
@@ -209,11 +210,11 @@ color1 = half4(worldNormal, 1.0h);
             { "LinearSampler", SamplerState },
         },
         Outputs{
-            { "baseColor", half3() },
-            { "transparency", half1(), {} },
+            { "baseColor", half3 },
+            { "transparency", half1, {} },
         },
         Inputs{
-            { "uv", float2(), TEXCOORD },
+            { "uv", float2, TEXCOORD },
         },
         Content{ R"({
 half4 tmp = BaseColor.Sample(LinearSampler, uv);
@@ -229,10 +230,10 @@ transparency = tmp.w;
             { "LinearSampler", SamplerState },
         },
         Outputs{
-            { "worldNormal", half3() },
+            { "worldNormal", half3 },
         },
         Inputs{
-            { "uv", float2(), TEXCOORD },
+            { "uv", float2, TEXCOORD },
         },
         Content{ R"(worldNormal = WorldNormalMap.Sample(LinearSampler, uv).xyz;
 )" }

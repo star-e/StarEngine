@@ -41,6 +41,140 @@ UnorderedRenderQueue::UnorderedRenderQueue(UnorderedRenderQueue&& rhs, const all
 
 UnorderedRenderQueue::~UnorderedRenderQueue() = default;
 
+ShaderDescriptorSubrange::allocator_type ShaderDescriptorSubrange::get_allocator() const noexcept {
+    return allocator_type(mDescriptors.get_allocator().resource());
+}
+
+ShaderDescriptorSubrange::ShaderDescriptorSubrange(const allocator_type& alloc)
+    : mDescriptors(alloc)
+{}
+
+ShaderDescriptorSubrange::ShaderDescriptorSubrange(ShaderDescriptorSubrange const& rhs, const allocator_type& alloc)
+    : mSource(rhs.mSource)
+    , mDescriptors(rhs.mDescriptors, alloc)
+{}
+
+ShaderDescriptorSubrange::ShaderDescriptorSubrange(ShaderDescriptorSubrange&& rhs, const allocator_type& alloc)
+    : mSource(std::move(rhs.mSource))
+    , mDescriptors(std::move(rhs.mDescriptors), alloc)
+{}
+
+ShaderDescriptorSubrange::~ShaderDescriptorSubrange() = default;
+
+ShaderDescriptorRange::allocator_type ShaderDescriptorRange::get_allocator() const noexcept {
+    return allocator_type(mSubranges.get_allocator().resource());
+}
+
+ShaderDescriptorRange::ShaderDescriptorRange(const allocator_type& alloc)
+    : mSubranges(alloc)
+{}
+
+ShaderDescriptorRange::ShaderDescriptorRange(ShaderDescriptorRange const& rhs, const allocator_type& alloc)
+    : mType(rhs.mType)
+    , mSubranges(rhs.mSubranges, alloc)
+    , mCapacity(rhs.mCapacity)
+{}
+
+ShaderDescriptorRange::ShaderDescriptorRange(ShaderDescriptorRange&& rhs, const allocator_type& alloc)
+    : mType(std::move(rhs.mType))
+    , mSubranges(std::move(rhs.mSubranges), alloc)
+    , mCapacity(std::move(rhs.mCapacity))
+{}
+
+ShaderDescriptorRange::~ShaderDescriptorRange() = default;
+
+ShaderUnboundedDescriptor::allocator_type ShaderUnboundedDescriptor::get_allocator() const noexcept {
+    return allocator_type(mAttribute.get_allocator().resource());
+}
+
+ShaderUnboundedDescriptor::ShaderUnboundedDescriptor(const allocator_type& alloc)
+    : mAttribute(alloc)
+{}
+
+ShaderUnboundedDescriptor::ShaderUnboundedDescriptor(ShaderUnboundedDescriptor const& rhs, const allocator_type& alloc)
+    : mType(rhs.mType)
+    , mAttribute(rhs.mAttribute, alloc)
+    , mCapacity(rhs.mCapacity)
+{}
+
+ShaderUnboundedDescriptor::ShaderUnboundedDescriptor(ShaderUnboundedDescriptor&& rhs, const allocator_type& alloc)
+    : mType(std::move(rhs.mType))
+    , mAttribute(std::move(rhs.mAttribute), alloc)
+    , mCapacity(std::move(rhs.mCapacity))
+{}
+
+ShaderUnboundedDescriptor::~ShaderUnboundedDescriptor() = default;
+
+ShaderDescriptorList::allocator_type ShaderDescriptorList::get_allocator() const noexcept {
+    return allocator_type(mRanges.get_allocator().resource());
+}
+
+ShaderDescriptorList::ShaderDescriptorList(const allocator_type& alloc)
+    : mRanges(alloc)
+    , mUnboundedDescriptors(alloc)
+{}
+
+ShaderDescriptorList::ShaderDescriptorList(ShaderDescriptorList const& rhs, const allocator_type& alloc)
+    : mSlot(rhs.mSlot)
+    , mCapacity(rhs.mCapacity)
+    , mRanges(rhs.mRanges, alloc)
+    , mUnboundedDescriptors(rhs.mUnboundedDescriptors, alloc)
+{}
+
+ShaderDescriptorList::ShaderDescriptorList(ShaderDescriptorList&& rhs, const allocator_type& alloc)
+    : mSlot(std::move(rhs.mSlot))
+    , mCapacity(std::move(rhs.mCapacity))
+    , mRanges(std::move(rhs.mRanges), alloc)
+    , mUnboundedDescriptors(std::move(rhs.mUnboundedDescriptors), alloc)
+{}
+
+ShaderDescriptorList::~ShaderDescriptorList() = default;
+
+ShaderDescriptorCollection::allocator_type ShaderDescriptorCollection::get_allocator() const noexcept {
+    return allocator_type(mResourceViewLists.get_allocator().resource());
+}
+
+ShaderDescriptorCollection::ShaderDescriptorCollection(const allocator_type& alloc)
+    : mResourceViewLists(alloc)
+    , mSamplerLists(alloc)
+{}
+
+ShaderDescriptorCollection::ShaderDescriptorCollection(ShaderDescriptorCollection const& rhs, const allocator_type& alloc)
+    : mIndex(rhs.mIndex)
+    , mResourceViewLists(rhs.mResourceViewLists, alloc)
+    , mSamplerLists(rhs.mSamplerLists, alloc)
+{}
+
+ShaderDescriptorCollection::ShaderDescriptorCollection(ShaderDescriptorCollection&& rhs, const allocator_type& alloc)
+    : mIndex(std::move(rhs.mIndex))
+    , mResourceViewLists(std::move(rhs.mResourceViewLists), alloc)
+    , mSamplerLists(std::move(rhs.mSamplerLists), alloc)
+{}
+
+ShaderDescriptorCollection::~ShaderDescriptorCollection() = default;
+
+ShaderConstantBuffer::allocator_type ShaderConstantBuffer::get_allocator() const noexcept {
+    return allocator_type(mConstants.get_allocator().resource());
+}
+
+ShaderConstantBuffer::ShaderConstantBuffer(const allocator_type& alloc)
+    : mConstants(alloc)
+{}
+
+ShaderConstantBuffer::ShaderConstantBuffer(ShaderConstantBuffer const& rhs, const allocator_type& alloc)
+    : mIndex(rhs.mIndex)
+    , mSize(rhs.mSize)
+    , mConstants(rhs.mConstants, alloc)
+{}
+
+ShaderConstantBuffer::ShaderConstantBuffer(ShaderConstantBuffer&& rhs, const allocator_type& alloc)
+    : mIndex(std::move(rhs.mIndex))
+    , mSize(std::move(rhs.mSize))
+    , mConstants(std::move(rhs.mConstants), alloc)
+{}
+
+ShaderConstantBuffer::~ShaderConstantBuffer() = default;
+
 RenderSubpass::allocator_type RenderSubpass::get_allocator() const noexcept {
     return allocator_type(mInputAttachments.get_allocator().resource());
 }
@@ -55,7 +189,8 @@ RenderSubpass::RenderSubpass(const allocator_type& alloc)
     , mPostViewTransitions(alloc)
     , mOrderedRenderQueue(alloc)
     , mRootSignature(alloc)
-    , mConstantBuffer(alloc)
+    , mConstantBuffers(alloc)
+    , mDescriptors(alloc)
 {}
 
 RenderSubpass::RenderSubpass(RenderSubpass const& rhs, const allocator_type& alloc)
@@ -70,7 +205,8 @@ RenderSubpass::RenderSubpass(RenderSubpass const& rhs, const allocator_type& all
     , mPostViewTransitions(rhs.mPostViewTransitions, alloc)
     , mOrderedRenderQueue(rhs.mOrderedRenderQueue, alloc)
     , mRootSignature(rhs.mRootSignature, alloc)
-    , mConstantBuffer(rhs.mConstantBuffer, alloc)
+    , mConstantBuffers(rhs.mConstantBuffers, alloc)
+    , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
 RenderSubpass::RenderSubpass(RenderSubpass&& rhs, const allocator_type& alloc)
@@ -85,7 +221,8 @@ RenderSubpass::RenderSubpass(RenderSubpass&& rhs, const allocator_type& alloc)
     , mPostViewTransitions(std::move(rhs.mPostViewTransitions), alloc)
     , mOrderedRenderQueue(std::move(rhs.mOrderedRenderQueue), alloc)
     , mRootSignature(std::move(rhs.mRootSignature), alloc)
-    , mConstantBuffer(std::move(rhs.mConstantBuffer), alloc)
+    , mConstantBuffers(std::move(rhs.mConstantBuffers), alloc)
+    , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
 RenderSubpass::~RenderSubpass() = default;
@@ -129,7 +266,6 @@ RenderPipeline::RenderPipeline(const allocator_type& alloc)
     , mDependencies(alloc)
     , mRTVInitialStates(alloc)
     , mDSVInitialStates(alloc)
-    , mConstantBuffer(alloc)
     , mSubpassIndex(alloc)
 {}
 
@@ -138,7 +274,6 @@ RenderPipeline::RenderPipeline(RenderPipeline const& rhs, const allocator_type& 
     , mDependencies(rhs.mDependencies, alloc)
     , mRTVInitialStates(rhs.mRTVInitialStates, alloc)
     , mDSVInitialStates(rhs.mDSVInitialStates, alloc)
-    , mConstantBuffer(rhs.mConstantBuffer, alloc)
     , mSubpassIndex(rhs.mSubpassIndex, alloc)
 {}
 
@@ -147,7 +282,6 @@ RenderPipeline::RenderPipeline(RenderPipeline&& rhs, const allocator_type& alloc
     , mDependencies(std::move(rhs.mDependencies), alloc)
     , mRTVInitialStates(std::move(rhs.mRTVInitialStates), alloc)
     , mDSVInitialStates(std::move(rhs.mDSVInitialStates), alloc)
-    , mConstantBuffer(std::move(rhs.mConstantBuffer), alloc)
     , mSubpassIndex(std::move(rhs.mSubpassIndex), alloc)
 {}
 
@@ -196,7 +330,6 @@ RenderSwapChain::allocator_type RenderSwapChain::get_allocator() const noexcept 
 RenderSwapChain::RenderSwapChain(const allocator_type& alloc)
     : mName(alloc)
     , mSolutions(alloc)
-    , mConstantBuffer(alloc)
     , mSolutionIndex(alloc)
 {}
 
@@ -211,7 +344,6 @@ RenderSwapChain::RenderSwapChain(RenderSwapChain const& rhs, const allocator_typ
     , mNumReserveUAVs(rhs.mNumReserveUAVs)
     , mNumReserveDSVs(rhs.mNumReserveDSVs)
     , mNumReserveRTVs(rhs.mNumReserveRTVs)
-    , mConstantBuffer(rhs.mConstantBuffer, alloc)
     , mSolutionIndex(rhs.mSolutionIndex, alloc)
 {}
 
@@ -226,7 +358,6 @@ RenderSwapChain::RenderSwapChain(RenderSwapChain&& rhs, const allocator_type& al
     , mNumReserveUAVs(std::move(rhs.mNumReserveUAVs))
     , mNumReserveDSVs(std::move(rhs.mNumReserveDSVs))
     , mNumReserveRTVs(std::move(rhs.mNumReserveRTVs))
-    , mConstantBuffer(std::move(rhs.mConstantBuffer), alloc)
     , mSolutionIndex(std::move(rhs.mSolutionIndex), alloc)
 {}
 

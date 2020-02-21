@@ -29,20 +29,6 @@ using Map = std::map<Key, Value, std::less<>>;
 template<class Key, class Value>
 using PmrMap = std::pmr::map<Key, Value, std::less<>>;
 
-// string
-template<class Value>
-using StringMap = std::map<std::string, Value, std::less<>>;
-
-template<class Value>
-using PmrStringMap = std::pmr::map<std::pmr::string, Value, std::less<>>;
-
-// uint32_t
-template<class Value>
-using UInt32Map = std::map<uint32_t, Value, std::less<>>;
-
-template<class Value>
-using PmrUInt32Map = std::pmr::map<uint32_t, Value, std::less<>>;
-
 // variant
 struct VariantIndexLess;
 

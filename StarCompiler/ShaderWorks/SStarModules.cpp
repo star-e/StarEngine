@@ -24,68 +24,68 @@ using namespace DSL;
 
 void createStarModules(ShaderModules& modules) {
     ADD_ATTRIBUTES({
-        { "Time", float4(), PerFrame, Unity::BuiltIn },
+        { "Time", float4, TypeFrame, Unity::BuiltIn },
 
-        { "View", matrix(), PerPass, Unity::BuiltIn },
-        { "Proj", matrix(), PerPass, Unity::BuiltIn },
-        { "CameraPos", float4(), PerPass, Unity::BuiltIn },
+        { "View", matrix, TypePass, Unity::BuiltIn },
+        { "Proj", matrix, TypePass, Unity::BuiltIn },
+        { "CameraPos", float4, TypePass, Unity::BuiltIn },
 
-        { "World", matrix(), PerInstance, Unity::BuiltIn },
-        { "WorldInvT", matrix(), PerInstance, Unity::BuiltIn },
-        { "WorldView", matrix(), PerInstance, Unity::BuiltIn },
+        { "World", matrix, TypeInstance, Unity::BuiltIn },
+        { "WorldInvT", matrix, TypeInstance, Unity::BuiltIn },
+        { "WorldView", matrix, TypeInstance, Unity::BuiltIn },
 
-        { "PointSampler", SamplerState, PerFrame, RootLevel },
-        { "LinearSampler", SamplerState, PerFrame, RootLevel },
+        { "PointSampler", SamplerState, TypeStaticSampler },
+        { "LinearSampler", SamplerState, TypeStaticSampler },
 
         // Unreal SceneTextures
-        { "SceneColor", Texture2D, PerPass },
-        { "SceneDepth", Texture2D, PerPass },
-        { "DiffuseColor", Texture2D, PerPass },
-        { "SpecularColor", Texture2D, PerPass },
-        { "SubsurfaceColor", Texture2D, PerPass },        
-        { "BaseColor", Texture2D, PerPass },
-        { "Specular", Texture2D, PerPass },
-        { "Metallic", Texture2D, PerPass },
-        { "WorldNormal", Texture2D, PerPass },
-        { "SeparateTranslucency", Texture2D, PerPass },
-        { "Opacity", Texture2D, PerPass },
-        { "Roughness", Texture2D, PerPass },
-        { "MaterialAO", Texture2D, PerPass },
-        { "CustomDepth", Texture2D, PerPass },
-        { "PostProcessInput0", Texture2D, PerPass },
-        { "PostProcessInput1", Texture2D, PerPass },
-        { "PostProcessInput2", Texture2D, PerPass },
-        { "PostProcessInput3", Texture2D, PerPass },
-        { "PostProcessInput4", Texture2D, PerPass },
-        { "PostProcessInput5", Texture2D, PerPass },
-        { "PostProcessInput6", Texture2D, PerPass },
-        { "DecalMask", Texture2D, PerPass },
-        { "ShadingModel", Texture2D, PerPass },
-        { "AmbientOcclusion", Texture2D, PerPass },
-        { "CustomStencil", Texture2D, PerPass },
-        { "BaseColorGBuffer", Texture2D, PerPass },
-        { "SpecularGBuffer", Texture2D, PerPass },
+        { "SceneColor", Texture2D, TypePass },
+        { "SceneDepth", Texture2D, TypePass },
+        { "DiffuseColor", Texture2D, TypePass },
+        { "SpecularColor", Texture2D, TypePass },
+        { "SubsurfaceColor", Texture2D, TypePass },
+        { "BaseColor", Texture2D, TypePass },
+        { "Specular", Texture2D, TypePass },
+        { "Metallic", Texture2D, TypePass },
+        { "WorldNormal", Texture2D, TypePass },
+        { "SeparateTranslucency", Texture2D, TypePass },
+        { "Opacity", Texture2D, TypePass },
+        { "Roughness", Texture2D, TypePass },
+        { "MaterialAO", Texture2D, TypePass },
+        { "CustomDepth", Texture2D, TypePass },
+        { "PostProcessInput0", Texture2D, TypePass },
+        { "PostProcessInput1", Texture2D, TypePass },
+        { "PostProcessInput2", Texture2D, TypePass },
+        { "PostProcessInput3", Texture2D, TypePass },
+        { "PostProcessInput4", Texture2D, TypePass },
+        { "PostProcessInput5", Texture2D, TypePass },
+        { "PostProcessInput6", Texture2D, TypePass },
+        { "DecalMask", Texture2D, TypePass },
+        { "ShadingModel", Texture2D, TypePass },
+        { "AmbientOcclusion", Texture2D, TypePass },
+        { "CustomStencil", Texture2D, TypePass },
+        { "BaseColorGBuffer", Texture2D, TypePass },
+        { "SpecularGBuffer", Texture2D, TypePass },
 
         // Unity Material
-        { "MainTex", Texture2D },
-        { "MainTexSampler", SamplerState },
-        { "BumpMap", Texture2D },
-        { "BumpMapSampler", SamplerState },
-        { "Material", Texture2D },
-        { "MaterialSampler", SamplerState },
+        { "MainTex", Texture2D, TypeMaterial },
+        { "MainTexSampler", SamplerState, TypeMaterial },
+        { "BumpMap", Texture2D, TypeMaterial },
+        { "BumpMapSampler", SamplerState, TypeMaterial },
+        { "Material", Texture2D, TypeMaterial },
+        { "MaterialSampler", SamplerState, TypeMaterial },
     });
 
     ADD_MODULE(ClipPos, Inline,
         Attributes{
-            { "WorldView", matrix() },
-            { "View", matrix() },
-            { "Proj", matrix() },
+            { "WorldView", matrix },
+            { "View", matrix },
+            { "Proj", matrix },
         },
         Outputs{
-            { "clipPos", float4(), SV_Position }
+            { "clipPos", float4, SV_Position }
         },
         Inputs{
-            { "vertex", float4(), POSITION }
+            { "vertex", float4, POSITION }
         },
         Contents{
             { "clipPos = mul(Proj, mul(WorldView, vertex));\n" },
@@ -95,13 +95,13 @@ void createStarModules(ShaderModules& modules) {
 
     ADD_MODULE(WorldPos, Inline,
         Attributes{
-            { "World", matrix() },
+            { "World", matrix },
         },
         Outputs{
-            { "worldPos", float3(), TEXCOORD }
+            { "worldPos", float3, TEXCOORD }
         },
         Inputs{
-            { "vertex", float4(), POSITION }
+            { "vertex", float4, POSITION }
         },
         Contents{
             { "worldPos = mul(World, vertex).xyz;\n" },
@@ -111,13 +111,13 @@ void createStarModules(ShaderModules& modules) {
     
     ADD_MODULE(ViewVector, Inline,
         Attributes{
-            { "CameraPos", float4() },
+            { "CameraPos", float4 },
         },
         Outputs{
-            { "viewVector", float3(), TEXCOORD },
+            { "viewVector", float3, TEXCOORD },
         },
         Inputs{
-            { "worldPos", float3() },
+            { "worldPos", float3 },
         },
         Contents{
             { "viewVector = CameraPos.xyz - worldPos;\n" },
@@ -127,10 +127,10 @@ void createStarModules(ShaderModules& modules) {
         
     ADD_MODULE(ViewDir, Inline,
         Outputs{
-            { "viewDir", half3(), TEXCOORD },
+            { "viewDir", half3, TEXCOORD },
         },
         Inputs{
-            { "viewVector", float3() },
+            { "viewVector", float3 },
         },
         Contents{
             { "viewDir = normalize(viewVector);\n" },
@@ -140,42 +140,42 @@ void createStarModules(ShaderModules& modules) {
     // BRDF coordinates
     ADD_MODULE(CosThetaOut, Inline,
         Outputs{
-            { "cosThetaOut", half1() },
+            { "cosThetaOut", half1 },
         },
         Inputs{
-            { "worldNormal", half3() },
-            { "viewDir", half3() },
+            { "worldNormal", half3 },
+            { "viewDir", half3 },
         },
         Content{ "cosThetaOut = dot(worldNormal, viewDir);\n" }
     );
         
     ADD_MODULE(NdotV, Inline,
         Outputs{
-            { "ndotv", half1() },
+            { "ndotv", half1 },
         },
         Inputs{
-            { "cosThetaOut", half1() },
+            { "cosThetaOut", half1 },
         },
         Content{ "ndotv = saturate(cosThetaOut);\n" }
     );
 
     ADD_MODULE(CosThetaIn, Inline,
         Outputs{
-            { "cosThetaIn", half1() },
+            { "cosThetaIn", half1 },
         },
         Inputs{
-            { "worldNormal", half3() },
-            { "lightDir", half3() },
+            { "worldNormal", half3 },
+            { "lightDir", half3 },
         },
         Content{ "cosThetaIn = dot(worldNormal, lightDir);\n" }
     );
     
     ADD_MODULE(NdotL, Inline,
         Outputs{
-            { "ndotl", half1() },
+            { "ndotl", half1 },
         },
         Inputs{
-            { "cosThetaIn", half1() },
+            { "cosThetaIn", half1 },
         },
         Content{ "ndotl = saturate(cosThetaIn);\n" }
     );
@@ -183,21 +183,21 @@ void createStarModules(ShaderModules& modules) {
     // Rusinkiewicz BRDF coordinates
     ADD_MODULE(HalfVector, Inline,
         Outputs{
-            { "halfVector", half3(), TEXCOORD },
+            { "halfVector", half3, TEXCOORD },
         },
         Inputs{
-            { "lightDir", half3() },
-            { "viewDir", half3() },
+            { "lightDir", half3 },
+            { "viewDir", half3 },
         },
         Content{ "halfVector = lightDir + viewDir;\n" }
     );
 
     ADD_MODULE(HalfAngle, Inline,
         Outputs{
-            { "halfAngle", half3(), TEXCOORD },
+            { "halfAngle", half3, TEXCOORD },
         },
         Inputs{
-            { "halfVector", half3() },
+            { "halfVector", half3 },
         },
         Contents{
             { "halfAngle = safeNormalize(halfVector);\n" },
@@ -207,11 +207,11 @@ void createStarModules(ShaderModules& modules) {
 
     ADD_MODULE(CosThetaH, Inline,
         Outputs{
-            { "cosThetaH", half1() },
+            { "cosThetaH", half1 },
         },
         Inputs{
-            { "halfAngle", half3() },
-            { "worldNormal", half3() },
+            { "halfAngle", half3 },
+            { "worldNormal", half3 },
         },
         Contents{
             { "cosThetaH = dot(worldNormal, halfAngle);\n" },
@@ -220,10 +220,10 @@ void createStarModules(ShaderModules& modules) {
         
     ADD_MODULE(NdotH, Inline,
         Outputs{
-            { "ndoth", half1() },
+            { "ndoth", half1 },
         },
         Inputs{
-            { "cosThetaH", half1() },
+            { "cosThetaH", half1 },
         },
         Content{ "ndoth = saturate(cosThetaH);\n" }
     );
@@ -231,11 +231,11 @@ void createStarModules(ShaderModules& modules) {
     // LdotH
     ADD_MODULE(CosThetaD, Inline,
         Outputs{
-            { "cosThetaD", half1() },
+            { "cosThetaD", half1 },
         },
         Inputs{
-            { "halfAngle", half3() },
-            { "lightDir", half3() },
+            { "halfAngle", half3 },
+            { "lightDir", half3 },
         },
         Contents{
             { "cosThetaH = dot(lightDir, halfAngle);\n" },
@@ -244,21 +244,21 @@ void createStarModules(ShaderModules& modules) {
 
     ADD_MODULE(LdotH, Inline,
         Outputs{
-            { "ldoth", half1() },
+            { "ldoth", half1 },
         },
         Inputs{
-            { "cosThetaD", half1() },
+            { "cosThetaD", half1 },
         },
         Content{ "ldoth = saturate(cosThetaD);\n" }
     );
 
     ADD_MODULE(CosDoubleThetaD, Inline,
         Outputs{
-            { "cosDoubleThetaD", half1() },
+            { "cosDoubleThetaD", half1 },
         },
         Inputs{
-            { "viewDir", half3() },
-            { "lightDir", half3() },
+            { "viewDir", half3 },
+            { "lightDir", half3 },
         },
         Contents{
             { "cosDoubleThetaD = dot(viewDir, lightDir);\n" },
@@ -267,10 +267,10 @@ void createStarModules(ShaderModules& modules) {
     
     ADD_MODULE(LdotV, Inline,
         Outputs{
-            { "ldotv", half1() },
+            { "ldotv", half1 },
         },
         Inputs{
-            { "cosDoubleThetaD", half1() },
+            { "cosDoubleThetaD", half1 },
         },
         Contents{
             { "ldotv = saturate(cosDoubleThetaD);\n" },
@@ -279,11 +279,11 @@ void createStarModules(ShaderModules& modules) {
 
     ADD_MODULE(ViewRefl, Inline,
         Outputs{
-            { "viewRefl", half3(), TEXCOORD },
+            { "viewRefl", half3, TEXCOORD },
         },
         Inputs{
-            { "worldNormal", half3() },
-            { "viewDir", half3() },
+            { "worldNormal", half3 },
+            { "viewDir", half3 },
         },
         Content{ "viewRefl = reflect(-viewDir, worldNormal);\n" }
     );
@@ -291,13 +291,13 @@ void createStarModules(ShaderModules& modules) {
     // vertex transform
     ADD_MODULE(WorldNormal, Inline,
         Attributes{
-            { "WorldInvT", matrix() },
+            { "WorldInvT", matrix },
         },
         Outputs{
-            { "worldNormal", half3(), TEXCOORD },
+            { "worldNormal", half3, TEXCOORD },
         },
         Inputs{
-            { "normal", half3(), NORMAL },
+            { "normal", half3, NORMAL },
         },
         Contents{
             { "worldNormal = normalize(mul(WorldInvT, half4(normal.xyz, 0.0h)).xyz);\n" },
@@ -307,13 +307,13 @@ void createStarModules(ShaderModules& modules) {
     
     ADD_MODULE(WorldTangent, Inline,
         Attributes{
-            { "WorldInvT", matrix() },
+            { "WorldInvT", matrix },
         },
         Outputs{
-            { "worldTangent", half3(), TEXCOORD },
+            { "worldTangent", half3, TEXCOORD },
         },
         Inputs{
-            { "tangent", half4(), TANGENT },
+            { "tangent", half4, TANGENT },
         },
         Contents{
             { "worldTangent = normalize(mul(WorldInvT, half4(tangent.xyz, 0.0h)).xyz);\n" },
@@ -323,13 +323,13 @@ void createStarModules(ShaderModules& modules) {
 
     ADD_MODULE(WorldBinormal, Inline,
         Attributes{
-            { "WorldInvT", matrix() },
+            { "WorldInvT", matrix },
         },
         Outputs{
-            { "worldBinormal", half3(), TEXCOORD },
+            { "worldBinormal", half3, TEXCOORD },
         },
         Inputs{
-            { "binormal", half4(), BINORMAL },
+            { "binormal", half4, BINORMAL },
         },
         Contents{
             { "worldBinormal = normalize(mul(WorldInvT, half4(binormal.xyz, 0.0h)).xyz);\n" },
@@ -339,12 +339,12 @@ void createStarModules(ShaderModules& modules) {
     
     ADD_MODULE(CalculateWorldBinormal, Inline,
         Outputs{
-            { "worldBinormal", half3(), TEXCOORD },
+            { "worldBinormal", half3, TEXCOORD },
         },
         Inputs{
-            { "worldTangent", half3() },
-            { "worldNormal", half3() },
-            { "tangent", half4(), TANGENT },
+            { "worldTangent", half3 },
+            { "worldNormal", half3 },
+            { "tangent", half4, TANGENT },
         },
         Contents{
             { "worldBinormal = cross(worldNormal, worldTangent);\n" },
@@ -354,15 +354,15 @@ void createStarModules(ShaderModules& modules) {
 
     ADD_MODULE(PackTangentSpaceAndViewDir, Inline,
         Outputs{
-            { "tspace0", half4(), TEXCOORD },
-            { "tspace1", half4(), TEXCOORD },
-            { "tspace2", half4(), TEXCOORD },
+            { "tspace0", half4, TEXCOORD },
+            { "tspace1", half4, TEXCOORD },
+            { "tspace2", half4, TEXCOORD },
         },
         Inputs{
-            { "worldTangent", half3() },
-            { "worldBinormal", half3() },
-            { "worldNormal", half3() },
-            { "viewDir", half3() }
+            { "worldTangent", half3 },
+            { "worldBinormal", half3 },
+            { "worldNormal", half3 },
+            { "viewDir", half3 }
         },
         Contents{
             { R"(tspace0 = half4(worldTangent.x, worldBinormal.x, worldNormal.x, viewDir.x);
@@ -374,12 +374,12 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
 
     ADD_MODULE(UnpackTangent, Inline,
         Outputs{
-            { "worldTangent", half3() },
+            { "worldTangent", half3 },
         },
         Inputs{
-            { "tspace0", half4(), TEXCOORD },
-            { "tspace1", half4(), TEXCOORD },
-            { "tspace2", half4(), TEXCOORD },
+            { "tspace0", half4, TEXCOORD },
+            { "tspace1", half4, TEXCOORD },
+            { "tspace2", half4, TEXCOORD },
         },
         Contents{
             { "worldTangent = half3(tspace0.x, tspace1.x, tspace2.x);\n" }
@@ -388,12 +388,12 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
 
     ADD_MODULE(UnpackBinormal, Inline,
         Outputs{
-            { "worldBinormal", half3() },
+            { "worldBinormal", half3 },
         },
         Inputs{
-            { "tspace0", half4(), TEXCOORD },
-            { "tspace1", half4(), TEXCOORD },
-            { "tspace2", half4(), TEXCOORD },
+            { "tspace0", half4, TEXCOORD },
+            { "tspace1", half4, TEXCOORD },
+            { "tspace2", half4, TEXCOORD },
         },
         Contents{
             { "worldBinormal = half3(tspace0.y, tspace1.y, tspace2.y);\n" }
@@ -402,12 +402,12 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
 
     ADD_MODULE(UnpackNormal, Inline,
         Outputs{
-            { "worldNormal", half3() },
+            { "worldNormal", half3 },
         },
         Inputs{
-            { "tspace0", half4(), TEXCOORD },
-            { "tspace1", half4(), TEXCOORD },
-            { "tspace2", half4(), TEXCOORD },
+            { "tspace0", half4, TEXCOORD },
+            { "tspace1", half4, TEXCOORD },
+            { "tspace2", half4, TEXCOORD },
         },
         Contents{
             { "worldNormal = half3(tspace0.z, tspace1.z, tspace2.z);\n" }
@@ -416,12 +416,12 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
 
     ADD_MODULE(UnpackViewDir, Inline,
         Outputs{
-            { "viewDir", half3() },
+            { "viewDir", half3 },
         },
         Inputs{
-            { "tspace0", half4(), TEXCOORD },
-            { "tspace1", half4(), TEXCOORD },
-            { "tspace2", half4(), TEXCOORD },
+            { "tspace0", half4, TEXCOORD },
+            { "tspace1", half4, TEXCOORD },
+            { "tspace2", half4, TEXCOORD },
         },
         Contents{
             { "viewDir = half3(tspace0.w, tspace1.w, tspace2.w);\n" }
@@ -430,10 +430,10 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
     
     ADD_MODULE(NormalizeViewDir, Inline,
         Outputs{
-            { "viewDir", half3() },
+            { "viewDir", half3 },
         },
         Inputs{
-            { "viewDir", half3() },
+            { "viewDir", half3 },
         },
         Contents{
             { "viewDir = normalize(viewDir);\n" }
@@ -444,49 +444,49 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
     // Disney PBR
     ADD_MODULE(DefaultBaseColor, Inline,
         Outputs{
-            { "baseColor", half3() },
+            { "baseColor", half3 },
         },
         Content{ "baseColor = half3(0.5h, 0.5h, 0.5h);\n" }
     );
 
     ADD_MODULE(DefaultTransparency, Inline,
         Outputs{
-            { "transparency", half1() },
+            { "transparency", half1 },
         },
         Content{ "transparency = 1.0h;\n" }
     );
 
     ADD_MODULE(DefaultPerceptualRoughness, Inline,
         Outputs{
-            { "perceptualRoughness", half1() },
+            { "perceptualRoughness", half1 },
         },
         Content{ "perceptualRoughness = 0.5h;\n" }
     );
 
     ADD_MODULE(DefaultPerceptualSmoothness, Inline,
         Outputs{
-            { "perceptualSmoothness", half1() },
+            { "perceptualSmoothness", half1 },
         },
         Content{ "perceptualSmoothness = 0.5h;\n" }
     );
 
     ADD_MODULE(DefaultMetallic, Inline,
         Outputs{
-            { "metallic", half1() },
+            { "metallic", half1 },
         },
         Content{ "metallic = 0.0h;\n" }
     );
 
     ADD_MODULE(DefaultOcclusion, Inline,
         Outputs{
-            { "occlusion", half1() },
+            { "occlusion", half1 },
         },
         Content{ "occlusion = 1.0h;\n" }
     );
 
     ADD_MODULE(DefaultEmission, Inline,
         Outputs{
-            { "emission", half1() },
+            { "emission", half1 },
         },
         Content{ "emission = 0.0h;\n" }
     );
@@ -498,10 +498,10 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
             { "MainTexSampler", SamplerState },
         },
         Outputs{
-            { "baseColor", half3() },
+            { "baseColor", half3 },
         },
         Inputs{
-            { "deviceUV", float2(), TEXCOORD },
+            { "deviceUV", float2, TEXCOORD },
         },
         Contents{
             { "baseColor = MainTex.Sample(MainTexSampler, deviceUV).xyz;\n" },
@@ -515,11 +515,11 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
             { "MainTexSampler", SamplerState },
         },
         Outputs{
-            { "baseColor", half3() },
-            { "transparency", half1() },
+            { "baseColor", half3 },
+            { "transparency", half1 },
         },
         Inputs{
-            { "deviceUV", float2(), TEXCOORD },
+            { "deviceUV", float2, TEXCOORD },
         },
         Contents{
             { R"({
@@ -543,10 +543,10 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
             { "BumpMapSampler", SamplerState },
         },
         Outputs{
-            { "normalTS", half3() },
+            { "normalTS", half3 },
         },
         Inputs{
-            { "deviceUV", float2(), TEXCOORD },
+            { "deviceUV", float2, TEXCOORD },
         },
         Contents{
             { "normalTS = BumpMap.Sample(BumpMapSampler, deviceUV).xyz;\n" },
@@ -560,12 +560,12 @@ tspace2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, viewDir.z);
             { "MaterialSampler", SamplerState },
         },
         Outputs{
-            { "metallic", half1() },
-            { "perceptualSmoothness", half1() },
-            { "occlusion", half1() },
+            { "metallic", half1 },
+            { "perceptualSmoothness", half1 },
+            { "occlusion", half1 },
         },
         Inputs{
-            { "deviceUV", float2(), TEXCOORD },
+            { "deviceUV", float2, TEXCOORD },
         },
         Contents{
             { R"(half3 tmp = Material.Sample(MaterialSampler, deviceUV).xyz;
@@ -584,33 +584,33 @@ occlusion = tmp.z;
     // material compute
     ADD_MODULE(PerceptualSmoothnessToPerceptualRoughness, Inline,
         Outputs{
-            { "perceptualRoughness", half1() }
+            { "perceptualRoughness", half1 }
         },
         Inputs{
-            { "perceptualSmoothness", half1() }
+            { "perceptualSmoothness", half1 }
         },
         Content{ "perceptualRoughness = 1.0h - perceptualSmoothness;\n" }
     );
 
     ADD_MODULE(PerceptualRoughnessToRoughness, Inline,
         Outputs{
-            { "roughness", half1() },
+            { "roughness", half1 },
         },
         Inputs{
-            { "perceptualRoughness", half1() },
+            { "perceptualRoughness", half1 },
         },
         Content{ "roughness = perceptualRoughness * perceptualRoughness;\n" }
     );
     
     ADD_MODULE(WorldShadingNormal, Inline,
         Outputs{
-            { "worldNormal", half3() }
+            { "worldNormal", half3 }
         },
         Inputs{
-            { "normalTS", half3() },
-            { "tspace0", half4(), TEXCOORD },
-            { "tspace1", half4(), TEXCOORD },
-            { "tspace2", half4(), TEXCOORD },
+            { "normalTS", half3 },
+            { "tspace0", half4, TEXCOORD },
+            { "tspace1", half4, TEXCOORD },
+            { "tspace2", half4, TEXCOORD },
         },
         Content{ R"(worldNormal.x = dot(half3(tspace0.xyz), normalTS);
 worldNormal.y = dot(half3(tspace1.xyz), normalTS);
@@ -621,37 +621,37 @@ worldNormal = normalize(worldNormal);
     // Lighting
     ADD_MODULE(LightIntensity, Inline,
         Outputs{
-            { "lightInten", half3() },
+            { "lightInten", half3 },
         },
         Content{ "lightInten = _LightColor0.xyz;\n", UnityCG }        
     );
      
     ADD_MODULE(DirectionalLightDir, Inline,
         Outputs{
-            { "lightDir", half3(), TEXCOORD },
+            { "lightDir", half3, TEXCOORD },
         },
         Content{ "lightDir = _WorldSpaceLightPos0.xyz;\n", UnityCG }
     );
     
     ADD_MODULE(LightAttenuation, Inline,
         Outputs{
-            { "atten", fixed1(), NoDeclare },
+            { "atten", fixed1, NoDeclare },
         },
         Inputs{
-            { "worldPos", float3() },
+            { "worldPos", float3 },
         },
         Content{ R"(UNITY_LIGHT_ATTENUATION(atten, IN, worldPos);
 )" });
     
     ADD_MODULE(SUnityAmbientOrLightmapUV,
         Outputs{
-            { "ambientOrLightmapUV", half4(), TEXCOORD },
+            { "ambientOrLightmapUV", half4, TEXCOORD },
         },
         Inputs{
-            { "deviceUV1", float2(), TEXCOORD },
-            { "deviceUV2", float2(), TEXCOORD },
-            { "worldNormal", half3() },
-            { "worldPos", float3() },
+            { "deviceUV1", float2, TEXCOORD },
+            { "deviceUV2", float2, TEXCOORD },
+            { "worldNormal", half3 },
+            { "worldPos", float3 },
         },
         Content{ R"(ambientOrLightmapUV = 0;
 // Static lightmaps
@@ -682,18 +682,18 @@ ambientOrLightmapUV.zw = deviceUV2.xy * unity_DynamicLightmapST.xy + unity_Dynam
             { "gi", ShaderStruct{ "UnityGI" } },
         },
         Inputs{
-            { "lightDir", half3() },
-            { "worldNormal", half3() },
-            { "perceptualSmoothness", half1() },
-            { "metallic", half1() },
-            { "worldPos", float3() },
-            { "viewDir", half3() },
-            { "atten", fixed1() },
-            { "ambientOrLightmapUV", half4() },
-            { "baseColor", half3() },
-            { "transparency", half1() },
-            { "occlusion", half1() },
-            { "lightInten", half3() },
+            { "lightDir", half3 },
+            { "worldNormal", half3 },
+            { "perceptualSmoothness", half1 },
+            { "metallic", half1 },
+            { "worldPos", float3 },
+            { "viewDir", half3 },
+            { "atten", fixed1 },
+            { "ambientOrLightmapUV", half4 },
+            { "baseColor", half3 },
+            { "transparency", half1 },
+            { "occlusion", half1 },
+            { "lightInten", half3 },
         },
         Content{ R"(#ifdef UNITY_COMPILER_HLSL
 SurfaceOutputStandard o = (SurfaceOutputStandard)0;
@@ -746,16 +746,16 @@ LightingStandard_GI(o, giInput, gi);
     // Shading
     ADD_MODULE(SUnityLightingStandard,
         Outputs{
-            { "color", half4() },
+            { "color", half4 },
         },
         Inputs{
             { "gi", ShaderStruct{ "UnityGI" } },
-            { "baseColor", half3() },
-            { "transparency", half1() },
-            { "perceptualSmoothness", half1() },
-            { "metallic", half1() },
-            { "worldNormal", half3() },
-            { "viewDir", half3() },
+            { "baseColor", half3 },
+            { "transparency", half1 },
+            { "perceptualSmoothness", half1 },
+            { "metallic", half1 },
+            { "worldNormal", half3 },
+            { "viewDir", half3 },
         },
         Content{ R"(half oneMinusReflectivity;
 half3 specColor;
@@ -773,10 +773,10 @@ color.a = outputAlpha;
     
     ADD_MODULE(SUnityUnpackTexcoord, Inline,
         Outputs{
-            { "deviceUV", float2(), TEXCOORD },
+            { "deviceUV", float2, TEXCOORD },
         },
         Inputs{
-            { "texcoord", float4(), TEXCOORD },
+            { "texcoord", float4, TEXCOORD },
         },
         Content{ R"(deviceUV = texcoord.xy;
 )", UnityCG }
@@ -784,10 +784,10 @@ color.a = outputAlpha;
 
     ADD_MODULE(SUnityUnpackTexcoord1, Inline,
         Outputs{
-            { "deviceUV1", float2(), TEXCOORD },
+            { "deviceUV1", float2, TEXCOORD },
         },
         Inputs{
-            { "texcoord1", float4(), TEXCOORD },
+            { "texcoord1", float4, TEXCOORD },
         },
         Content{ R"(deviceUV1 = texcoord1.xy;
 )", UnityCG }
@@ -795,10 +795,10 @@ color.a = outputAlpha;
     
     ADD_MODULE(SUnityUnpackTexcoord2, Inline,
         Outputs{
-            { "deviceUV2", float2(), TEXCOORD },
+            { "deviceUV2", float2, TEXCOORD },
         },
         Inputs{
-            { "texcoord2", float4(), TEXCOORD },
+            { "texcoord2", float4, TEXCOORD },
         },
         Content{ R"(deviceUV2 = texcoord2.xy;
 )", UnityCG }
@@ -806,10 +806,10 @@ color.a = outputAlpha;
 
     ADD_MODULE(SUnityUnpackTexcoord3, Inline,
         Outputs{
-            { "deviceUV3", float2(), TEXCOORD },
+            { "deviceUV3", float2, TEXCOORD },
         },
         Inputs{
-            { "texcoord3", float4(), TEXCOORD },
+            { "texcoord3", float4, TEXCOORD },
         },
         Content{ R"(deviceUV3 = texcoord3.xy;
 )", UnityCG }

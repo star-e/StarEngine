@@ -19,33 +19,24 @@
 #include <StarCompiler/Graphics/SRenderTypes.h>
 #include <StarCompiler/ShaderGraph/SShaderTypes.h>
 #include <StarCompiler/ShaderGraph/SShaderAttribute.h>
+#include <StarCompiler/ShaderGraph/SShaderDescriptorDatabase.h>
 
 namespace Star::Graphics::Render::Shader {
 
 class ShaderRegister;
 class RootSignature {
 public:
-    void addConstant(const ShaderAttribute& attr, ShaderStageType stage);
-    void mergeConstantBuffers(UpdateEnum update, RootSignature& rhs) const;
-    
-    void addConstantBufferDescriptor(const DescriptorIndex& index, const ShaderConstantBuffer& cb);
+    void addConstant(const ShaderAttribute& attr, ShaderVisibilityType stage);
     void addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage);
 
-    void collectCapacities(UpdateEnum update, std::map<DescriptorIndex, DescriptorTableCapacity>& rhs) const;
-    void resizeCapacities(const std::map<DescriptorIndex, DescriptorTableCapacity>& rhs);
-
+    void mergeConstantBuffers(UpdateEnum update, RootSignature& rhs) const;
+    
+    void reserveCapacities(UpdateEnum update, RootSignature& rhs) const;
     void collectDescriptors(UpdateEnum update, RootSignature& rhs) const;
-    void reserveRegisters(UpdateEnum update, ShaderRegister& reg) const;
-    void reserveCapacityRegisters(UpdateEnum update, ShaderRegister& reg) const;
 
-    static bool try_addDescriptor(const Descriptor& d, DescriptorTable& table, DescriptorTableCapacity& cap);
-    static void maximizeCapacity(const DescriptorTableCapacity& source, DescriptorTableCapacity& target);
+    void addConstantBuffersDescriptors();
 
-    // compiled
-    std::map<DescriptorIndex, ShaderConstantBuffer> mConstantBuffers;
-    std::map<DescriptorIndex, RootParameter> mRootParameters;
-    std::map<DescriptorIndex, DescriptorTable> mTables;
-    std::map<DescriptorIndex, DescriptorTableCapacity> mCapacities;
+    DescriptorDatabase mDatabase;
 };
 
 }

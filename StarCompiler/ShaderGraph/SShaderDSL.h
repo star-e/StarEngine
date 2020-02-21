@@ -19,13 +19,20 @@
 #include <Star/SMathFwd.h>
 #include <StarCompiler/ShaderGraph/SShaderSemantics.h>
 #include <StarCompiler/ShaderGraph/SShaderModule.h>
+#include <StarCompiler/ShaderGraph/SShaderTypes.h>
 
 namespace Star::Graphics::Render::Shader {
 
 namespace DSL {
 
-static const matrix identity = matrix::Identity();
-static const matrix zero = matrix::Zero();
+//static const matrix identity = matrix::Identity();
+//static const matrix zero = matrix::Zero();
+
+static const AttributeDescriptor TypeFrame{ PerFrame, Table, Dynamic, EngineSource };
+static const AttributeDescriptor TypePass{ PerPass, Table, Dynamic, EngineSource };
+static const AttributeDescriptor TypeInstance{ PerInstance, Table, Dynamic, EngineSource };
+static const AttributeDescriptor TypeMaterial{ PerBatch, Table, Persistent, MaterialSource };
+static const AttributeDescriptor TypeStaticSampler{ PerFrame, SSV, Persistent, EngineSource };
 
 }
 
@@ -35,7 +42,8 @@ static const matrix zero = matrix::Zero();
 // Shader Attribute
 #define ADD_ATTRIBUTES(...) { \
 auto attrs = AttributeMap __VA_ARGS__ ; \
-for (const auto& attr : attrs) { \
+for (auto& attr : attrs) { \
+    compileShaderAttribute(const_cast<ShaderAttribute&>(attr)); \
     modules.mAttributes.emplace(attr); \
 } \
 }

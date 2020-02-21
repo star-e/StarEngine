@@ -43,7 +43,7 @@ public:
         : mBuffer(rhs.mBuffer, alloc)
     {}
 
-    void resize(size_t sz) {
+    size_t resize_aligned(size_t sz) {
         static_assert(std::is_pod_v<DataBlock>);
         static_assert(sizeof(DataBlock) == NAlignment);
         static_assert(sizeof(std::byte) == 1);
@@ -52,7 +52,8 @@ public:
         Expects(sz % NAlignment == 0);
         size_t count = sz / NAlignment;
         mBuffer.resize(count);
-        Expects(sz && boost::alignment::is_aligned(NAlignment, mBuffer.data()));
+        Expects(sz == 0 || (sz && boost::alignment::is_aligned(NAlignment, mBuffer.data())));
+        return sz;
     }
 
     bool empty() const noexcept {
@@ -75,6 +76,7 @@ public:
         return alias_cast<std::byte*>(mBuffer.data());
     }
 
+private:
     std::pmr::vector<DataBlock> mBuffer;
 };
 

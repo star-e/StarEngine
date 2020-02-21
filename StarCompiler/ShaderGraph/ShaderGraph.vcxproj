@@ -246,6 +246,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="SShaderAttribute.h" />
+    <ClInclude Include="SShaderDescriptorDatabase.h" />
     <ClInclude Include="SShaderSolution.h" />
     <ClInclude Include="SShaderDatabase.h" />
     <ClInclude Include="SShaderDescriptor.h" />
@@ -262,7 +263,6 @@
     <ClInclude Include="SShaderProgram.h" />
     <ClInclude Include="SShaderPrototype.h" />
     <ClInclude Include="SShaderQueue.h" />
-    <ClInclude Include="SShaderRegisters.h" />
     <ClInclude Include="SShaderRootSignature.h" />
     <ClInclude Include="SShaderSemantics.h" />
     <ClInclude Include="SShaderStage.h" />
@@ -282,6 +282,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SShaderAttribute.cpp" />
+    <ClCompile Include="SShaderDescriptorDatabase.cpp" />
     <ClCompile Include="SShaderSolution.cpp" />
     <ClCompile Include="SShaderDatabase.cpp" />
     <ClCompile Include="SShaderDescriptor.cpp" />
@@ -295,7 +296,6 @@
     <ClCompile Include="SShaderProgram.cpp" />
     <ClCompile Include="SShaderPrototype.cpp" />
     <ClCompile Include="SShaderQueue.cpp" />
-    <ClCompile Include="SShaderRegisters.cpp" />
     <ClCompile Include="SShaderRootSignature.cpp" />
     <ClCompile Include="SShaderStage.cpp" />
     <ClCompile Include="SShaderGroup.cpp" />

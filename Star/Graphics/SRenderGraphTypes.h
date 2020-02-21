@@ -58,7 +58,7 @@ inline bool operator==(const Discard_&, const Discard_&) noexcept { return true;
 inline bool operator!=(const Discard_&, const Discard_&) noexcept { return false; }
 
 struct ClearColor {
-    float4 mClearColor = float4::Zero();
+    Float4 mClearColor = Float4::Zero();
     Format mClearFormat = Format::UNKNOWN;
 };
 
@@ -126,6 +126,130 @@ struct STAR_GRAPHICS_API UnorderedRenderQueue {
     std::pmr::vector<MetaID> mContents;
 };
 
+namespace Descriptor {
+
+struct ConstantBuffer_ {} static constexpr ConstantBuffer;
+struct BaseColor_ {} static constexpr BaseColor;
+struct LinearSampler_ {} static constexpr LinearSampler;
+
+using Type = std::variant<std::monostate, ConstantBuffer_, BaseColor_, LinearSampler_>;
+
+inline bool operator<(const Type& lhs, const Type& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+} // namespace Descriptor
+
+namespace Data {
+
+struct Proj_ {} static constexpr Proj;
+struct View_ {} static constexpr View;
+struct WorldView_ {} static constexpr WorldView;
+
+using Type = std::variant<std::monostate, Proj_, View_, WorldView_>;
+
+inline bool operator<(const Type& lhs, const Type& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+} // namespace Data
+
+struct ShaderDescriptor {
+    Descriptor::Type mDataType;
+    AttributeType mAttributeType;
+    uint32_t mID = 0;
+};
+
+struct STAR_GRAPHICS_API ShaderDescriptorSubrange {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ShaderDescriptorSubrange(const allocator_type& alloc);
+    ShaderDescriptorSubrange(ShaderDescriptorSubrange&& rhs, const allocator_type& alloc);
+    ShaderDescriptorSubrange(ShaderDescriptorSubrange const& rhs, const allocator_type& alloc);
+    ~ShaderDescriptorSubrange();
+
+    DescriptorSource mSource;
+    std::pmr::vector<ShaderDescriptor> mDescriptors;
+};
+
+struct STAR_GRAPHICS_API ShaderDescriptorRange {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ShaderDescriptorRange(const allocator_type& alloc);
+    ShaderDescriptorRange(ShaderDescriptorRange&& rhs, const allocator_type& alloc);
+    ShaderDescriptorRange(ShaderDescriptorRange const& rhs, const allocator_type& alloc);
+    ~ShaderDescriptorRange();
+
+    DescriptorType mType;
+    std::pmr::vector<ShaderDescriptorSubrange> mSubranges;
+    uint32_t mCapacity = 0;
+};
+
+struct STAR_GRAPHICS_API ShaderUnboundedDescriptor {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ShaderUnboundedDescriptor(const allocator_type& alloc);
+    ShaderUnboundedDescriptor(ShaderUnboundedDescriptor&& rhs, const allocator_type& alloc);
+    ShaderUnboundedDescriptor(ShaderUnboundedDescriptor const& rhs, const allocator_type& alloc);
+    ~ShaderUnboundedDescriptor();
+
+    DescriptorType mType;
+    std::pmr::string mAttribute;
+    uint32_t mCapacity = 0;
+};
+
+struct STAR_GRAPHICS_API ShaderDescriptorList {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ShaderDescriptorList(const allocator_type& alloc);
+    ShaderDescriptorList(ShaderDescriptorList&& rhs, const allocator_type& alloc);
+    ShaderDescriptorList(ShaderDescriptorList const& rhs, const allocator_type& alloc);
+    ~ShaderDescriptorList();
+
+    uint32_t mSlot = 0;
+    uint32_t mCapacity = 0;
+    std::pmr::vector<ShaderDescriptorRange> mRanges;
+    std::pmr::vector<ShaderUnboundedDescriptor> mUnboundedDescriptors;
+};
+
+struct STAR_GRAPHICS_API ShaderDescriptorCollection {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ShaderDescriptorCollection(const allocator_type& alloc);
+    ShaderDescriptorCollection(ShaderDescriptorCollection&& rhs, const allocator_type& alloc);
+    ShaderDescriptorCollection(ShaderDescriptorCollection const& rhs, const allocator_type& alloc);
+    ~ShaderDescriptorCollection();
+
+    DescriptorIndex mIndex;
+    std::pmr::vector<ShaderDescriptorList> mResourceViewLists;
+    std::pmr::vector<ShaderDescriptorList> mSamplerLists;
+};
+
+struct ShaderConstant {
+    Data::Type mDataType;
+    DescriptorSource mSource;
+    uint32_t mID = 0;
+};
+
+struct STAR_GRAPHICS_API ShaderConstantBuffer {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ShaderConstantBuffer(const allocator_type& alloc);
+    ShaderConstantBuffer(ShaderConstantBuffer&& rhs, const allocator_type& alloc);
+    ShaderConstantBuffer(ShaderConstantBuffer const& rhs, const allocator_type& alloc);
+    ~ShaderConstantBuffer();
+
+    DescriptorIndex mIndex;
+    uint32_t mSize = 0;
+    std::pmr::vector<ShaderConstant> mConstants;
+};
+
 struct STAR_GRAPHICS_API RenderSubpass {
     using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
     allocator_type get_allocator() const noexcept;
@@ -146,7 +270,8 @@ struct STAR_GRAPHICS_API RenderSubpass {
     std::pmr::vector<RenderViewTransition> mPostViewTransitions;
     std::pmr::vector<UnorderedRenderQueue> mOrderedRenderQueue;
     std::pmr::string mRootSignature;
-    ConstantBuffer mConstantBuffer;
+    std::pmr::vector<ShaderConstantBuffer> mConstantBuffers;
+    std::pmr::vector<ShaderDescriptorCollection> mDescriptors;
 };
 
 struct RenderSubpassDependency {
@@ -199,8 +324,7 @@ struct STAR_GRAPHICS_API RenderPipeline {
     std::pmr::vector<RenderPassDependency> mDependencies;
     std::pmr::vector<RESOURCE_STATES> mRTVInitialStates;
     std::pmr::vector<RESOURCE_STATES> mDSVInitialStates;
-    ConstantBuffer mConstantBuffer;
-    PmrStringMap<RenderSubpassDesc> mSubpassIndex;
+    PmrMap<std::pmr::string, RenderSubpassDesc> mSubpassIndex;
 };
 
 struct Framebuffer {
@@ -223,7 +347,7 @@ struct STAR_GRAPHICS_API RenderSolution {
     std::pmr::vector<FramebufferHandle> mDSVSources;
     std::pmr::vector<RENDER_TARGET_VIEW_DESC> mRTVs;
     std::pmr::vector<DEPTH_STENCIL_VIEW_DESC> mDSVs;
-    PmrStringMap<uint32_t> mPipelineIndex;
+    PmrMap<std::pmr::string, uint32_t> mPipelineIndex;
 };
 
 struct SwapChain {
@@ -250,8 +374,7 @@ struct STAR_GRAPHICS_API RenderSwapChain {
     uint32_t mNumReserveUAVs = 0;
     uint32_t mNumReserveDSVs = 0;
     uint32_t mNumReserveRTVs = 0;
-    ConstantBuffer mConstantBuffer;
-    PmrStringMap<uint32_t> mSolutionIndex;
+    PmrMap<std::pmr::string, uint32_t> mSolutionIndex;
 };
 
 } // namespace Render

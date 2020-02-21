@@ -36,11 +36,12 @@ public:
 
     void build(Resources& resources) const;
 
-    PmrStringMap<ShaderData> mShaders;
+    PmrMap<std::pmr::string, ShaderData> mShaders;
 };
 
 void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modules,
-    const ShaderGroups& sw, ShaderData& prototypeData, bool bCompile = true);
+    const ShaderGroups& sw, const AttributeDatabase& attributes,
+    ShaderData& prototypeData, bool bCompile = true);
 void buildShaderText(std::ostream& oss, const ShaderData& prototypeData);
 void buildShaderText2(std::ostream& oss, const ShaderData& prototype);
 

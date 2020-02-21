@@ -1309,6 +1309,7 @@ struct Table_;
 struct Constants_;
 
 using RootParameterType = std::variant<Constants_, CBV_, UAV_, SRV_, Table_, SSV_>;
+using DescriptorType = std::variant<CBV_, UAV_, SRV_, SSV_>;
 
 struct OM_;
 struct PS_;
@@ -1324,26 +1325,70 @@ using ShaderVisibilityType = std::variant<std::monostate, PS_, GS_, DS_, HS_, VS
 
 enum UpdateEnum : uint32_t;
 
+struct Dynamic_;
+struct Persistent_;
+
+using Persistency = std::variant<Dynamic_, Persistent_>;
+
 struct DescriptorIndex;
-struct Matrix_;
-struct Float4_;
-struct UInt4_;
-struct Int4_;
-struct Float2_;
-struct UInt2_;
-struct Int2_;
-struct Half4_;
-struct Float1_;
-struct UInt1_;
-struct Int1_;
-struct Half2_;
-struct Fixed4_;
-struct Half1_;
+struct EngineSource_;
+struct MaterialSource_;
 
-using DataType = std::variant<std::monostate, Matrix_, Float4_, UInt4_, Int4_, Float2_, UInt2_, Int2_, Half4_, Float1_, UInt1_, Int1_, Half2_, Fixed4_, Half1_>;
+using DescriptorSource = std::variant<EngineSource_, MaterialSource_>;
 
-struct DataID;
-struct ConstantBuffer;
+struct matrix_;
+struct double4_;
+struct double3_;
+struct double2_;
+struct double1_;
+struct float4_;
+struct float3_;
+struct float2_;
+struct float1_;
+struct half4_;
+struct half3_;
+struct half2_;
+struct half1_;
+struct uint4_;
+struct uint3_;
+struct uint2_;
+struct uint1_;
+struct int4_;
+struct int3_;
+struct int2_;
+struct int1_;
+struct fixed4_;
+struct fixed3_;
+struct fixed2_;
+struct fixed1_;
+struct InputPatch_;
+struct OutputPatch_;
+struct CBuffer_;
+struct Buffer_;
+struct ByteAddressBuffer_;
+struct StructuredBuffer_;
+struct AppendStructuredBuffer_;
+struct ConsumeStructuredBuffer_;
+struct Texture1D_;
+struct Texture1DArray_;
+struct Texture2D_;
+struct Texture2DArray_;
+struct Texture2DMS_;
+struct Texture2DMSArray_;
+struct Texture3D_;
+struct TextureCube_;
+struct TextureCubeArray_;
+struct RWBuffer_;
+struct RWByteAddressBuffer_;
+struct RWStructuredBuffer_;
+struct RWTexture1D_;
+struct RWTexture1DArray_;
+struct RWTexture2D_;
+struct RWTexture2DArray_;
+struct RWTexture3D_;
+struct SamplerState_;
+
+using AttributeType = std::variant<matrix_, float4_, uint4_, int4_, float2_, uint2_, int2_, half4_, float1_, uint1_, int1_, half2_, fixed4_, half1_, InputPatch_, OutputPatch_, CBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, SamplerState_>;
 
 } // namespace Render
 

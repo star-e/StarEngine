@@ -77,11 +77,17 @@ void intrusive_ptr_release(DX12MaterialData* p) {
                         for (size_t variantID = 0; variantID != level.mPasses.size(); ++variantID) {
                             const auto& variant = level.mPasses[variantID];
                             for (size_t passID = 0; passID != variant.mSubpasses.size(); ++passID) {
-                                const auto& pass = variant.mSubpasses[passID];
-                                if (pass.mPersistentCountSRV) {
-                                    p->mDescriptorHeap->deallocatePersistent(
-                                        pass.mPersistentCpuOffsetSRV, pass.mPersistentCountSRV);
-                                }
+                                const auto& subpass = variant.mSubpasses[passID];
+                                for (const auto& collection : subpass.mCollections) {
+                                    if (std::holds_alternative<Persistent_>(collection.mIndex.mPersistency)) {
+                                        for (const auto& list : collection.mResourceViewLists) {
+                                            p->mDescriptorHeap->deallocatePersistent(list.mCpuOffset, list.mCapacity);
+                                        }
+                                        for (const auto& list : collection.mSamplerLists) {
+                                            p->mDescriptorHeap->deallocatePersistent(list.mCpuOffset, list.mCapacity);
+                                        }
+                                    }
+                                } // descriptor collection
                             } // subpasses
                         } // passes
                     } // level
@@ -92,8 +98,8 @@ void intrusive_ptr_release(DX12MaterialData* p) {
         p->mShader.reset();
         p->mShaderData.clear();
         p->mMaterialData.reset();
-        p->mConstantBuffer.mBuffer.clear();
-        p->mConstantBuffer.mIndex.clear();
+        p->mConstantMap.mBuffer.clear();
+        p->mConstantMap.mIndex.clear();
 
         p->mDescriptorHeap = nullptr;
     }

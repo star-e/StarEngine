@@ -44,6 +44,8 @@ struct ShaderQueueData;
 struct ShaderPipelineData;
 struct ShaderSolutionData;
 struct ShaderData;
+struct ConstantDescriptor;
+struct ConstantMap;
 struct MaterialData;
 struct FullScreenTriangle_;
 

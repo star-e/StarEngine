@@ -2877,6 +2877,27 @@ inline bool operator<(const RootParameterType& lhs, const RootParameterType& rhs
     return lhs.index() < rhs.index();
 }
 
+inline bool operator==(const RootParameterType& lhs, const RootParameterType& rhs) noexcept {
+    return lhs.index() == rhs.index();
+}
+
+inline bool operator!=(const RootParameterType& lhs, const RootParameterType& rhs) noexcept {
+    return !(lhs == rhs);
+}
+using DescriptorType = std::variant<CBV_, UAV_, SRV_, SSV_>;
+
+inline bool operator<(const DescriptorType& lhs, const DescriptorType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+inline bool operator==(const DescriptorType& lhs, const DescriptorType& rhs) noexcept {
+    return lhs.index() == rhs.index();
+}
+
+inline bool operator!=(const DescriptorType& lhs, const DescriptorType& rhs) noexcept {
+    return !(lhs == rhs);
+}
+
 struct OM_ {} static constexpr OM;
 struct PS_ {} static constexpr PS;
 struct GS_ {} static constexpr GS;
@@ -2921,56 +2942,169 @@ enum UpdateEnum : uint32_t {
     UpdateCount = 4,
 };
 
+struct Dynamic_ {} static constexpr Dynamic;
+struct Persistent_ {} static constexpr Persistent;
+
+using Persistency = std::variant<Dynamic_, Persistent_>;
+
+inline bool operator<(const Persistency& lhs, const Persistency& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+inline bool operator==(const Persistency& lhs, const Persistency& rhs) noexcept {
+    return lhs.index() == rhs.index();
+}
+
+inline bool operator!=(const Persistency& lhs, const Persistency& rhs) noexcept {
+    return !(lhs == rhs);
+}
+
 struct DescriptorIndex {
     UpdateEnum mUpdate = PerInstance;
     RootParameterType mType = Table;
     ShaderVisibilityType mVisibility;
+    Persistency mPersistency;
 };
+
+inline bool operator==(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
+    return
+        std::forward_as_tuple(lhs.mUpdate, lhs.mType, lhs.mVisibility, lhs.mPersistency) ==
+        std::forward_as_tuple(rhs.mUpdate, rhs.mType, rhs.mVisibility, rhs.mPersistency);
+}
+inline bool operator!=(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
+    return !(lhs == rhs);
+}
 
 inline bool operator<(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
     return
-        std::forward_as_tuple(lhs.mUpdate, lhs.mType, lhs.mVisibility) <
-        std::forward_as_tuple(rhs.mUpdate, rhs.mType, rhs.mVisibility);
+        std::forward_as_tuple(lhs.mUpdate, lhs.mType, lhs.mVisibility, lhs.mPersistency) <
+        std::forward_as_tuple(rhs.mUpdate, rhs.mType, rhs.mVisibility, rhs.mPersistency);
 }
 
-struct Matrix_ {} static constexpr Matrix;
-struct Float4_ {} static constexpr Float4;
-struct UInt4_ {} static constexpr UInt4;
-struct Int4_ {} static constexpr Int4;
-struct Float2_ {} static constexpr Float2;
-struct UInt2_ {} static constexpr UInt2;
-struct Int2_ {} static constexpr Int2;
-struct Half4_ {} static constexpr Half4;
-struct Float1_ {} static constexpr Float1;
-struct UInt1_ {} static constexpr UInt1;
-struct Int1_ {} static constexpr Int1;
-struct Half2_ {} static constexpr Half2;
-struct Fixed4_ {} static constexpr Fixed4;
-struct Half1_ {} static constexpr Half1;
+struct EngineSource_ {} static constexpr EngineSource;
+struct MaterialSource_ {} static constexpr MaterialSource;
 
-using DataType = std::variant<std::monostate, Matrix_, Float4_, UInt4_, Int4_, Float2_, UInt2_, Int2_, Half4_, Float1_, UInt1_, Int1_, Half2_, Fixed4_, Half1_>;
+using DescriptorSource = std::variant<EngineSource_, MaterialSource_>;
 
-inline bool operator<(const DataType& lhs, const DataType& rhs) noexcept {
+inline bool operator<(const DescriptorSource& lhs, const DescriptorSource& rhs) noexcept {
     return lhs.index() < rhs.index();
 }
 
-struct DataID {
-    DataType mType;
-    uint16_t mOffset;
-};
+struct matrix_ {} static constexpr matrix;
+inline bool operator==(const matrix_&, const matrix_&) noexcept { return true; }
+inline bool operator!=(const matrix_&, const matrix_&) noexcept { return false; }
+struct double4_ {} static constexpr double4;
+inline bool operator==(const double4_&, const double4_&) noexcept { return true; }
+inline bool operator!=(const double4_&, const double4_&) noexcept { return false; }
+struct double3_ {} static constexpr double3;
+inline bool operator==(const double3_&, const double3_&) noexcept { return true; }
+inline bool operator!=(const double3_&, const double3_&) noexcept { return false; }
+struct double2_ {} static constexpr double2;
+inline bool operator==(const double2_&, const double2_&) noexcept { return true; }
+inline bool operator!=(const double2_&, const double2_&) noexcept { return false; }
+struct double1_ {} static constexpr double1;
+inline bool operator==(const double1_&, const double1_&) noexcept { return true; }
+inline bool operator!=(const double1_&, const double1_&) noexcept { return false; }
+struct float4_ {} static constexpr float4;
+inline bool operator==(const float4_&, const float4_&) noexcept { return true; }
+inline bool operator!=(const float4_&, const float4_&) noexcept { return false; }
+struct float3_ {} static constexpr float3;
+inline bool operator==(const float3_&, const float3_&) noexcept { return true; }
+inline bool operator!=(const float3_&, const float3_&) noexcept { return false; }
+struct float2_ {} static constexpr float2;
+inline bool operator==(const float2_&, const float2_&) noexcept { return true; }
+inline bool operator!=(const float2_&, const float2_&) noexcept { return false; }
+struct float1_ {} static constexpr float1;
+inline bool operator==(const float1_&, const float1_&) noexcept { return true; }
+inline bool operator!=(const float1_&, const float1_&) noexcept { return false; }
+struct half4_ {} static constexpr half4;
+inline bool operator==(const half4_&, const half4_&) noexcept { return true; }
+inline bool operator!=(const half4_&, const half4_&) noexcept { return false; }
+struct half3_ {} static constexpr half3;
+inline bool operator==(const half3_&, const half3_&) noexcept { return true; }
+inline bool operator!=(const half3_&, const half3_&) noexcept { return false; }
+struct half2_ {} static constexpr half2;
+inline bool operator==(const half2_&, const half2_&) noexcept { return true; }
+inline bool operator!=(const half2_&, const half2_&) noexcept { return false; }
+struct half1_ {} static constexpr half1;
+inline bool operator==(const half1_&, const half1_&) noexcept { return true; }
+inline bool operator!=(const half1_&, const half1_&) noexcept { return false; }
+struct uint4_ {} static constexpr uint4;
+inline bool operator==(const uint4_&, const uint4_&) noexcept { return true; }
+inline bool operator!=(const uint4_&, const uint4_&) noexcept { return false; }
+struct uint3_ {} static constexpr uint3;
+inline bool operator==(const uint3_&, const uint3_&) noexcept { return true; }
+inline bool operator!=(const uint3_&, const uint3_&) noexcept { return false; }
+struct uint2_ {} static constexpr uint2;
+inline bool operator==(const uint2_&, const uint2_&) noexcept { return true; }
+inline bool operator!=(const uint2_&, const uint2_&) noexcept { return false; }
+struct uint1_ {} static constexpr uint1;
+inline bool operator==(const uint1_&, const uint1_&) noexcept { return true; }
+inline bool operator!=(const uint1_&, const uint1_&) noexcept { return false; }
+struct int4_ {} static constexpr int4;
+inline bool operator==(const int4_&, const int4_&) noexcept { return true; }
+inline bool operator!=(const int4_&, const int4_&) noexcept { return false; }
+struct int3_ {} static constexpr int3;
+inline bool operator==(const int3_&, const int3_&) noexcept { return true; }
+inline bool operator!=(const int3_&, const int3_&) noexcept { return false; }
+struct int2_ {} static constexpr int2;
+inline bool operator==(const int2_&, const int2_&) noexcept { return true; }
+inline bool operator!=(const int2_&, const int2_&) noexcept { return false; }
+struct int1_ {} static constexpr int1;
+inline bool operator==(const int1_&, const int1_&) noexcept { return true; }
+inline bool operator!=(const int1_&, const int1_&) noexcept { return false; }
+struct fixed4_ {} static constexpr fixed4;
+inline bool operator==(const fixed4_&, const fixed4_&) noexcept { return true; }
+inline bool operator!=(const fixed4_&, const fixed4_&) noexcept { return false; }
+struct fixed3_ {} static constexpr fixed3;
+inline bool operator==(const fixed3_&, const fixed3_&) noexcept { return true; }
+inline bool operator!=(const fixed3_&, const fixed3_&) noexcept { return false; }
+struct fixed2_ {} static constexpr fixed2;
+inline bool operator==(const fixed2_&, const fixed2_&) noexcept { return true; }
+inline bool operator!=(const fixed2_&, const fixed2_&) noexcept { return false; }
+struct fixed1_ {} static constexpr fixed1;
+inline bool operator==(const fixed1_&, const fixed1_&) noexcept { return true; }
+inline bool operator!=(const fixed1_&, const fixed1_&) noexcept { return false; }
+struct InputPatch_ {} static constexpr InputPatch;
+struct OutputPatch_ {} static constexpr OutputPatch;
+struct CBuffer_ {} static constexpr CBuffer;
+struct Buffer_ {} static constexpr Buffer;
+struct ByteAddressBuffer_ {} static constexpr ByteAddressBuffer;
+struct StructuredBuffer_ {} static constexpr StructuredBuffer;
+struct AppendStructuredBuffer_ {} static constexpr AppendStructuredBuffer;
+struct ConsumeStructuredBuffer_ {} static constexpr ConsumeStructuredBuffer;
+struct Texture1D_ {} static constexpr Texture1D;
+struct Texture1DArray_ {} static constexpr Texture1DArray;
+struct Texture2D_ {} static constexpr Texture2D;
+struct Texture2DArray_ {} static constexpr Texture2DArray;
+struct Texture2DMS_ {} static constexpr Texture2DMS;
+struct Texture2DMSArray_ {} static constexpr Texture2DMSArray;
+struct Texture3D_ {} static constexpr Texture3D;
+struct TextureCube_ {} static constexpr TextureCube;
+struct TextureCubeArray_ {} static constexpr TextureCubeArray;
+struct RWBuffer_ {} static constexpr RWBuffer;
+struct RWByteAddressBuffer_ {} static constexpr RWByteAddressBuffer;
+struct RWStructuredBuffer_ {} static constexpr RWStructuredBuffer;
+struct RWTexture1D_ {} static constexpr RWTexture1D;
+struct RWTexture1DArray_ {} static constexpr RWTexture1DArray;
+struct RWTexture2D_ {} static constexpr RWTexture2D;
+struct RWTexture2DArray_ {} static constexpr RWTexture2DArray;
+struct RWTexture3D_ {} static constexpr RWTexture3D;
+struct SamplerState_ {} static constexpr SamplerState;
 
-struct STAR_GRAPHICS_API ConstantBuffer {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
-    allocator_type get_allocator() const noexcept;
+using AttributeType = std::variant<matrix_, float4_, uint4_, int4_, float2_, uint2_, int2_, half4_, float1_, uint1_, int1_, half2_, fixed4_, half1_, InputPatch_, OutputPatch_, CBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, SamplerState_>;
 
-    ConstantBuffer(const allocator_type& alloc);
-    ConstantBuffer(ConstantBuffer&& rhs, const allocator_type& alloc);
-    ConstantBuffer(ConstantBuffer const& rhs, const allocator_type& alloc);
-    ~ConstantBuffer();
+inline bool operator<(const AttributeType& lhs, const AttributeType& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
 
-    std::pmr::vector<char> mBuffer;
-    PmrStringMap<DataID> mIndex;
-};
+inline bool operator==(const AttributeType& lhs, const AttributeType& rhs) noexcept {
+    return lhs.index() == rhs.index();
+}
+
+inline bool operator!=(const AttributeType& lhs, const AttributeType& rhs) noexcept {
+    return !(lhs == rhs);
+}
 
 } // namespace Render
 

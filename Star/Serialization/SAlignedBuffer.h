@@ -54,7 +54,7 @@ template<class Archive, size_t NAlignment>
 void load(Archive& ar, Star::AlignedBuffer<NAlignment>& v, const unsigned int version) {
     size_t sz;
     ar >> sz;
-    v.resize(sz);
+    v.resize_aligned(sz);
     ar >> boost::serialization::make_array(v.data(), sz);
 }
 

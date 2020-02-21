@@ -77,21 +77,24 @@ DX12ShaderSubpassData::allocator_type DX12ShaderSubpassData::get_allocator() con
 DX12ShaderSubpassData::DX12ShaderSubpassData(const allocator_type& alloc)
     : mStates(alloc)
     , mVertexLayoutIndex(alloc)
-    , mTextures(alloc)
+    , mConstantBuffers(alloc)
+    , mDescriptors(alloc)
 {}
 
 DX12ShaderSubpassData::DX12ShaderSubpassData(DX12ShaderSubpassData const& rhs, const allocator_type& alloc)
     : mProgram(rhs.mProgram)
     , mStates(rhs.mStates, alloc)
     , mVertexLayoutIndex(rhs.mVertexLayoutIndex, alloc)
-    , mTextures(rhs.mTextures, alloc)
+    , mConstantBuffers(rhs.mConstantBuffers, alloc)
+    , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
 DX12ShaderSubpassData::DX12ShaderSubpassData(DX12ShaderSubpassData&& rhs, const allocator_type& alloc)
     : mProgram(std::move(rhs.mProgram))
     , mStates(std::move(rhs.mStates), alloc)
     , mVertexLayoutIndex(std::move(rhs.mVertexLayoutIndex), alloc)
-    , mTextures(std::move(rhs.mTextures), alloc)
+    , mConstantBuffers(std::move(rhs.mConstantBuffers), alloc)
+    , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
 DX12ShaderSubpassData::~DX12ShaderSubpassData() = default;
@@ -228,6 +231,76 @@ DX12ShaderData::DX12ShaderData(DX12ShaderData&& rhs, const allocator_type& alloc
 
 DX12ShaderData::~DX12ShaderData() = default;
 
+DX12MaterialDescriptorList::allocator_type DX12MaterialDescriptorList::get_allocator() const noexcept {
+    return allocator_type(mRanges.get_allocator().resource());
+}
+
+DX12MaterialDescriptorList::DX12MaterialDescriptorList(const allocator_type& alloc)
+    : mRanges(alloc)
+    , mUnboundedDescriptors(alloc)
+{}
+
+DX12MaterialDescriptorList::DX12MaterialDescriptorList(DX12MaterialDescriptorList const& rhs, const allocator_type& alloc)
+    : mSlot(rhs.mSlot)
+    , mCapacity(rhs.mCapacity)
+    , mGpuOffset(rhs.mGpuOffset)
+    , mCpuOffset(rhs.mCpuOffset)
+    , mRanges(rhs.mRanges, alloc)
+    , mUnboundedDescriptors(rhs.mUnboundedDescriptors, alloc)
+{}
+
+DX12MaterialDescriptorList::DX12MaterialDescriptorList(DX12MaterialDescriptorList&& rhs, const allocator_type& alloc)
+    : mSlot(std::move(rhs.mSlot))
+    , mCapacity(std::move(rhs.mCapacity))
+    , mGpuOffset(std::move(rhs.mGpuOffset))
+    , mCpuOffset(std::move(rhs.mCpuOffset))
+    , mRanges(std::move(rhs.mRanges), alloc)
+    , mUnboundedDescriptors(std::move(rhs.mUnboundedDescriptors), alloc)
+{}
+
+DX12MaterialDescriptorList::~DX12MaterialDescriptorList() = default;
+
+DX12MaterialDescriptorCollection::allocator_type DX12MaterialDescriptorCollection::get_allocator() const noexcept {
+    return allocator_type(mResourceViewLists.get_allocator().resource());
+}
+
+DX12MaterialDescriptorCollection::DX12MaterialDescriptorCollection(const allocator_type& alloc)
+    : mResourceViewLists(alloc)
+    , mSamplerLists(alloc)
+{}
+
+DX12MaterialDescriptorCollection::DX12MaterialDescriptorCollection(DX12MaterialDescriptorCollection const& rhs, const allocator_type& alloc)
+    : mIndex(rhs.mIndex)
+    , mResourceViewLists(rhs.mResourceViewLists, alloc)
+    , mSamplerLists(rhs.mSamplerLists, alloc)
+{}
+
+DX12MaterialDescriptorCollection::DX12MaterialDescriptorCollection(DX12MaterialDescriptorCollection&& rhs, const allocator_type& alloc)
+    : mIndex(std::move(rhs.mIndex))
+    , mResourceViewLists(std::move(rhs.mResourceViewLists), alloc)
+    , mSamplerLists(std::move(rhs.mSamplerLists), alloc)
+{}
+
+DX12MaterialDescriptorCollection::~DX12MaterialDescriptorCollection() = default;
+
+DX12MaterialSubpassData::allocator_type DX12MaterialSubpassData::get_allocator() const noexcept {
+    return allocator_type(mCollections.get_allocator().resource());
+}
+
+DX12MaterialSubpassData::DX12MaterialSubpassData(const allocator_type& alloc)
+    : mCollections(alloc)
+{}
+
+DX12MaterialSubpassData::DX12MaterialSubpassData(DX12MaterialSubpassData const& rhs, const allocator_type& alloc)
+    : mCollections(rhs.mCollections, alloc)
+{}
+
+DX12MaterialSubpassData::DX12MaterialSubpassData(DX12MaterialSubpassData&& rhs, const allocator_type& alloc)
+    : mCollections(std::move(rhs.mCollections), alloc)
+{}
+
+DX12MaterialSubpassData::~DX12MaterialSubpassData() = default;
+
 DX12MaterialPassData::allocator_type DX12MaterialPassData::get_allocator() const noexcept {
     return allocator_type(mSubpasses.get_allocator().resource());
 }
@@ -325,14 +398,14 @@ DX12MaterialData::allocator_type DX12MaterialData::get_allocator() const noexcep
 DX12MaterialData::DX12MaterialData(const allocator_type& alloc)
     : mShaderData(alloc)
     , mTextures(alloc)
-    , mConstantBuffer(alloc)
+    , mConstantMap(alloc)
 {}
 
 DX12MaterialData::DX12MaterialData(MetaID metaID, const allocator_type& alloc)
     : mMetaID(std::move(metaID))
     , mShaderData(alloc)
     , mTextures(alloc)
-    , mConstantBuffer(alloc)
+    , mConstantMap(alloc)
 {}
 
 DX12MaterialData::DX12MaterialData(DX12MaterialData const& rhs, const allocator_type& alloc)
@@ -341,7 +414,7 @@ DX12MaterialData::DX12MaterialData(DX12MaterialData const& rhs, const allocator_
     , mDescriptorHeap(rhs.mDescriptorHeap)
     , mShaderData(rhs.mShaderData, alloc)
     , mTextures(rhs.mTextures, alloc)
-    , mConstantBuffer(rhs.mConstantBuffer, alloc)
+    , mConstantMap(rhs.mConstantMap, alloc)
     , mMaterialData(rhs.mMaterialData)
     , mRefCount(rhs.mRefCount)
 {}
@@ -352,7 +425,7 @@ DX12MaterialData::DX12MaterialData(DX12MaterialData&& rhs, const allocator_type&
     , mDescriptorHeap(std::move(rhs.mDescriptorHeap))
     , mShaderData(std::move(rhs.mShaderData), alloc)
     , mTextures(std::move(rhs.mTextures), alloc)
-    , mConstantBuffer(std::move(rhs.mConstantBuffer), alloc)
+    , mConstantMap(std::move(rhs.mConstantMap), alloc)
     , mMaterialData(std::move(rhs.mMaterialData))
     , mRefCount(std::move(rhs.mRefCount))
 {}
@@ -360,11 +433,11 @@ DX12MaterialData::DX12MaterialData(DX12MaterialData&& rhs, const allocator_type&
 DX12MaterialData::~DX12MaterialData() = default;
 
 DX12DrawCallData::allocator_type DX12DrawCallData::get_allocator() const noexcept {
-    return allocator_type(mConstantBuffer.get_allocator().resource());
+    return allocator_type(mConstantMap.get_allocator().resource());
 }
 
 DX12DrawCallData::DX12DrawCallData(const allocator_type& alloc)
-    : mConstantBuffer(alloc)
+    : mConstantMap(alloc)
 {}
 
 DX12DrawCallData::DX12DrawCallData(DX12DrawCallData const& rhs, const allocator_type& alloc)
@@ -373,7 +446,7 @@ DX12DrawCallData::DX12DrawCallData(DX12DrawCallData const& rhs, const allocator_
     , mMaterial(rhs.mMaterial)
     , mInstanceSize(rhs.mInstanceSize)
     , mInstanceCount(rhs.mInstanceCount)
-    , mConstantBuffer(rhs.mConstantBuffer, alloc)
+    , mConstantMap(rhs.mConstantMap, alloc)
 {}
 
 DX12DrawCallData::DX12DrawCallData(DX12DrawCallData&& rhs, const allocator_type& alloc)
@@ -382,7 +455,7 @@ DX12DrawCallData::DX12DrawCallData(DX12DrawCallData&& rhs, const allocator_type&
     , mMaterial(std::move(rhs.mMaterial))
     , mInstanceSize(std::move(rhs.mInstanceSize))
     , mInstanceCount(std::move(rhs.mInstanceCount))
-    , mConstantBuffer(std::move(rhs.mConstantBuffer), alloc)
+    , mConstantMap(std::move(rhs.mConstantMap), alloc)
 {}
 
 DX12DrawCallData::~DX12DrawCallData() = default;
@@ -502,6 +575,8 @@ DX12RenderSubpass::DX12RenderSubpass(const allocator_type& alloc)
     , mUAVs(alloc)
     , mPostViewTransitions(alloc)
     , mOrderedRenderQueue(alloc)
+    , mConstantBuffers(alloc)
+    , mDescriptors(alloc)
 {}
 
 DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass const& rhs, const allocator_type& alloc)
@@ -516,6 +591,8 @@ DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass const& rhs, const allocat
     , mPostViewTransitions(rhs.mPostViewTransitions, alloc)
     , mOrderedRenderQueue(rhs.mOrderedRenderQueue, alloc)
     , mRootSignature(rhs.mRootSignature)
+    , mConstantBuffers(rhs.mConstantBuffers, alloc)
+    , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
 DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass&& rhs, const allocator_type& alloc)
@@ -530,6 +607,8 @@ DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass&& rhs, const allocator_ty
     , mPostViewTransitions(std::move(rhs.mPostViewTransitions), alloc)
     , mOrderedRenderQueue(std::move(rhs.mOrderedRenderQueue), alloc)
     , mRootSignature(std::move(rhs.mRootSignature))
+    , mConstantBuffers(std::move(rhs.mConstantBuffers), alloc)
+    , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
 DX12RenderSubpass::~DX12RenderSubpass() = default;

@@ -746,35 +746,19 @@ using UniformScalingh = Eigen::UniformScaling<half>;
 
 //---------------------------------------------
 // Alias 
-using double4 = Vector4d;
-using double3 = Vector3d;
-using double2 = Vector2d;
-using double1 = Vector1d;
+using Double4 = Vector4d;
+using Double3 = Vector3d;
+using Double2 = Vector2d;
 
-using float4 = Vector4f;
-using float3 = Vector3f;
-using float2 = Vector2f;
-using float1 = Vector1f;
+using Float4 = Vector4f;
+using Float3 = Vector3f;
+using Float2 = Vector2f;
 
-using half4 = Vector4h;
-using half3 = Vector3h;
-using half2 = Vector2h;
-using half1 = Vector1h;
+using Half4 = Vector4h;
+using Half3 = Vector3h;
+using Half2 = Vector2h;
 
-using uint4 = Vector4u;
-using uint3 = Vector3u;
-using uint2 = Vector2u;
-using uint1 = Vector1u;
 
-using int4 = Vector4i;
-using int3 = Vector3i;
-using int2 = Vector2i;
-using int1 = Vector1i;
-
-using fixed4 = Unorm4;
-using fixed3 = Unorm3;
-using fixed2 = Unorm2;
-using fixed1 = Unorm1;
 
 //---------------------------------------------
 // Special types
@@ -782,10 +766,6 @@ using AlignedVector3d = Eigen::AlignedVector3<double>;
 using AlignedVector3f = Eigen::AlignedVector3<float>;
 
 using Bool = int32_t;
-
-using matrix = Matrix4f;
-using fixed = uint8_t;
-using uint = uint32_t;
 
 #define STAR_ALIGNED_OPERATOR_NEW EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

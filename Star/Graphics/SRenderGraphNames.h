@@ -38,6 +38,30 @@ inline const char* getName(const DescriptorHandle& v) noexcept { return "Descrip
 inline const char* getName(const Attachment& v) noexcept { return "Attachment"; }
 inline const char* getName(const RenderViewTransition& v) noexcept { return "RenderViewTransition"; }
 inline const char* getName(const UnorderedRenderQueue& v) noexcept { return "UnorderedRenderQueue"; }
+
+namespace Descriptor {
+
+inline const char* getName(const ConstantBuffer_& v) noexcept { return "ConstantBuffer"; }
+inline const char* getName(const BaseColor_& v) noexcept { return "BaseColor"; }
+inline const char* getName(const LinearSampler_& v) noexcept { return "LinearSampler"; }
+
+} // namespace Descriptor
+
+namespace Data {
+
+inline const char* getName(const Proj_& v) noexcept { return "Proj"; }
+inline const char* getName(const View_& v) noexcept { return "View"; }
+inline const char* getName(const WorldView_& v) noexcept { return "WorldView"; }
+
+} // namespace Data
+inline const char* getName(const ShaderDescriptor& v) noexcept { return "ShaderDescriptor"; }
+inline const char* getName(const ShaderDescriptorSubrange& v) noexcept { return "ShaderDescriptorSubrange"; }
+inline const char* getName(const ShaderDescriptorRange& v) noexcept { return "ShaderDescriptorRange"; }
+inline const char* getName(const ShaderUnboundedDescriptor& v) noexcept { return "ShaderUnboundedDescriptor"; }
+inline const char* getName(const ShaderDescriptorList& v) noexcept { return "ShaderDescriptorList"; }
+inline const char* getName(const ShaderDescriptorCollection& v) noexcept { return "ShaderDescriptorCollection"; }
+inline const char* getName(const ShaderConstant& v) noexcept { return "ShaderConstant"; }
+inline const char* getName(const ShaderConstantBuffer& v) noexcept { return "ShaderConstantBuffer"; }
 inline const char* getName(const RenderSubpass& v) noexcept { return "RenderSubpass"; }
 inline const char* getName(const RenderSubpassDependency& v) noexcept { return "RenderSubpassDependency"; }
 inline const char* getName(const RenderPass& v) noexcept { return "RenderPass"; }

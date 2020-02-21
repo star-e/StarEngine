@@ -23,9 +23,15 @@ namespace Star::Graphics::Render::Shader {
 const char* getName(const AttributeType& attr) noexcept;
 const char* getHLSLName(const AttributeType& attr) noexcept;
 
+void compileShaderAttribute(ShaderAttribute& attr);
+bool isConstant(const ShaderAttribute& attr);
+DescriptorIndex getDescriptorIndex(const AttributeDescriptor& d, ShaderVisibilityType vis);
+
+uint32_t getDescriptorCapacity(const ShaderAttribute& attr);
+uint32_t getDescriptorCapacity(const DescriptorRange& list);
+
 RootParameterType getRootParameterType(const ShaderAttribute& attr);
-DescriptorRangeType getDescriptorType(const ShaderAttribute& attr);
-Descriptor getDescriptor(const ShaderAttribute& attr, uint32_t space);
+DescriptorType getDescriptorType(const ShaderAttribute& attr);
 TextureView getTextureView(const ShaderAttribute& attr);
 
 void validate(const ShaderAttribute& attr);

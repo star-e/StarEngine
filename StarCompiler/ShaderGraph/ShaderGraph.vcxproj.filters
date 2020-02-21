@@ -11,9 +11,6 @@
     <ClInclude Include="SShaderDescriptor.h">
       <Filter>3.ShaderBinding</Filter>
     </ClInclude>
-    <ClInclude Include="SShaderRegisters.h">
-      <Filter>3.ShaderBinding</Filter>
-    </ClInclude>
     <ClInclude Include="SShaderPass.h">
       <Filter>2.ShaderPrototype</Filter>
     </ClInclude>
@@ -65,7 +62,6 @@
     <ClInclude Include="SShaderQueue.h">
       <Filter>2.ShaderPrototype</Filter>
     </ClInclude>
-    <ClInclude Include="SShaderDSL.h" />
     <ClInclude Include="SShaderState.h">
       <Filter>1.Program</Filter>
     </ClInclude>
@@ -78,6 +74,12 @@
     <ClInclude Include="SShaderModules.h">
       <Filter>1.Program</Filter>
     </ClInclude>
+    <ClInclude Include="SShaderDescriptorDatabase.h">
+      <Filter>3.ShaderBinding</Filter>
+    </ClInclude>
+    <ClInclude Include="SShaderDSL.h">
+      <Filter>2.ShaderPrototype</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -85,9 +87,6 @@
       <Filter>3.ShaderBinding</Filter>
     </ClCompile>
     <ClCompile Include="SShaderGroup.cpp">
-      <Filter>3.ShaderBinding</Filter>
-    </ClCompile>
-    <ClCompile Include="SShaderRegisters.cpp">
       <Filter>3.ShaderBinding</Filter>
     </ClCompile>
     <ClCompile Include="SShaderDescriptor.cpp">
@@ -143,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="SShaderModules.cpp">
       <Filter>1.Program</Filter>
+    </ClCompile>
+    <ClCompile Include="SShaderDescriptorDatabase.cpp">
+      <Filter>3.ShaderBinding</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

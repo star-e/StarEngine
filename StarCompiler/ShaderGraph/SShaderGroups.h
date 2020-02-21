@@ -32,6 +32,7 @@ public:
     void bindProgram(const ShaderProgram& program, std::string_view shaderName,
         std::string_view bundleName, std::string_view pipelineName, std::string_view passName);
 
+    void collectAttributes(const ShaderModules& modules, AttributeDatabase& database) const;
     void buildRootSignatures(const ShaderModules& modules, UpdateEnum frequency);
 
     Map<std::string, Map<std::string, PassGroup>> mSolutions;

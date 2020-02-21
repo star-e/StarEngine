@@ -143,7 +143,7 @@ void prepareTextureForCompression(std::istream& is, uint32_t width, uint32_t hei
     } else {
         bufferSize = mip_size(width, height, BlockX, BlockY, bpe);
     }
-    buffer.resize(bufferSize);
+    buffer.resize_aligned(bufferSize);
     size_t rowAlignment = boost::alignment::align_up(width, BlockX) * sizeof(SrcPixel);
     Expects(rowAlignment % AlignX == 0);
 
@@ -198,12 +198,12 @@ void loadImage(std::istream& is, std::pmr::memory_resource* mr,
         auto sz = getTextureSize(info.mFormat, width, height);
         auto sz1 = texture_size(width, height, blockX, blockY, dstBPE);
         Expects(sz == sz1);
-        tex.mBuffer.resize(sz);
+        tex.mBuffer.resize_aligned(sz);
         tex.mDesc.mMipLevels = mipCount;
     } else {
         auto sz = getMipSize(info.mFormat, width, height);
         auto sz1 = mip_size(width, height, blockX, blockY, dstBPE);
-        tex.mBuffer.resize(sz);
+        tex.mBuffer.resize_aligned(sz);
     }
 
     size_t srcOffset = 0;
@@ -367,7 +367,7 @@ void loadDDS(std::istream& is, std::pmr::memory_resource* mr, Graphics::Render::
 
     auto uploadSize = Graphics::Render::getTextureUploadSize(desc.mFormat,
         gsl::narrow_cast<uint32_t>(desc.mWidth), gsl::narrow_cast<uint32_t>(desc.mHeight));
-    tex.mBuffer.resize(uploadSize);
+    tex.mBuffer.resize_aligned(uploadSize);
     
     auto width = gsl::narrow_cast<uint32_t>(desc.mWidth);
     auto height = gsl::narrow_cast<uint32_t>(desc.mHeight);

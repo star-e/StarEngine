@@ -38,6 +38,8 @@ public:
     void buildDescriptors(const AttributeMap& attrs, RootSignature& rsg) const;
     bool hasIA() const;
 
+    void collectAttributes(const AttributeMap& attrs, AttributeDatabase& database) const;
+
     ShaderProgram& operator<<(std::string_view content) {
         mInclude.append(content);
         return *this;

@@ -118,7 +118,7 @@ inline bool operator<(const ShaderStruct&lhs, const ShaderStruct&rhs) noexcept {
         std::forward_as_tuple(rhs.mName);
 }
 
-using ValueModel = std::variant<std::monostate, float4, float3, float2, float1, half4, half3, half2, half1, fixed4, fixed3, fixed2, fixed1, uint4, uint3, uint2, uint1, int4, int3, int2, int1, ShaderStruct>;
+using ValueModel = std::variant<std::monostate, float4_, float3_, float2_, float1_, half4_, half3_, half2_, half1_, fixed4_, fixed3_, fixed2_, fixed1_, uint4_, uint3_, uint2_, uint1_, int4_, int3_, int2_, int1_, ShaderStruct>;
 
 inline bool operator<(const ValueModel& lhs, const ValueModel& rhs) noexcept {
     return lhs.index() < rhs.index();
@@ -157,142 +157,17 @@ struct ShaderValue {
     ValueBuilderFlags mBuilderFlags = DefaultValue;
 };
 
-struct InputPatch_ {} static constexpr InputPatch;
-inline bool operator==(const InputPatch_&, const InputPatch_&) noexcept { return true; }
-inline bool operator!=(const InputPatch_&, const InputPatch_&) noexcept { return false; }
-struct OutputPatch_ {} static constexpr OutputPatch;
-inline bool operator==(const OutputPatch_&, const OutputPatch_&) noexcept { return true; }
-inline bool operator!=(const OutputPatch_&, const OutputPatch_&) noexcept { return false; }
-struct ConstantBuffer_ {} static constexpr ConstantBuffer;
-inline bool operator<(const ConstantBuffer_&, const ConstantBuffer_&) noexcept { return false; }
-struct Buffer_ {} static constexpr Buffer;
-inline bool operator==(const Buffer_&, const Buffer_&) noexcept { return true; }
-inline bool operator!=(const Buffer_&, const Buffer_&) noexcept { return false; }
-inline bool operator<(const Buffer_&, const Buffer_&) noexcept { return false; }
-struct ByteAddressBuffer_ {} static constexpr ByteAddressBuffer;
-inline bool operator==(const ByteAddressBuffer_&, const ByteAddressBuffer_&) noexcept { return true; }
-inline bool operator!=(const ByteAddressBuffer_&, const ByteAddressBuffer_&) noexcept { return false; }
-inline bool operator<(const ByteAddressBuffer_&, const ByteAddressBuffer_&) noexcept { return false; }
-struct StructuredBuffer_ {} static constexpr StructuredBuffer;
-inline bool operator==(const StructuredBuffer_&, const StructuredBuffer_&) noexcept { return true; }
-inline bool operator!=(const StructuredBuffer_&, const StructuredBuffer_&) noexcept { return false; }
-inline bool operator<(const StructuredBuffer_&, const StructuredBuffer_&) noexcept { return false; }
-struct AppendStructuredBuffer_ {} static constexpr AppendStructuredBuffer;
-inline bool operator==(const AppendStructuredBuffer_&, const AppendStructuredBuffer_&) noexcept { return true; }
-inline bool operator!=(const AppendStructuredBuffer_&, const AppendStructuredBuffer_&) noexcept { return false; }
-inline bool operator<(const AppendStructuredBuffer_&, const AppendStructuredBuffer_&) noexcept { return false; }
-struct ConsumeStructuredBuffer_ {} static constexpr ConsumeStructuredBuffer;
-inline bool operator==(const ConsumeStructuredBuffer_&, const ConsumeStructuredBuffer_&) noexcept { return true; }
-inline bool operator!=(const ConsumeStructuredBuffer_&, const ConsumeStructuredBuffer_&) noexcept { return false; }
-inline bool operator<(const ConsumeStructuredBuffer_&, const ConsumeStructuredBuffer_&) noexcept { return false; }
-struct Texture1D_ {} static constexpr Texture1D;
-inline bool operator==(const Texture1D_&, const Texture1D_&) noexcept { return true; }
-inline bool operator!=(const Texture1D_&, const Texture1D_&) noexcept { return false; }
-inline bool operator<(const Texture1D_&, const Texture1D_&) noexcept { return false; }
-struct Texture1DArray_ {} static constexpr Texture1DArray;
-inline bool operator==(const Texture1DArray_&, const Texture1DArray_&) noexcept { return true; }
-inline bool operator!=(const Texture1DArray_&, const Texture1DArray_&) noexcept { return false; }
-inline bool operator<(const Texture1DArray_&, const Texture1DArray_&) noexcept { return false; }
-struct Texture2D_ {} static constexpr Texture2D;
-inline bool operator==(const Texture2D_&, const Texture2D_&) noexcept { return true; }
-inline bool operator!=(const Texture2D_&, const Texture2D_&) noexcept { return false; }
-inline bool operator<(const Texture2D_&, const Texture2D_&) noexcept { return false; }
-struct Texture2DArray_ {} static constexpr Texture2DArray;
-inline bool operator==(const Texture2DArray_&, const Texture2DArray_&) noexcept { return true; }
-inline bool operator!=(const Texture2DArray_&, const Texture2DArray_&) noexcept { return false; }
-inline bool operator<(const Texture2DArray_&, const Texture2DArray_&) noexcept { return false; }
-struct Texture2DMS_ {} static constexpr Texture2DMS;
-inline bool operator==(const Texture2DMS_&, const Texture2DMS_&) noexcept { return true; }
-inline bool operator!=(const Texture2DMS_&, const Texture2DMS_&) noexcept { return false; }
-inline bool operator<(const Texture2DMS_&, const Texture2DMS_&) noexcept { return false; }
-struct Texture2DMSArray_ {} static constexpr Texture2DMSArray;
-inline bool operator==(const Texture2DMSArray_&, const Texture2DMSArray_&) noexcept { return true; }
-inline bool operator!=(const Texture2DMSArray_&, const Texture2DMSArray_&) noexcept { return false; }
-inline bool operator<(const Texture2DMSArray_&, const Texture2DMSArray_&) noexcept { return false; }
-struct Texture3D_ {} static constexpr Texture3D;
-inline bool operator==(const Texture3D_&, const Texture3D_&) noexcept { return true; }
-inline bool operator!=(const Texture3D_&, const Texture3D_&) noexcept { return false; }
-inline bool operator<(const Texture3D_&, const Texture3D_&) noexcept { return false; }
-struct TextureCube_ {} static constexpr TextureCube;
-inline bool operator==(const TextureCube_&, const TextureCube_&) noexcept { return true; }
-inline bool operator!=(const TextureCube_&, const TextureCube_&) noexcept { return false; }
-inline bool operator<(const TextureCube_&, const TextureCube_&) noexcept { return false; }
-struct TextureCubeArray_ {} static constexpr TextureCubeArray;
-inline bool operator==(const TextureCubeArray_&, const TextureCubeArray_&) noexcept { return true; }
-inline bool operator!=(const TextureCubeArray_&, const TextureCubeArray_&) noexcept { return false; }
-inline bool operator<(const TextureCubeArray_&, const TextureCubeArray_&) noexcept { return false; }
-struct RWBuffer_ {} static constexpr RWBuffer;
-inline bool operator==(const RWBuffer_&, const RWBuffer_&) noexcept { return true; }
-inline bool operator!=(const RWBuffer_&, const RWBuffer_&) noexcept { return false; }
-inline bool operator<(const RWBuffer_&, const RWBuffer_&) noexcept { return false; }
-struct RWByteAddressBuffer_ {} static constexpr RWByteAddressBuffer;
-inline bool operator==(const RWByteAddressBuffer_&, const RWByteAddressBuffer_&) noexcept { return true; }
-inline bool operator!=(const RWByteAddressBuffer_&, const RWByteAddressBuffer_&) noexcept { return false; }
-inline bool operator<(const RWByteAddressBuffer_&, const RWByteAddressBuffer_&) noexcept { return false; }
-struct RWStructuredBuffer_ {} static constexpr RWStructuredBuffer;
-inline bool operator==(const RWStructuredBuffer_&, const RWStructuredBuffer_&) noexcept { return true; }
-inline bool operator!=(const RWStructuredBuffer_&, const RWStructuredBuffer_&) noexcept { return false; }
-inline bool operator<(const RWStructuredBuffer_&, const RWStructuredBuffer_&) noexcept { return false; }
-struct RWTexture1D_ {} static constexpr RWTexture1D;
-inline bool operator==(const RWTexture1D_&, const RWTexture1D_&) noexcept { return true; }
-inline bool operator!=(const RWTexture1D_&, const RWTexture1D_&) noexcept { return false; }
-inline bool operator<(const RWTexture1D_&, const RWTexture1D_&) noexcept { return false; }
-struct RWTexture1DArray_ {} static constexpr RWTexture1DArray;
-inline bool operator==(const RWTexture1DArray_&, const RWTexture1DArray_&) noexcept { return true; }
-inline bool operator!=(const RWTexture1DArray_&, const RWTexture1DArray_&) noexcept { return false; }
-inline bool operator<(const RWTexture1DArray_&, const RWTexture1DArray_&) noexcept { return false; }
-struct RWTexture2D_ {} static constexpr RWTexture2D;
-inline bool operator==(const RWTexture2D_&, const RWTexture2D_&) noexcept { return true; }
-inline bool operator!=(const RWTexture2D_&, const RWTexture2D_&) noexcept { return false; }
-inline bool operator<(const RWTexture2D_&, const RWTexture2D_&) noexcept { return false; }
-struct RWTexture2DArray_ {} static constexpr RWTexture2DArray;
-inline bool operator==(const RWTexture2DArray_&, const RWTexture2DArray_&) noexcept { return true; }
-inline bool operator!=(const RWTexture2DArray_&, const RWTexture2DArray_&) noexcept { return false; }
-inline bool operator<(const RWTexture2DArray_&, const RWTexture2DArray_&) noexcept { return false; }
-struct RWTexture3D_ {} static constexpr RWTexture3D;
-inline bool operator==(const RWTexture3D_&, const RWTexture3D_&) noexcept { return true; }
-inline bool operator!=(const RWTexture3D_&, const RWTexture3D_&) noexcept { return false; }
-inline bool operator<(const RWTexture3D_&, const RWTexture3D_&) noexcept { return false; }
-struct SamplerState_ {} static constexpr SamplerState;
-inline bool operator==(const SamplerState_&, const SamplerState_&) noexcept { return true; }
-inline bool operator!=(const SamplerState_&, const SamplerState_&) noexcept { return false; }
-inline bool operator<(const SamplerState_&, const SamplerState_&) noexcept { return false; }
-
 struct FloatRange {
     float mValue = 0.0f;
     float mMin = 0.0f;
     float mMax = 1.0f;
 };
 
-inline bool operator==(const FloatRange&lhs, const FloatRange&rhs) noexcept {
-    return
-        std::forward_as_tuple(lhs.mValue, lhs.mMin, lhs.mMax) ==
-        std::forward_as_tuple(rhs.mValue, rhs.mMin, rhs.mMax);
-}
-inline bool operator!=(const FloatRange&lhs, const FloatRange&rhs) noexcept {
-    return !(lhs == rhs);
-}
-
 struct HalfRange {
     half mValue = half(0.0f);
     half mMin = half(0.0f);
     half mMax = half(1.0f);
 };
-
-inline bool operator==(const HalfRange&lhs, const HalfRange&rhs) noexcept {
-    return
-        std::forward_as_tuple(lhs.mValue, lhs.mMin, lhs.mMax) ==
-        std::forward_as_tuple(rhs.mValue, rhs.mMin, rhs.mMax);
-}
-inline bool operator!=(const HalfRange&lhs, const HalfRange&rhs) noexcept {
-    return !(lhs == rhs);
-}
-
-using AttributeType = std::variant<matrix, float4, uint4, int4, float2, uint2, int2, half4, FloatRange, float1, uint1, int1, half2, fixed4, HalfRange, half1, InputPatch_, OutputPatch_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, SamplerState_>;
-
-inline bool operator<(const AttributeType& lhs, const AttributeType& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
 
 enum AttributeFlags : uint32_t {
     NoFlags = 0,
@@ -332,181 +207,182 @@ inline bool operator<(const DefaultView_&, const DefaultView_&) noexcept { retur
 
 using ShaderResourceDataView = std::variant<DefaultView_, TextureView>;
 
+struct Bounded_ {} static constexpr Bounded;
+struct Unbounded_ {} static constexpr Unbounded;
+
+using Boundedness = std::variant<Bounded_, Unbounded_>;
+
+inline bool operator<(const Boundedness& lhs, const Boundedness& rhs) noexcept {
+    return lhs.index() < rhs.index();
+}
+
+struct AttributeDescriptor {
+    AttributeDescriptor() = default;
+    AttributeDescriptor(UpdateEnum update, RootParameterType rootParameterType, Persistency persistency, DescriptorType descriptorType, std::string registerSpace, DescriptorSource source, Boundedness boundedness, std::string name)
+        : mUpdate(std::move(update))
+        , mRootParameterType(std::move(rootParameterType))
+        , mPersistency(std::move(persistency))
+        , mDescriptorType(std::move(descriptorType))
+        , mRegisterSpace(std::move(registerSpace))
+        , mSource(std::move(source))
+        , mBoundedness(std::move(boundedness))
+        , mName(std::move(name))
+    {}
+    AttributeDescriptor(UpdateEnum update, RootParameterType rootParameterType, Persistency persistency, std::string registerSpace, DescriptorSource source, Boundedness boundedness)
+        : mUpdate(std::move(update))
+        , mRootParameterType(std::move(rootParameterType))
+        , mPersistency(std::move(persistency))
+        , mRegisterSpace(std::move(registerSpace))
+        , mSource(std::move(source))
+        , mBoundedness(std::move(boundedness))
+    {}
+    AttributeDescriptor(UpdateEnum update, RootParameterType rootParameterType, Persistency persistency, DescriptorSource source)
+        : mUpdate(std::move(update))
+        , mRootParameterType(std::move(rootParameterType))
+        , mPersistency(std::move(persistency))
+        , mSource(std::move(source))
+    {}
+    UpdateEnum mUpdate = PerBatch;
+    RootParameterType mRootParameterType = Table;
+    Persistency mPersistency = Persistent;
+    DescriptorType mDescriptorType;
+    std::string mRegisterSpace;
+    DescriptorSource mSource = MaterialSource;
+    Boundedness mBoundedness;
+    std::string mName;
+};
+
+inline bool operator<(const AttributeDescriptor&lhs, const AttributeDescriptor&rhs) noexcept {
+    return
+        std::forward_as_tuple(lhs.mUpdate, lhs.mRootParameterType, lhs.mPersistency, lhs.mDescriptorType, lhs.mRegisterSpace, lhs.mSource, lhs.mBoundedness, lhs.mName) <
+        std::forward_as_tuple(rhs.mUpdate, rhs.mRootParameterType, rhs.mPersistency, rhs.mDescriptorType, rhs.mRegisterSpace, rhs.mSource, rhs.mBoundedness, rhs.mName);
+}
+
+struct AttributeDatabase {
+    IdentityNameMap<AttributeDescriptor> mAttributes;
+    Map<std::string, uint32_t> mIndex;
+};
+
 struct ShaderAttribute {
     ShaderAttribute() = default;
-    ShaderAttribute(std::string name, AttributeType type)
+    ShaderAttribute(std::string name, AttributeType type, AttributeDescriptor descriptor)
         : mName(std::move(name))
         , mType(std::move(type))
+        , mDescriptor(std::move(descriptor))
     {}
-    ShaderAttribute(std::string name, AttributeType type, uint32_t flags)
+    ShaderAttribute(std::string name, AttributeType type, AttributeDescriptor descriptor, uint32_t flags)
         : mName(std::move(name))
         , mType(std::move(type))
+        , mDescriptor(std::move(descriptor))
         , mFlags(std::move(flags))
     {}
-    ShaderAttribute(std::string name, AttributeType type, UpdateEnum updateFrequency)
+    ShaderAttribute(std::string name, AttributeType type, AttributeDescriptor descriptor, uint32_t flags, std::string defaultValue)
         : mName(std::move(name))
         , mType(std::move(type))
-        , mUpdateFrequency(std::move(updateFrequency))
+        , mDescriptor(std::move(descriptor))
+        , mFlags(std::move(flags))
+        , mDefaultValue(std::move(defaultValue))
     {}
-    ShaderAttribute(std::string name, AttributeType type, UpdateEnum updateFrequency, uint32_t flags)
+    ShaderAttribute(std::string name, AttributeType type, AttributeDescriptor descriptor, std::string defaultValue)
         : mName(std::move(name))
         , mType(std::move(type))
-        , mUpdateFrequency(std::move(updateFrequency))
+        , mDescriptor(std::move(descriptor))
+        , mDefaultValue(std::move(defaultValue))
+    {}
+    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor)
+        : mName(std::move(name))
+        , mType(std::move(type))
+        , mData(std::move(data))
+        , mDescriptor(std::move(descriptor))
+    {}
+    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor, uint32_t flags)
+        : mName(std::move(name))
+        , mType(std::move(type))
+        , mData(std::move(data))
+        , mDescriptor(std::move(descriptor))
         , mFlags(std::move(flags))
     {}
-    ShaderAttribute(std::string name, AttributeType type, UpdateEnum updateFrequency, ValueModel model)
+    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor, uint32_t flags, std::string defaultValue)
         : mName(std::move(name))
         , mType(std::move(type))
-        , mUpdateFrequency(std::move(updateFrequency))
+        , mData(std::move(data))
+        , mDescriptor(std::move(descriptor))
+        , mFlags(std::move(flags))
+        , mDefaultValue(std::move(defaultValue))
+    {}
+    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor, std::string defaultValue)
+        : mName(std::move(name))
+        , mType(std::move(type))
+        , mData(std::move(data))
+        , mDescriptor(std::move(descriptor))
+        , mDefaultValue(std::move(defaultValue))
+    {}
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, AttributeDescriptor descriptor)
+        : mName(std::move(name))
         , mModel(std::move(model))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, UpdateEnum updateFrequency, ValueModel model, uint32_t flags)
-        : mName(std::move(name))
         , mType(std::move(type))
-        , mUpdateFrequency(std::move(updateFrequency))
+        , mDescriptor(std::move(descriptor))
+    {}
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, AttributeDescriptor descriptor, uint32_t flags)
+        : mName(std::move(name))
         , mModel(std::move(model))
+        , mType(std::move(type))
+        , mDescriptor(std::move(descriptor))
         , mFlags(std::move(flags))
     {}
-    ShaderAttribute(std::string name, AttributeType type, ValueModel model)
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, AttributeDescriptor descriptor, uint32_t flags, std::string defaultValue)
         : mName(std::move(name))
-        , mType(std::move(type))
         , mModel(std::move(model))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, ValueModel model, uint32_t flags)
-        : mName(std::move(name))
         , mType(std::move(type))
+        , mDescriptor(std::move(descriptor))
+        , mFlags(std::move(flags))
+        , mDefaultValue(std::move(defaultValue))
+    {}
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, AttributeDescriptor descriptor, std::string defaultValue)
+        : mName(std::move(name))
         , mModel(std::move(model))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data)
-        : mName(std::move(name))
         , mType(std::move(type))
-        , mData(std::move(data))
+        , mDescriptor(std::move(descriptor))
+        , mDefaultValue(std::move(defaultValue))
     {}
-    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, uint32_t flags)
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor)
         : mName(std::move(name))
-        , mType(std::move(type))
-        , mData(std::move(data))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, UpdateEnum updateFrequency)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, UpdateEnum updateFrequency, uint32_t flags)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, UpdateEnum updateFrequency, ValueModel model)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
         , mModel(std::move(model))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, ShaderResourceDataView data, UpdateEnum updateFrequency, ValueModel model, uint32_t flags)
-        : mName(std::move(name))
         , mType(std::move(type))
         , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
+        , mDescriptor(std::move(descriptor))
+    {}
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor, uint32_t flags)
+        : mName(std::move(name))
         , mModel(std::move(model))
+        , mType(std::move(type))
+        , mData(std::move(data))
+        , mDescriptor(std::move(descriptor))
         , mFlags(std::move(flags))
     {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue)
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor, uint32_t flags, std::string defaultValue)
         : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, uint32_t flags)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, UpdateEnum updateFrequency)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mUpdateFrequency(std::move(updateFrequency))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, UpdateEnum updateFrequency, uint32_t flags)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mUpdateFrequency(std::move(updateFrequency))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, UpdateEnum updateFrequency, ValueModel model)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mUpdateFrequency(std::move(updateFrequency))
         , mModel(std::move(model))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, UpdateEnum updateFrequency, ValueModel model, uint32_t flags)
-        : mName(std::move(name))
         , mType(std::move(type))
+        , mData(std::move(data))
+        , mDescriptor(std::move(descriptor))
+        , mFlags(std::move(flags))
         , mDefaultValue(std::move(defaultValue))
-        , mUpdateFrequency(std::move(updateFrequency))
+    {}
+    ShaderAttribute(std::string name, ValueModel model, AttributeType type, ShaderResourceDataView data, AttributeDescriptor descriptor, std::string defaultValue)
+        : mName(std::move(name))
         , mModel(std::move(model))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, ShaderResourceDataView data)
-        : mName(std::move(name))
         , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
         , mData(std::move(data))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, ShaderResourceDataView data, uint32_t flags)
-        : mName(std::move(name))
-        , mType(std::move(type))
+        , mDescriptor(std::move(descriptor))
         , mDefaultValue(std::move(defaultValue))
-        , mData(std::move(data))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, ShaderResourceDataView data, UpdateEnum updateFrequency)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, ShaderResourceDataView data, UpdateEnum updateFrequency, uint32_t flags)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
-        , mFlags(std::move(flags))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, ShaderResourceDataView data, UpdateEnum updateFrequency, ValueModel model)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
-        , mModel(std::move(model))
-    {}
-    ShaderAttribute(std::string name, AttributeType type, std::string defaultValue, ShaderResourceDataView data, UpdateEnum updateFrequency, ValueModel model, uint32_t flags)
-        : mName(std::move(name))
-        , mType(std::move(type))
-        , mDefaultValue(std::move(defaultValue))
-        , mData(std::move(data))
-        , mUpdateFrequency(std::move(updateFrequency))
-        , mModel(std::move(model))
-        , mFlags(std::move(flags))
     {}
     std::string mName;
-    AttributeType mType;
-    UpdateEnum mUpdateFrequency = PerBatch;
-    uint32_t mFlags = 0;
     ValueModel mModel;
+    AttributeType mType;
     ShaderResourceDataView mData;
+    AttributeDescriptor mDescriptor;
+    uint32_t mFlags = 0;
     std::string mDefaultValue;
 };
 
@@ -577,172 +453,48 @@ struct ShaderStageContent {
     std::string mMain;
 };
 
-using DescriptorRangeType = std::variant<CBV_, UAV_, SRV_, SSV_>;
-
-inline bool operator<(const DescriptorRangeType& lhs, const DescriptorRangeType& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-
-inline bool operator==(const DescriptorRangeType& lhs, const DescriptorRangeType& rhs) noexcept {
-    return lhs.index() == rhs.index();
-}
-
-inline bool operator!=(const DescriptorRangeType& lhs, const DescriptorRangeType& rhs) noexcept {
-    return !(lhs == rhs);
-}
-
-struct DescriptorRegisterSpace {
-    DescriptorRangeType mType;
-    std::string mName;
-    uint32_t mSpace = 0;
-};
-
-inline bool operator<(const DescriptorRegisterSpace&lhs, const DescriptorRegisterSpace&rhs) noexcept {
-    return
-        std::forward_as_tuple(lhs.mType, lhs.mName, lhs.mSpace) <
-        std::forward_as_tuple(rhs.mType, rhs.mName, rhs.mSpace);
-}
-
-struct Bounded_ {} static constexpr Bounded;
-struct Unbounded_ {} static constexpr Unbounded;
-
-using Boundedness = std::variant<Bounded_, Unbounded_>;
-
-inline bool operator<(const Boundedness& lhs, const Boundedness& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-using ShaderCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_>;
-
-inline bool operator<(const ShaderCBV& lhs, const ShaderCBV& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-using ShaderSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_>;
-
-inline bool operator<(const ShaderSRV& lhs, const ShaderSRV& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-using ShaderUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_>;
-
-inline bool operator<(const ShaderUAV& lhs, const ShaderUAV& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-using ShaderSSV = std::variant<SamplerState_>;
-
-inline bool operator<(const ShaderSSV& lhs, const ShaderSSV& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
-using ShaderDescriptor = std::variant<ShaderCBV, ShaderUAV, ShaderSRV, ShaderSSV>;
-
-struct DescriptorValue {
-    ShaderDescriptor mShaderDescriptor;
-    Boundedness mBoundedness;
-    std::string mName;
-};
-
-inline bool operator<(const DescriptorValue&lhs, const DescriptorValue&rhs) noexcept {
-    return
-        std::forward_as_tuple(lhs.mShaderDescriptor, lhs.mBoundedness, lhs.mName) <
-        std::forward_as_tuple(rhs.mShaderDescriptor, rhs.mBoundedness, rhs.mName);
-}
-
 struct DescriptorSubrange {
-    Set<DescriptorValue> mValues;
-    uint32_t mCapacity = 0;
+    NameMap<ShaderAttribute> mAttributes;
 };
-
-struct MaterialSource_ {} static constexpr MaterialSource;
-struct LightSource_ {} static constexpr LightSource;
-struct CameraSource_ {} static constexpr CameraSource;
-struct EngineSource_ {} static constexpr EngineSource;
-
-using DescriptorSource = std::variant<MaterialSource_, LightSource_, CameraSource_, EngineSource_>;
-
-inline bool operator<(const DescriptorSource& lhs, const DescriptorSource& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
 
 struct DescriptorRange {
     Map<DescriptorSource, DescriptorSubrange> mSubranges;
-    uint32_t mMaxUnboundedSize = 0;
-};
-
-struct RootParameter {
-    Map<DescriptorRegisterSpace, DescriptorRange> mRanges;
-};
-
-struct RangeUnbounded {};
-
-struct RangeBounded {
+    uint32_t mCapacity = 0;
+    uint32_t mSpace = 0;
+    uint32_t mStart = 0;
     uint32_t mCount = 0;
 };
 
-using DescriptorArray = std::variant<RangeBounded, RangeUnbounded>;
+struct UnboundedDescriptor {
+    ShaderAttribute mAttribute;
+    uint32_t mSpace = 0;
+    uint32_t mStart = 0;
+};
 
-inline bool operator<(const DescriptorArray& lhs, const DescriptorArray& rhs) noexcept {
-    return lhs.index() < rhs.index();
-}
+struct DescriptorList {
+    uint32_t mSlot = 0;
+    Map<DescriptorType, DescriptorRange> mRanges;
+    Map<DescriptorType, UnboundedDescriptor> mUnboundedDescriptors;
+};
 
-struct ShaderConstant {
-    bool mUnbounded = false;
+struct DescriptorCollection {
+    Map<std::string, DescriptorList> mResourceViewLists;
+    Map<std::string, DescriptorList> mSamplerLists;
+};
+
+struct Constant {
     AttributeType mType;
     std::string mName;
 };
 
-inline bool operator<(const ShaderConstant&lhs, const ShaderConstant&rhs) noexcept {
+inline bool operator<(const Constant&lhs, const Constant&rhs) noexcept {
     return
-        std::forward_as_tuple(lhs.mUnbounded, lhs.mType, lhs.mName) <
-        std::forward_as_tuple(rhs.mUnbounded, rhs.mType, rhs.mName);
+        std::forward_as_tuple(lhs.mType, lhs.mName) <
+        std::forward_as_tuple(rhs.mType, rhs.mName);
 }
 
-struct ShaderConstantBuffer {
-    IdentityMap<ShaderConstant> mValues;
-};
-
-using DescriptorCBV = std::variant<ConstantBuffer_, Buffer_, ByteAddressBuffer_, StructuredBuffer_, DescriptorArray>;
-using DescriptorSRV = std::variant<Texture1D_, Texture1DArray_, Texture2D_, Texture2DArray_, Texture2DMS_, Texture2DMSArray_, Texture3D_, TextureCube_, TextureCubeArray_, DescriptorArray>;
-using DescriptorUAV = std::variant<AppendStructuredBuffer_, ConsumeStructuredBuffer_, RWBuffer_, RWByteAddressBuffer_, RWStructuredBuffer_, RWTexture1D_, RWTexture1DArray_, RWTexture2D_, RWTexture2DArray_, RWTexture3D_, DescriptorArray>;
-using DescriptorSSV = std::variant<SamplerState_, DescriptorArray>;
-using DescriptorModel = std::variant<DescriptorCBV, DescriptorUAV, DescriptorSRV, DescriptorSSV>;
-
-struct Descriptor {
-    DescriptorRangeType mType;
-    uint32_t mSpace = 0;
-    DescriptorModel mModel;
-    std::string mName;
-};
-
-inline bool operator<(const Descriptor&lhs, const Descriptor&rhs) noexcept {
-    return
-        std::forward_as_tuple(lhs.mType, lhs.mSpace, lhs.mModel, lhs.mName) <
-        std::forward_as_tuple(rhs.mType, rhs.mSpace, rhs.mModel, rhs.mName);
-}
-
-struct DescriptorTable {
-    IdentityMap<Descriptor> mDescriptors;
-};
-
-struct DescriptorCapacity {
-    DescriptorRangeType mType;
-    uint32_t mSpace = 0;
-    DescriptorArray mCount = {};
-};
-
-inline bool operator<(const DescriptorCapacity&lhs, const DescriptorCapacity&rhs) noexcept {
-    return
-        std::forward_as_tuple(lhs.mType, lhs.mSpace, lhs.mCount) <
-        std::forward_as_tuple(rhs.mType, rhs.mSpace, rhs.mCount);
-}
-
-struct DescriptorTableCapacity {
-    IdentityMap<DescriptorCapacity> mNumDescriptors;
-};
-
-struct MergeStages_ {} static constexpr MergeStages;
-
-using StageOptimization = std::variant<std::monostate, MergeStages_>;
-
-struct RootSignatureOptimizeStrategy {
-    StageOptimization mStageOptimization;
+struct ConstantBuffer {
+    IdentityMap<Constant> mValues;
 };
 
 struct Zero_ {} static constexpr Zero;

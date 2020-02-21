@@ -69,6 +69,12 @@
       <Filter>5.Engine</Filter>
     </ClInclude>
     <ClInclude Include="SConfig.h" />
+    <ClInclude Include="SRenderGraphReflection.h">
+      <Filter>3.RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="SRenderUtils.h">
+      <Filter>2.Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -98,6 +104,12 @@
     </ClCompile>
     <ClCompile Include="SRenderEngine.cpp">
       <Filter>5.Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SRenderGraphReflection.cpp">
+      <Filter>3.RenderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="SRenderUtils.cpp">
+      <Filter>2.Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

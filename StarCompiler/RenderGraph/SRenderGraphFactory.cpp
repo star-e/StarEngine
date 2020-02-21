@@ -22,6 +22,9 @@
 #include <StarCompiler/ShaderGraph/SShaderTypes.h>
 #include <Star/Graphics/SRenderFormatUtils.h>
 #include <StarCompiler/ShaderWorks/SShaderCompiler.h>
+#include <Star/Graphics/SRenderGraphReflection.h>
+#include <StarCompiler/ShaderGraph/SShaderModules.h>
+#include <Star/Graphics/SRenderUtils.h>
 
 namespace Star {
 
@@ -36,10 +39,6 @@ void RenderSolutionFactory::addPipeline(GraphicsRenderNodeGraph&& graph) {
     if (!res.second) {
         throw std::invalid_argument("pipeline already exists" + res.first->first);
     }
-}
-
-int RenderSolutionFactory::compile() {
-    return 0;
 }
 
 void RenderSolutionFactory::validateGraphs() const {
@@ -123,6 +122,8 @@ void RenderSolutionFactory::buildShaderGroup(Shader::ShaderGroups& shaderWorks) 
 void RenderSolutionFactory::updateRenderGraph(const Shader::ShaderModules& modules,
     const Shader::ShaderGroups& shaderWorks
 ) {
+    mShaderGroups = &shaderWorks;
+
     for (auto& [bundleName, bundle] : shaderWorks.mSolutions) {
         for (auto& [pipelineName, pipeline] : bundle) {
             auto& renderGraph = at(mNodeGraphs, pipelineName);
@@ -130,7 +131,7 @@ void RenderSolutionFactory::updateRenderGraph(const Shader::ShaderModules& modul
                 auto renderNodeID = renderGraph.mNodeIndex.at(name);
                 auto& renderNode = renderGraph.mNodeGraph[renderNodeID];
                 renderNode.mRootSignature = group.generateRootSignature();
-
+                
                 for (const auto& [nameProgram, program] : group.mPrograms) {
                     for (const auto& [type, stage] : program.first->mShaders) {
                         for (const auto& usage : stage.mGraph.mAttributeUsages) {
@@ -138,15 +139,15 @@ void RenderSolutionFactory::updateRenderGraph(const Shader::ShaderModules& modul
 
                             bool bTex = true;
                             visit(overload(
-                                [&](Shader::Texture1D_) {},
-                                [&](Shader::Texture1DArray_) {},
-                                [&](Shader::Texture2D_) {},
-                                [&](Shader::Texture2DArray_) {},
-                                [&](Shader::Texture2DMS_) {},
-                                [&](Shader::Texture2DMSArray_) {},
-                                [&](Shader::Texture3D_) {},
-                                [&](Shader::TextureCube_) {},
-                                [&](Shader::TextureCubeArray_) {},
+                                [&](Texture1D_) {},
+                                [&](Texture1DArray_) {},
+                                [&](Texture2D_) {},
+                                [&](Texture2DArray_) {},
+                                [&](Texture2DMS_) {},
+                                [&](Texture2DMSArray_) {},
+                                [&](Texture3D_) {},
+                                [&](TextureCube_) {},
+                                [&](TextureCubeArray_) {},
                                 [&](auto) {
                                     bTex = false;
                                 }
@@ -466,7 +467,46 @@ void RenderSolutionFactory::collectDSVsMinimal(
 //    return true;
 //}
 
-void RenderSolutionFactory::build(std::string solutionName, RenderSolution& rw, std::ostringstream& oss) const {
+void RenderSolutionFactory::compile(std::string solutionName, RenderSolution& rw) const {
+    for (const auto& [graphName, graph] : mNodeGraphs) {
+        {
+            auto res = rw.mPipelineIndex.emplace(std::piecewise_construct,
+                std::forward_as_tuple(graphName),
+                std::forward_as_tuple((uint32_t)rw.mPipelines.size()));
+            Ensures(res.second);
+        }
+        rw.mPipelines.emplace_back();
+        auto& pipeline = rw.mPipelines.back();
+
+        for (size_t k = graph.mNodeSorted.size(); k-- > 0;) {
+            const auto& nodeID = graph.mNodeSorted[k];
+            const auto& node = graph.mNodeGraph[nodeID];
+
+            {
+                RenderSubpassDesc desc{ (uint32_t)pipeline.mPasses.size(), 0 };
+                auto res = pipeline.mSubpassIndex.emplace(std::piecewise_construct,
+                    std::forward_as_tuple(node.mName),
+                    std::forward_as_tuple(desc));
+                Ensures(res.second);
+            }
+
+            pipeline.mPasses.emplace_back();
+            auto& pass = pipeline.mPasses.back();
+
+            pass.mSubpasses.emplace_back();
+            Ensures(pass.mSubpasses.size() == 1);
+        }
+    }
+}
+
+void RenderSolutionFactory::collectAttributes(const Shader::ShaderModules& modules, Shader::AttributeDatabase& database) const {
+    Expects(mShaderGroups);
+    mShaderGroups->collectAttributes(modules, database);
+}
+
+void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::string solutionName,
+    RenderSolution& rw, std::ostringstream& oss
+) const {
     uint32_t rsgCount = 0;
     OrderedNameMap<RenderTargetResource> bbs;
     OrderedNameMap<RenderTargetResource> rts;
@@ -560,14 +600,7 @@ void RenderSolutionFactory::build(std::string solutionName, RenderSolution& rw, 
 
     // build rtv, dsv
     for (const auto& [graphName, graph] : mNodeGraphs) {
-        {
-            auto res = rw.mPipelineIndex.emplace(std::piecewise_construct,
-                std::forward_as_tuple(graphName),
-                std::forward_as_tuple((uint32_t)rw.mPipelines.size()));
-            Ensures(res.second);
-        }
-        rw.mPipelines.emplace_back();
-        auto& pipeline = rw.mPipelines.back();
+        auto& pipeline = rw.mPipelines.at(at(rw.mPipelineIndex, graphName));
 
         pipeline.mRTVInitialStates.resize(rtvOffset + rtvs.size());
         pipeline.mDSVInitialStates.resize(dsvs.size());
@@ -612,24 +645,12 @@ void RenderSolutionFactory::build(std::string solutionName, RenderSolution& rw, 
 
         for (size_t k = graph.mNodeSorted.size(); k --> 0;) {
             bool bOutput = (k == 0);
-
             const auto& nodeID = graph.mNodeSorted[k];
             const auto& node = graph.mNodeGraph[nodeID];
-
-            {
-                RenderSubpassDesc desc{ (uint32_t)pipeline.mPasses.size(), 0 };
-                auto res = pipeline.mSubpassIndex.emplace(std::piecewise_construct,
-                    std::forward_as_tuple(node.mName),
-                    std::forward_as_tuple(desc));
-                Ensures(res.second);
-            }
-
-            pipeline.mPasses.emplace_back();
-            auto& pass = pipeline.mPasses.back();
-
-            pass.mSubpasses.emplace_back();
-            auto& subpass = pass.mSubpasses.back();
-            Ensures(pass.mSubpasses.size() == 1);
+            const auto& subpassIndex = at(pipeline.mSubpassIndex, node.mName);
+            auto& pass = pipeline.mPasses.at(subpassIndex.mPassID);
+            auto& subpass = pass.mSubpasses.at(subpassIndex.mSubpassID);
+            Expects(pass.mSubpasses.size() == 1);
 
             visit(overload(
                 [&](const Multisampling& s) {
@@ -658,16 +679,107 @@ void RenderSolutionFactory::build(std::string solutionName, RenderSolution& rw, 
                     copyString(oss, space, node.mRootSignature);
                 }
                 oss << "}\n";
-            }
 
-            // Render Queue
-            subpass.mOrderedRenderQueue.reserve(node.mQueue.size());
-            for (const auto& unordered : node.mQueue) {
-                subpass.mOrderedRenderQueue.emplace_back();
-                auto& unorderedQueue = subpass.mOrderedRenderQueue.back();
-                unorderedQueue.mContents.reserve(unordered.mContents.size());
-                for (const auto& content : unordered.mContents) {
-                    unorderedQueue.mContents.emplace_back(content);
+                Expects(mShaderGroups);
+                
+                const auto& group = mShaderGroups->getGroup(solutionName, graphName, node.mName);
+                subpass.mConstantBuffers.reserve(group.mRootSignature.mDatabase.mConstantBuffers.size());
+                for (const auto& constantBufferPair : group.mRootSignature.mDatabase.mConstantBuffers) {
+                    const auto& index = constantBufferPair.first;
+                    const auto& constantBuffer = constantBufferPair.second;
+                    if (index.mUpdate < group.mUpdateFrequency) {
+                        continue;
+                    }
+                    Expects(index.mUpdate >= group.mUpdateFrequency);
+                    auto& runtimeConstantBuffer = subpass.mConstantBuffers.emplace_back();
+                    runtimeConstantBuffer.mIndex = index;
+                    runtimeConstantBuffer.mConstants.reserve(constantBuffer.mValues.size());
+                    Expects(runtimeConstantBuffer.mSize == 0);
+                    for (const auto& constant : constantBuffer.mValues) {
+                        Expects(!constant.mName.empty());
+                        const auto& attr = at(attrs.mAttributes, constant.mName);
+                        auto& dst = runtimeConstantBuffer.mConstants.emplace_back();
+                        visit(overload(
+                            [&](EngineSource_) {
+                                getType(constant.mName, dst.mDataType);
+                            },
+                            [&](MaterialSource_) {
+                                throw std::invalid_argument("PerPass attribute should not be material source");
+                            }
+                            ), attr.mSource);
+                        dst.mSource = attr.mSource;
+                        dst.mID = gsl::narrow<uint32_t>(attrs.mIndex.at(constant.mName));
+                        runtimeConstantBuffer.mSize += getSize(constant.mType);
+                    }
+                }
+
+                subpass.mDescriptors.reserve(group.mRootSignature.mDatabase.mDescriptors.size());
+                for (const auto& collectionPair : group.mRootSignature.mDatabase.mDescriptors) {
+                    const auto& index = collectionPair.first;
+                    const auto& collection = collectionPair.second;
+                    auto& runtimeCollection = subpass.mDescriptors.emplace_back();
+                    runtimeCollection.mIndex = index;
+                    runtimeCollection.mResourceViewLists.reserve(collection.mResourceViewLists.size());
+                    runtimeCollection.mSamplerLists.reserve(collection.mSamplerLists.size());
+
+                    auto buildList = [&runtimeCollection, &index, &group, &attrs](const Shader::DescriptorList& list) {
+                        auto& runtimeList = runtimeCollection.mResourceViewLists.emplace_back();
+                        runtimeList.mSlot = list.mSlot;
+                        runtimeList.mRanges.reserve(list.mRanges.size());
+                        runtimeList.mUnboundedDescriptors.reserve(list.mUnboundedDescriptors.size());
+                        for (const auto& [type, range] : list.mRanges) {
+                            auto& runtimeRange = runtimeList.mRanges.emplace_back();
+                            runtimeRange.mType = type;
+                            runtimeRange.mSubranges.reserve(range.mSubranges.size());
+                            runtimeRange.mCapacity = range.mCapacity;
+
+                            if (index.mUpdate < group.mUpdateFrequency) {
+                                Expects(range.mSubranges.empty());
+                                Expects(range.mCapacity != 0);
+                                runtimeList.mCapacity += runtimeRange.mCapacity;
+                            } else {
+                                Expects(!range.mSubranges.empty());
+                                Expects(range.mCapacity == 0);
+                                runtimeList.mCapacity += getDescriptorCapacity(range);
+                            }
+                            for (const auto& [source, subrange] : range.mSubranges) {
+                                auto& runtimeSubrange = runtimeRange.mSubranges.emplace_back();
+                                runtimeSubrange.mSource = source;
+                                runtimeSubrange.mDescriptors.reserve(subrange.mAttributes.size());
+                                for (const auto& attr : subrange.mAttributes) {
+                                    auto& d = runtimeSubrange.mDescriptors.emplace_back();
+                                    d.mAttributeType = attr.mType;
+                                    visit(overload(
+                                        [&](EngineSource_) {
+                                            getType(attr.mName, d.mDataType);
+                                        },
+                                        [&](MaterialSource_) {
+                                            try_getType(attr.mName, d.mDataType);
+                                        }
+                                    ), source);
+                                    if (attr.mName.empty()) {
+                                        Expects(std::holds_alternative<CBuffer_>(attr.mType));
+                                        Expects(std::holds_alternative<Descriptor::ConstantBuffer_>(d.mDataType));
+                                    } else {
+                                        Expects(!std::holds_alternative<Descriptor::ConstantBuffer_>(d.mDataType));
+                                        d.mID = gsl::narrow<uint32_t>(attrs.mIndex.at(attr.mName));
+                                    }
+                                }
+                            }
+                        }
+                        Expects(list.mUnboundedDescriptors.size() <= 1);
+                        for (const auto& [type, unbounded] : list.mUnboundedDescriptors) {
+                            auto& runtimeUnbounded = runtimeList.mUnboundedDescriptors.emplace_back();
+                            runtimeUnbounded.mType = type;
+                            runtimeUnbounded.mAttribute = unbounded.mAttribute.mName;
+                        }
+                    };
+                    for (const auto& [space, list] : collection.mResourceViewLists) {
+                        buildList(list);
+                    }
+                    for (const auto& [space, list] : collection.mSamplerLists) {
+                        buildList(list);
+                    }
                 }
             }
 
@@ -851,6 +963,43 @@ void RenderSolutionFactory::build(std::string solutionName, RenderSolution& rw, 
                 subpass.mPostViewTransitions.emplace_back(v.second);
             }
         }
+    }
+}
+
+void RenderGraphFactory::buildShaderGroupFromSolutions() {
+    for (const auto& [solutionName, solutionFactory] : mSolutionFactories) {
+        solutionFactory.buildShaderGroup(mShaderGroups);
+    }
+}
+
+void RenderGraphFactory::bindShadersToShaderGroups() {
+    mShaderDatabase.fillShaderGroups(mShaderGroups);
+}
+
+void RenderGraphFactory::completeFactories() {
+    for (auto& [solutionName, solutionFactory] : mSolutionFactories) {
+        solutionFactory.updateRenderGraph(mShaderModules, mShaderGroups);
+        solutionFactory.validateGraphs();
+    }
+}
+
+void RenderGraphFactory::buildRootSignatureAndDescriptors() {
+    mShaderGroups.buildRootSignatures(mShaderModules, PerPass);
+}
+
+void RenderGraphFactory::buildRenderGraphData(RenderSwapChain& renderGraphData) const {
+    renderGraphData.mSolutionIndex.clear();
+    renderGraphData.mSolutions.clear();
+    for (auto& [solutionName, factory] : mSolutionFactories) {
+        renderGraphData.mSolutionIndex.emplace(solutionName, gsl::narrow<uint32_t>(renderGraphData.mSolutions.size()));
+        auto& solutionData = renderGraphData.mSolutions.emplace_back();
+        factory.compile(solutionName, solutionData);
+    }
+}
+
+void RenderGraphFactory::buildAttributeDatabase(Shader::AttributeDatabase& attributes) const {
+    for (auto& [solutionName, factory] : mSolutionFactories) {
+        factory.collectAttributes(mShaderModules, attributes);
     }
 }
 

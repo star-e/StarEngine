@@ -19,7 +19,6 @@
 #include "SShaderProgram.h"
 #include "SShaderDescriptor.h"
 #include <StarCompiler/ShaderGraph/SShaderNames.h>
-#include "SShaderRegisters.h"
 
 namespace Star::Graphics::Render::Shader {
 
@@ -71,9 +70,7 @@ void ShaderGroup::collectConstantBuffers() {
 }
 
 void ShaderGroup::collectDescriptors(const AttributeMap& attrs) {
-    for (const auto& [index, cb] : mRootSignature.mConstantBuffers) {
-        mRootSignature.addConstantBufferDescriptor(index, cb);
-    }
+    mRootSignature.addConstantBuffersDescriptors();
 
     if (mGroups.empty()) {
         // Leaf Node
@@ -83,12 +80,10 @@ void ShaderGroup::collectDescriptors(const AttributeMap& attrs) {
         }
 
         for (uint32_t i = PerInstance; i != mUpdateFrequency; ++i) {
-            std::map<DescriptorIndex, DescriptorTableCapacity> caps;
             for (auto& [name, pair] : mPrograms) {
                 auto& [program, rsg] = pair;
-                rsg.collectCapacities(static_cast<UpdateEnum>(i), caps);
+                rsg.reserveCapacities(static_cast<UpdateEnum>(i), mRootSignature);
             }
-            mRootSignature.resizeCapacities(caps);
         }
 
         if (mGenerateRootSignature) {
@@ -110,6 +105,25 @@ void ShaderGroup::collectDescriptors(const AttributeMap& attrs) {
             throw std::runtime_error("internal group not supported yet");
         } else {
             // do nothing
+        }
+    }
+}
+
+void ShaderGroup::collectAttributes(const AttributeMap& attrs, AttributeDatabase& database) const {
+    if (mGroups.empty()) {
+        for (auto& [name, pair] : mPrograms) {
+            auto& [program, rsg] = pair;
+            program->collectAttributes(attrs, database);
+        }
+    }
+}
+
+void ShaderGroup::buildRegisters() {
+    if (mGenerateRootSignature) {
+        mRootSignature.mDatabase.buildRegisters();
+        for (auto& pair : mPrograms) {
+            auto& rsg = pair.second.second;
+            rsg.mDatabase.buildRegisters(mUpdateFrequency, mRootSignature.mDatabase);
         }
     }
 }
@@ -140,6 +154,90 @@ bool ShaderGroup::hasIA() const {
     return hasIA;
 }
 
+namespace {
+
+void outputVisibility(std::ostream& oss, const ShaderVisibilityType& vis) {
+    visit(overload(
+        [&](std::monostate) {
+            // output nothing
+            throw std::runtime_error("SHADER_VISIBILITY_ALL not supported yet");
+        },
+        [&](PS_) {
+            oss << ", visibility = SHADER_VISIBILITY_PIXEL";
+        },
+        [&](GS_) {
+            oss << ", visibility = SHADER_VISIBILITY_GEOMETRY";
+        },
+        [&](DS_) {
+            oss << ", visibility = SHADER_VISIBILITY_DOMAIN";
+        },
+        [&](HS_) {
+            oss << ", visibility = SHADER_VISIBILITY_HULL";
+        },
+        [&](VS_) {
+            oss << ", visibility = SHADER_VISIBILITY_VERTEX";
+        }
+    ), vis);
+};
+
+void outputSpace(std::ostream& oss, const DescriptorRange& range) {
+    if (range.mSpace)
+        oss << ", space = " << range.mSpace;
+};
+
+void outputTable(std::ostream& oss, std::string& space,
+    const DescriptorList& list, const ShaderVisibilityType& vis
+) {
+    uint32_t rangeCount = 0;
+    std::string bol = "\"";
+    std::string eol = "\" \\\n";
+
+    OSS << bol << "DescriptorTable(";
+    for (const auto& rangePair : list.mRanges) {
+        const auto& type = rangePair.first;
+        const auto& range = rangePair.second;
+        if (rangeCount++) {
+            oss << ", ";
+        }
+        oss << getVariantName(type) << "(" << getRegisterPrefix(type) << range.mStart;
+        Expects(range.mCount);
+
+        if (range.mCapacity == 0) {
+            auto sz = getDescriptorCapacity(range);
+            Expects(sz == range.mCount);
+        } else {
+            Expects(range.mCapacity == range.mCount);
+        }
+
+        if (range.mCount > 1) {
+            oss << ", numDescriptors = " << range.mCount;
+        }
+
+        if (range.mSpace) {
+            oss << ", space = " << range.mSpace;
+        }
+        oss << ")";
+    }
+
+    for (const auto& rangePair : list.mUnboundedDescriptors) {
+        const auto& type = rangePair.first;
+        const auto& desc = rangePair.second;
+        if (rangeCount++) {
+            oss << ", ";
+        }
+        oss << getVariantName(type) << "(" << getRegisterPrefix(type) << desc.mStart;
+        oss << ", numDescriptors = unbounded";
+        if (desc.mSpace) {
+            oss << ", space = " << desc.mSpace;
+        }
+        oss << ")";
+    }
+    outputVisibility(oss, vis);
+    oss << ")," << eol;
+}
+
+}
+
 std::string ShaderGroup::generateRootSignature() const {
     if (!mGenerateRootSignature) {
         throw std::runtime_error("this shader group does not generate root signature");
@@ -155,7 +253,7 @@ std::string ShaderGroup::generateRootSignature() const {
     bool hasHS = false;
     bool hasVS = false;
 
-    for (const auto& [index, table] : mRootSignature.mTables) {
+    for (const auto& [index, collection] : mRootSignature.mDatabase.mDescriptors) {
         visit(overload(
             [&](std::monostate) {
                 hasPS = hasGS = hasDS = hasHS = hasVS = true;
@@ -177,6 +275,7 @@ std::string ShaderGroup::generateRootSignature() const {
             }
         ), index.mVisibility);
     }
+
     if (!hasPS)
         flags |= ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
@@ -228,180 +327,88 @@ std::string ShaderGroup::generateRootSignature() const {
     }
     OSS << bol << ")," << eol;
 
-    ShaderRegister slots;
-    // 1. reserve registers shared between all stages
-    for (uint i = mUpdateFrequency; i != UpdateCount; ++i) {
-        mRootSignature.reserveRegisters(static_cast<UpdateEnum>(i), slots);
-    }
-    for (uint i = PerInstance; i != mUpdateFrequency; ++i) {
-        mRootSignature.reserveCapacityRegisters(static_cast<UpdateEnum>(i), slots);
-    }
+    // build descriptors
+    for (int update = 0; update != UpdateEnum::UpdateCount; ++update) {
+        for (const auto& collectionPair : mRootSignature.mDatabase.mDescriptors) {
+            const auto& index = collectionPair.first;
+            const auto& collection = collectionPair.second;
+            if (index.mUpdate != update)
+                continue;
 
-    // 2. build descriptors
-    for (const auto& p : mRootSignature.mTables) {
-        const auto& index = p.first;
-        const auto& table = p.second;
-        auto outputVisibility = [&]() {
             visit(overload(
-                [&](std::monostate) {
-                    // output nothing
-                },
-                [&](PS_) {
-                    oss << ", visibility = SHADER_VISIBILITY_PIXEL";
-                },
-                [&](GS_) {
-                    oss << ", visibility = SHADER_VISIBILITY_GEOMETRY";
-                },
-                [&](DS_) {
-                    oss << ", visibility = SHADER_VISIBILITY_DOMAIN";
-                },
-                [&](HS_) {
-                    oss << ", visibility = SHADER_VISIBILITY_HULL";
-                },
-                [&](VS_) {
-                    oss << ", visibility = SHADER_VISIBILITY_VERTEX";
-                }
-            ), index.mVisibility);
-        };
-
-        auto outputDetails = [&](const Descriptor& d) {
-            if (d.mSpace)
-                oss << ", space = " << d.mSpace;
-            outputVisibility();
-        };
-
-        visit(overload(
-            [&](Constants_) {
-                for (const auto& d : table.mDescriptors) {
-                    if (!std::holds_alternative<DescriptorCBV>(d.mModel)) {
-                        throw std::runtime_error("contant descriptor is not cbv");
-                    }
-                    if (!std::holds_alternative<ConstantBuffer_>(std::get<DescriptorCBV>(d.mModel))) {
-                        throw std::runtime_error("constant descriptor is not constant buffer");
-                    }
+                [&](Constants_) {
                     throw std::invalid_argument("root signature Constants not supported yet");
-                }
-            },
-            [&](auto type) {
-                for (const auto& d : table.mDescriptors) {
-                    if (DescriptorRangeType(type) != getDescriptorType(d.mModel)) {
-                        throw std::runtime_error("descriptor type and model inconsistent");
-                    }
-                    auto outputDescriptor = [&]() {
-                        OSS << bol << getRootDescriptorName(type) << "(" << getRegisterPrefix(type) << slots.increase(index.mVisibility, type, d.mSpace);
-                        outputDetails(d);
-                        oss << ")," << eol;
-                    };
-                    
-                    visit([&](const auto& dd) {
-                        visit(overload(
-                            [&](auto) {
-                                outputDescriptor();
-                            },
-                            [&](const DescriptorArray& range) {
-                                if (std::holds_alternative<RangeUnbounded>(range)) {
-                                    throw std::runtime_error("root descriptor unbounded not supported");
-                                }
-                                const auto& arr = std::get<RangeBounded>(range);
-                                for (uint32_t i = 0; i != arr.mCount; ++i) {
-                                    outputDescriptor();
-                                }
+                },
+                [&](auto type) {
+                    for (const auto& listPair : collection.mResourceViewLists) {
+                        const auto& spaceName = listPair.first;
+                        const auto& list = listPair.second;
+                        const auto& range = list.mRanges.at(DescriptorType{ type });
+                        Expects(list.mUnboundedDescriptors.empty());
+
+                        uint32_t slot = range.mStart;
+                        if (range.mCapacity == 0) {
+                            auto sz = getDescriptorCapacity(range);
+                            for (uint32_t i = 0; i != sz; ++i) {
+                                OSS << bol << getRootDescriptorName(type)
+                                    << "(" << getRegisterPrefix(type) << slot++;
+                                outputSpace(oss, range);
+                                outputVisibility(oss, index.mVisibility);
+                                oss << ")," << eol;
                             }
-                        ), dd);
-                    }, d.mModel);
-                }
-            },
-            [&](SSV_) {
-                for (const auto& d : table.mDescriptors) {
-                    if (!std::holds_alternative<DescriptorSSV>(d.mModel)) {
-                        throw std::runtime_error("contant descriptor is not srv");
-                    }
-                    auto outputSSV = [&]() {
-                        OSS << bol << "StaticSampler(s" << slots.increase(index.mVisibility, SSV, d.mSpace);
-                        outputDetails(d);
-                        oss << ")," << eol;
-                    };
-                    visit(overload(
-                        [&](auto) {
-                            outputSSV();
-                        },
-                        [&](const DescriptorArray& range) {
-                            if (std::holds_alternative<RangeUnbounded>(range)) {
-                                throw std::runtime_error("root descriptor unbounded not supported");
-                            }
-                            const auto& arr = std::get<RangeBounded>(range);
-                            for (uint32_t i = 0; i != arr.mCount; ++i) {
-                                outputSSV();
+                        } else {
+                            for (uint32_t i = 0; i != range.mCapacity; ++i) {
+                                OSS << bol << getRootDescriptorName(type)
+                                    << "(" << getRegisterPrefix(type) << slot++;
+                                outputSpace(oss, range);
+                                outputVisibility(oss, index.mVisibility);
+                                oss << ")," << eol;
                             }
                         }
-                    ), std::get<DescriptorSSV>(d.mModel));
-                }
-            },
-            [&](Table_) {
-                OSS << bol << "DescriptorTable(";
-                uint tableCount = 0;
-                uint prevReg = 0;
-                Descriptor prev{};
-
-                auto finish = [&]() {
-                    oss << getVariantName(prev.mType) << "(" << getRegisterPrefix(prev.mType);
-                    oss << prevReg;
-
-                    if (isUnbounded(prev.mModel)) {
-                        oss << ", numDescriptors = unbounded";
-                    } else {
-                        uint numReg = slots.get(index.mVisibility, prev.mType, prev.mSpace) - prevReg;
-                        if (numReg == 0)
-                            throw std::runtime_error("num reg is 0");
-
-                        if (numReg > 1) {
-                            oss << ", numDescriptors = " << numReg;
-                        }
+                        Ensures(slot - range.mStart == range.mCount);
                     }
+                },
+                [&](SSV_ type) {
+                    for (const auto& listPair : collection.mSamplerLists) {
+                        const auto& spaceName = listPair.first;
+                        const auto& list = listPair.second;
+                        const auto& range = list.mRanges.at(DescriptorType{ type });
+                        Expects(list.mUnboundedDescriptors.empty());
+                        Expects(range.mCount);
 
-                    if (prev.mSpace) {
-                        oss << ", space = " << prev.mSpace;
-                    }
-                };
-
-                for (const auto& d : table.mDescriptors) {
-                    if (tableCount == 0 || prev.mType != d.mType || prev.mSpace != d.mSpace) {
-                        if (tableCount++) {
-                            finish();
+                        uint32_t slot = range.mStart;
+                        if (range.mCapacity == 0) {
+                            auto sz = getDescriptorCapacity(range);
+                            for (uint32_t i = 0; i != sz; ++i) {
+                                OSS << bol << "StaticSampler(s" << slot++;
+                                outputSpace(oss, range);
+                                outputVisibility(oss, index.mVisibility);
+                                oss << ")," << eol;
+                            }
+                        } else {
+                            for (uint32_t i = 0; i != range.mCapacity; ++i) {
+                                OSS << bol << "StaticSampler(s" << slot++;
+                                outputSpace(oss, range);
+                                outputVisibility(oss, index.mVisibility);
+                                oss << ")," << eol;
+                            }
                         }
-                        prevReg = slots.get(index.mVisibility, d.mType, d.mSpace);
+                        Ensures(slot - range.mStart == range.mCount);
                     }
-
-                    visit(overload(
-                        [&](const auto& v) {
-                            visit(overload(
-                                [&](const auto&) {
-                                    slots.increase(index.mVisibility, d.mType, d.mSpace);
-                                },
-                                [&](const DescriptorArray& r) {
-                                    visit(overload(
-                                        [&](const RangeBounded& arr) {
-                                            slots.increase(index.mVisibility, d.mType, d.mSpace, arr.mCount);
-                                        },
-                                        [](RangeUnbounded) {}
-                                    ), r);
-                                }
-                            ), v);
-                        }
-                    ), d.mModel);
-
-                    prev = d;
+                },
+                [&](Table_) {
+                    for (const auto& listPair : collection.mResourceViewLists) {
+                        const auto& list = listPair.second;
+                        outputTable(oss, space, list, index.mVisibility);
+                    }
+                    for (const auto& listPair : collection.mSamplerLists) {
+                        const auto& list = listPair.second;
+                        outputTable(oss, space, list, index.mVisibility);
+                    }
                 }
-
-                if (tableCount) {
-                    finish();
-                    oss << ")";
-                }
-                outputVisibility();
-                oss << ")," << eol;
-            }
-        ), index.mType);
-    }
+            ), index.mType);
+        } // for collection
+    } // for update
 
     auto content = oss.str();
     boost::algorithm::replace_last(content, "),\" \\", ")\"");
@@ -409,9 +416,9 @@ std::string ShaderGroup::generateRootSignature() const {
     return content;
 }
 
-const ShaderConstantBuffer& ShaderGroup::getConstantBuffer(const DescriptorIndex& index) const {
+const ConstantBuffer& ShaderGroup::getConstantBuffer(const DescriptorIndex& index) const {
     if (index.mUpdate == mUpdateFrequency) {
-        return mRootSignature.mConstantBuffers.at(index);
+        return mRootSignature.mDatabase.mConstantBuffers.at(index);
     } else if (index.mUpdate > mUpdateFrequency) {
         if (!mParent) {
             throw std::runtime_error("lower frequency parent not exists");

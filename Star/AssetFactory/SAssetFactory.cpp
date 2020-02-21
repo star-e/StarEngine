@@ -63,7 +63,7 @@ struct AssetFactory::Impl final : public Core::Producer {
             { "tangent", { 0, 2 } },
             { "uv", { 0, 3 } },
         };
-        mResources.mSettings.mIndex.emplace("StaticMesh", 0);
+        mResources.mSettings.mVertexLayoutIndex.emplace("StaticMesh", 0);
     }
     Impl(const Impl&) = delete;
     Impl& operator=(const Impl&) = delete;
@@ -503,19 +503,19 @@ private:
         return iter->mMetaID;
     }
 
-    void createShaders(const ShaderGroups& shaderGroups, std::string_view folder,
-        const ShaderDatabase& db, RenderGraphData& rg
+    void createShaders(const RenderGraphFactory& factory,
+        const Shader::AttributeDatabase& attrs, RenderGraphData& rg
     ) {
-        auto shaderFolder = std::filesystem::path(folder);
+        const auto& shaderFolder = factory.mFolder;
         if (!exists(mFolder / shaderFolder)) {
             create_directories(mFolder / shaderFolder);
         }
-        for (const auto& [prototypeName, prototype] : db.mPrototypes) {
+        for (const auto& [prototypeName, prototype] : factory.mShaderDatabase.mPrototypes) {
             auto assetPath = boost::algorithm::to_lower_copy((shaderFolder / prototype.mAssetPath).generic_string());
 
             ShaderData prototypeData(std::pmr::get_default_resource());
             prototypeData.mName = prototypeName;
-            buildShaderData(prototype, mShaderModules, shaderGroups, prototypeData, false);
+            buildShaderData(prototype, mShaderModules, factory.mShaderGroups, attrs, prototypeData, false);
 
             std::ostringstream oss;
             buildShaderText2(oss, prototypeData);
@@ -534,7 +534,7 @@ private:
             auto res3 = try_createResource(assetPath, mDatabase.mShaderInfo, mResources.mShaders);
             Ensures(res3.second);
             auto& prototypeResource = res3.first.second;
-            buildShaderData(prototype, mShaderModules, shaderGroups, prototypeResource);
+            buildShaderData(prototype, mShaderModules, factory.mShaderGroups, attrs, prototypeResource);
 
             rg.mShaderIndex.emplace(prototypeName, res.first->mMetaID);
         }
@@ -558,8 +558,43 @@ public:
     void build() {
         updateResource("settings.star", mResources.mSettings);
 
-        for (const auto& renderAsset : mDatabase.mRenderGraphInfo) {
-            updateResource(renderAsset.mName, mResources.mRenderGraphs.at(renderAsset.mMetaID));
+        // build shader attributes
+        Shader::AttributeDatabase attributes;
+        for (const auto& renderGraphInfo : mDatabase.mRenderGraphInfo) {
+            const auto& rg = at(mRenderGraphs, renderGraphInfo.mName);
+            rg.buildAttributeDatabase(attributes);
+        }
+        for (const auto& attr : attributes.mAttributes) {
+            auto id = attributes.mIndex.size();
+            attributes.mIndex.emplace(attr.mName, gsl::narrow<uint32_t>(id));
+        }
+
+        // build render graph and shaders
+        for (const auto& renderGraphInfo : mDatabase.mRenderGraphInfo) {
+            auto& renderGraphData = mResources.mRenderGraphs.at(renderGraphInfo.mMetaID);
+            auto& renderSwapChain = renderGraphData.mRenderGraph;
+            
+            const auto& rg = at(mRenderGraphs, renderGraphInfo.mName);
+            createShaders(rg, attributes, renderGraphData);
+
+            renderSwapChain.mNumBackBuffers = 3;
+
+            for (auto& [solutionName, factory] : rg.mSolutionFactories) {
+                auto& solutionData = renderSwapChain.mSolutions.at(at(renderSwapChain.mSolutionIndex, solutionName));
+
+                std::ostringstream oss;
+                factory.build(attributes, solutionName, solutionData, oss);
+                auto fileRSG = mFolder / renderGraphInfo.mName;
+                fileRSG.replace_extension(".rsg");
+                updateFile(fileRSG, oss.str());
+                renderSwapChain.mNumReserveFramebuffers = std::max(renderSwapChain.mNumReserveFramebuffers, gsl::narrow<uint32_t>(solutionData.mFramebuffers.size()));
+                //renderSwapChain.mNumReserveSRVs = std::max(renderSwapChain.mNumReserveSRVs, gsl::narrow<uint32_t>(solutionData.mSRVs.size()));
+                //renderSwapChain.mNumReserveUAVs = std::max(renderSwapChain.mNumReserveUAVs, gsl::narrow<uint32_t>(solutionData.mUAVs.size()));
+                renderSwapChain.mNumReserveDSVs = std::max(renderSwapChain.mNumReserveDSVs, gsl::narrow<uint32_t>(solutionData.mDSVs.size()));
+                renderSwapChain.mNumReserveRTVs = std::max(renderSwapChain.mNumReserveRTVs, gsl::narrow<uint32_t>(solutionData.mRTVs.size()));
+            }
+
+            updateResource(renderGraphInfo.mName, mResources.mRenderGraphs.at(renderGraphInfo.mMetaID));
         }
 
         auto meshFolder = mLibrary / "star_meshes";
@@ -605,7 +640,7 @@ public:
                 auto vertexLayoutID = meshData.mLayoutID;
                 std::string layoutName(sv(meshData.mLayoutName));
                 Expects(!layoutName.empty());
-                Expects(at(mResources.mSettings.mIndex, sv(layoutName)) == vertexLayoutID);
+                Expects(at(mResources.mSettings.mVertexLayoutIndex, sv(layoutName)) == vertexLayoutID);
 
                 if (layoutName.empty()) {
                     throw std::runtime_error("build shader failed, vertex layout not found");
@@ -645,7 +680,8 @@ public:
             materialData.mShader = materialAsset.mShader;
             materialData.mTextures.reserve(materialAsset.mTextures.size());
             for (const auto& texID : materialAsset.mTextures) {
-                materialData.mTextures.emplace(texID);
+                auto id = attributes.mIndex.at(texID.first);
+                materialData.mTextures.emplace(id, texID.second);
             }
             updateResource(materialAsset.mName, materialData);
         }
@@ -934,12 +970,10 @@ public:
         return res.second;
     }
 
-    void editRenderGraph(std::string_view assetPath0) {
+    void editRenderGraph(std::string_view assetPath0, std::string_view shaderFolder) {
         auto assetPath = getAssetName(assetPath0);
-        auto res1 = mRenderGraphs.try_emplace(assetPath);
+        auto res1 = mRenderGraphs.try_emplace(assetPath, RenderGraphFactory{ mShaderModules, shaderFolder });
         Ensures(res1.second);
-        auto res2 = mShaderGroups.try_emplace(assetPath);
-        Ensures(res2.second);
 
         clearResource(assetPath, mDatabase.mRenderGraphInfo, mResources.mRenderGraphs);
         {
@@ -954,27 +988,16 @@ public:
     std::pair<Graphics::Render::RenderSolutionFactory&, bool> try_createRenderSolution(
         std::string_view renderGraph, std::string_view solution
     ) {
-        auto& factories = at(mRenderGraphs, getAssetName(renderGraph));
-        auto res = factories.try_emplace(str(solution), str(solution));
+        auto& rg = at(mRenderGraphs, getAssetName(renderGraph));
+        auto res = rg.mSolutionFactories.try_emplace(str(solution), str(solution));
         return { res.first->second, res.second };
     }
 
-    void consolidateRenderGraph(std::string_view renderGraph) {
+    ShaderDatabase& setupRenderGraph(std::string_view renderGraph) {
         auto name = getAssetName(renderGraph);
-        auto& factories = at(mRenderGraphs, name);
-        auto& shaderGroups = at(mShaderGroups, name);
-
-        for (const auto& [solutionName, solutionFactory] : factories) {
-            solutionFactory.buildShaderGroup(shaderGroups);
-        }
-    }
-
-    void createShaders(std::string_view renderGraph, std::string_view folder, const Graphics::Render::Shader::ShaderDatabase& db) {
-        auto& shaderGroups = at(mShaderGroups, renderGraph);
-        db.fillShaderGroups(shaderGroups);
-        shaderGroups.buildRootSignatures(mShaderModules, PerPass);
-        auto& rg = getResource(renderGraph, mDatabase.mRenderGraphInfo, mResources.mRenderGraphs);
-        createShaders(shaderGroups, folder, db, rg);
+        auto& rg = at(mRenderGraphs, name);
+        rg.buildShaderGroupFromSolutions();
+        return rg.mShaderDatabase;
     }
 
     void addContent(std::string_view contentPath, std::string_view renderGraphPath,
@@ -990,31 +1013,15 @@ public:
         queue.mContents.emplace_back(contentID);
     }
 
-    void compileRenderGraph(std::string_view renderGraph) {
+    void saveRenderGraph(std::string_view renderGraph) {
+        auto& rg = at(mRenderGraphs, getAssetName(renderGraph));
+        rg.bindShadersToShaderGroups();
+        rg.buildRootSignatureAndDescriptors();
+        rg.completeFactories();
+
+        // init render graph data
         auto& renderGraphData = getResource(renderGraph, mDatabase.mRenderGraphInfo, mResources.mRenderGraphs).mRenderGraph;
-
-        const auto& shaderGroups = at(mShaderGroups, renderGraph);
-
-        auto& solutionFactories = at(mRenderGraphs, renderGraph);
-        for (auto& [solutionName, factory] : solutionFactories) {
-            factory.updateRenderGraph(mShaderModules, shaderGroups);
-            factory.validateGraphs();
-            renderGraphData.mSolutionIndex.emplace(solutionName, gsl::narrow<uint32_t>(renderGraphData.mSolutions.size()));
-            auto& solutionData = renderGraphData.mSolutions.emplace_back();
-
-            std::ostringstream oss;
-            factory.build(solutionName, solutionData, oss);
-            auto fileRSG = mFolder / renderGraph;
-            fileRSG.replace_extension(".rsg");
-            updateFile(fileRSG, oss.str());
-            renderGraphData.mNumReserveFramebuffers = std::max(renderGraphData.mNumReserveFramebuffers, gsl::narrow<uint32_t>(solutionData.mFramebuffers.size()));
-            //renderGraphData.mNumReserveSRVs = std::max(renderGraphData.mNumReserveSRVs, gsl::narrow<uint32_t>(solutionData.mSRVs.size()));
-            //renderGraphData.mNumReserveUAVs = std::max(renderGraphData.mNumReserveUAVs, gsl::narrow<uint32_t>(solutionData.mUAVs.size()));
-            renderGraphData.mNumReserveDSVs = std::max(renderGraphData.mNumReserveDSVs, gsl::narrow<uint32_t>(solutionData.mDSVs.size()));
-            renderGraphData.mNumReserveRTVs = std::max(renderGraphData.mNumReserveRTVs, gsl::narrow<uint32_t>(solutionData.mRTVs.size()));
-        }
-
-        renderGraphData.mNumBackBuffers = 3;
+        rg.buildRenderGraphData(renderGraphData);
     }
 
     std::thread::id mThreadID = {};
@@ -1027,9 +1034,8 @@ public:
     Resources mResources;
 
     std::pmr::unordered_map<MetaID, FlattenedObjects> mFlattenedFbx;
-    Map<std::string, Map<std::string, RenderSolutionFactory>> mRenderGraphs;
-    ShaderModules mShaderModules;
-    Map<std::string, ShaderGroups> mShaderGroups;
+    Shader::ShaderModules mShaderModules;
+    Map<std::string, RenderGraphFactory> mRenderGraphs;
 
     int32_t mMaxTaskCount = 4;
     int32_t mTaskCount = 0;
@@ -1063,11 +1069,11 @@ void AssetFactory::registerProducers() {
     mImpl->registerProducers();
 }
 
-ShaderModules& AssetFactory::getShaderModules() {
+Shader::ShaderModules& AssetFactory::getShaderModules() {
     return mImpl->mShaderModules;
 }
 
-const ShaderModules& AssetFactory::getShaderModules() const {
+const Shader::ShaderModules& AssetFactory::getShaderModules() const {
     return mImpl->mShaderModules;
 }
 
@@ -1075,8 +1081,8 @@ bool AssetFactory::try_createRenderGraph(std::string_view assetPath, std::string
     return mImpl->try_createRenderGraph(assetPath, name, width, height);
 }
 
-void AssetFactory::editRenderGraph(std::string_view assetPath) {
-    mImpl->editRenderGraph(assetPath);
+void AssetFactory::editRenderGraph(std::string_view assetPath, std::string_view shaderFolder) {
+    mImpl->editRenderGraph(assetPath, shaderFolder);
 }
 
 std::pair<Graphics::Render::RenderSolutionFactory&, bool> AssetFactory::try_createRenderSolution(
@@ -1085,12 +1091,8 @@ std::pair<Graphics::Render::RenderSolutionFactory&, bool> AssetFactory::try_crea
     return mImpl->try_createRenderSolution(renderGraph, solution);
 }
 
-void AssetFactory::consolidateRenderGraph(std::string_view assetPath) {
-    mImpl->consolidateRenderGraph(assetPath);
-}
-
-void AssetFactory::createShaders(std::string_view renderGraph, std::string_view folder, const Graphics::Render::Shader::ShaderDatabase& db) {
-    mImpl->createShaders(renderGraph, folder, db);
+ShaderDatabase& AssetFactory::setupRenderGraph(std::string_view assetPath) {
+    return mImpl->setupRenderGraph(assetPath);
 }
 
 void AssetFactory::addContent(std::string_view contentPath, std::string_view renderGraphPath,
@@ -1099,8 +1101,8 @@ void AssetFactory::addContent(std::string_view contentPath, std::string_view ren
     mImpl->addContent(contentPath, renderGraphPath, solution, pipeline, pass);
 }
 
-void AssetFactory::compileRenderGraph(std::string_view renderGraph) {
-    mImpl->compileRenderGraph(renderGraph);
+void AssetFactory::saveRenderGraph(std::string_view renderGraph) {
+    mImpl->saveRenderGraph(renderGraph);
 }
 
 void AssetFactory::build() const {

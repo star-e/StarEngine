@@ -20,6 +20,7 @@
 #include <StarCompiler/RenderGraph/SRenderGraphFactory.h>
 #include <StarCompiler/ShaderGraph/SShaderSemantics.h>
 #include <StarCompiler/ShaderGraph/SShaderGroups.h>
+#include <StarCompiler/ShaderGraph/SShaderModules.h>
 #include <StarCompiler/ShaderWorks/SBasicModules.h>
 #include <StarCompiler/ShaderWorks/SStarModules.h>
 #include <StarCompiler/ShaderWorks/SShaderCompiler.h>
@@ -49,10 +50,10 @@ void buildForwardSolution(RenderSolutionFactory& renderSolutionFactory) {
     context.mStrictLightingColorSpace = false;
     context.mVerbose = true;
 
-    ClearColor DefaultClearColor{ float4(0.251f, 0.3137255f, 0.5529f, 1.0f) };
-    ClearColor AlbedoClearColor{ float4{ 0.5f, 0.5f, 0.5f, 1.0f } };
-    ClearColor NormalClearColor{ float4{ 0.5f, 0.5f, 1.0f, 0.0f } };
-    ClearColor ZeroClearColor{ float4{ 0.0f, 0.0f, 0.0f, 0.0f } };
+    ClearColor DefaultClearColor{ Float4(0.251f, 0.3137255f, 0.5529f, 1.0f) };
+    ClearColor AlbedoClearColor{ Float4{ 0.5f, 0.5f, 0.5f, 1.0f } };
+    ClearColor NormalClearColor{ Float4{ 0.5f, 0.5f, 1.0f, 0.0f } };
+    ClearColor ZeroClearColor{ Float4{ 0.0f, 0.0f, 0.0f, 0.0f } };
 
     //// Image Effects
     //{
@@ -213,7 +214,7 @@ void buildMaterials(Resources& resources) {
 int buildForwardShaders(const ShaderModules& modules, ShaderDatabase& db) {
     //Shader("Star/RenderPipeline") {
     //    SinglePass("Forward", "Forward", "Lighting", 0) {
-    //        PixelShader({ "color", half4(), SV_Target }) {
+    //        PixelShader({ "color", half4, SV_Target }) {
     //            Group(VisualizeWorldNormal)
     //        }
 
@@ -222,7 +223,7 @@ int buildForwardShaders(const ShaderModules& modules, ShaderDatabase& db) {
     //        }
     //    }
     //    SinglePass("Desktop", "Deferred", "Lighting", 0) {
-    //        PixelShader({ "color", half4(), SV_Target }) {
+    //        PixelShader({ "color", half4, SV_Target }) {
     //            Group(DeferredLambertian);
     //            Group(UnpackGBuffers);
     //        }
@@ -232,7 +233,7 @@ int buildForwardShaders(const ShaderModules& modules, ShaderDatabase& db) {
     //        }
     //    }
     //    SinglePass("Desktop", "Deferred", "PostProcessing", 0) {
-    //        PixelShader({ "color", half4(), SV_Target }) {
+    //        PixelShader({ "color", half4, SV_Target }) {
     //            Group(CopyRadiance);
     //        }
 
@@ -244,14 +245,14 @@ int buildForwardShaders(const ShaderModules& modules, ShaderDatabase& db) {
 
     Shader("Star/Diffuse", "diffuse.shader") {
         SinglePass("Forward", "Diffuse", "Lighting", 0) {
-            PixelShader({ "color", half4(), SV_Target }) {
+            PixelShader({ "color", half4, SV_Target }) {
                 Node(OutputAlbedo, Inline,
                     Outputs{
-                        { "color", half4() },
+                        { "color", half4 },
                     },
                     Inputs{
-                        { "baseColor", half3()  },
-                        { "transparency", half1() },
+                        { "baseColor", half3  },
+                        { "transparency", half1 },
                     },
                     Content{ R"(color = half4(baseColor, transparency);
 )" });
@@ -272,7 +273,7 @@ int main() {
     std::cout << "---------------------------------------\n";
 
     try {
-        Asset::AssetFactory factory("../../../deploy/SAsset", "../../../deploy/windows2",
+        Asset::AssetFactory factory("../../../deploy/asset", "../../../deploy/windows2",
             std::pmr::get_default_resource());
         
         auto& modules = factory.getShaderModules();
@@ -293,19 +294,16 @@ int main() {
         factory.try_createRenderGraph(renderGraphAsset, "main", 1280, 720);
 
         // add Forward render graph
-        factory.editRenderGraph(renderGraphAsset);
+        factory.editRenderGraph(renderGraphAsset, renderGraphShaderFolder);
         auto res = factory.try_createRenderSolution(renderGraphAsset, "Forward");
         Ensures(res.second);
         buildForwardSolution(res.first);
-        factory.consolidateRenderGraph(renderGraphAsset);
-
+        auto& shadersForward = factory.setupRenderGraph(renderGraphAsset);
         // add shaders
-        ShaderDatabase shadersForward;
         buildForwardShaders(modules, shadersForward);
-        factory.createShaders(renderGraphAsset, renderGraphShaderFolder, shadersForward);
 
-        // compile render graph
-        factory.compileRenderGraph(renderGraphAsset);
+        // save render graph
+        factory.saveRenderGraph(renderGraphAsset);
 
         // build contents
         factory.try_createContent("scene/sponza.content");

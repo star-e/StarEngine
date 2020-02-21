@@ -24,164 +24,85 @@ namespace Star::Graphics::Render::Shader {
 
 namespace {
 
-struct AttributeDescriptorVisitor {
-    const ShaderAttribute& mAttribute;
-    uint32_t mSpace = 0;
-
-    template<class Scalar, int Rows, int Cols>
-    Descriptor operator()(const Eigen::Matrix<Scalar, Rows, Cols>& v) {
-        throw std::invalid_argument("constants not supported");
-    }
-
-    Descriptor operator()(const FloatRange& v) {
-        throw std::invalid_argument("FloatRange not supported");
-    }
-    Descriptor operator()(const HalfRange& v) {
-        throw std::invalid_argument("HalfRange not supported");
-    }
-
-    Descriptor operator()(const InputPatch_& v) {
-        throw std::invalid_argument("InputPatch not supported");
-    }
-    Descriptor operator()(const OutputPatch_& v) {
-        throw std::invalid_argument("OutputPatch not supported");
-    }
-
-    Descriptor operator()(const ConstantBuffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
-        return Descriptor{ CBV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const Buffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
-        return Descriptor{ CBV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const ByteAddressBuffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
-        return Descriptor{ CBV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const StructuredBuffer_& v) {
-        DescriptorCBV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorCBV{ RangeUnbounded() } : v;
-        return Descriptor{ CBV, mSpace, model, mAttribute.mName };
-    }
-
-    Descriptor operator()(const Texture1D_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const Texture1DArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const Texture2D_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const Texture2DArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const Texture2DMS_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const Texture2DMSArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const Texture3D_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const TextureCube_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-    Descriptor operator()(const TextureCubeArray_& v) {
-        DescriptorSRV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorSRV{ RangeUnbounded() } : v;
-        return Descriptor{ SRV, mSpace, model, mAttribute.mName };
-    }
-
-    template<class T>
-    Descriptor operator()(const T& v) {
-        DescriptorUAV model = (mAttribute.mFlags & UnboundedSize) ? DescriptorUAV{ RangeUnbounded() } : v;
-        return Descriptor{ UAV, mSpace, model, mAttribute.mName };
-    }
-
-    Descriptor operator()(const SamplerState_& v) {
-        return Descriptor{ SSV, mSpace, v, mAttribute.mName };
-    }
-};
-
 struct AttributeDescriptorTypeVisitor {
-    const ShaderAttribute& mAttribute;
-    uint32_t mSpace = 0;
-
     template<class Scalar, int Rows, int Cols>
-    DescriptorRangeType operator()(const Eigen::Matrix<Scalar, Rows, Cols>& v) {
+    DescriptorType operator()(const Eigen::Matrix<Scalar, Rows, Cols>& v) const noexcept {
+        return CBV;
+    }
+    DescriptorType operator()(const float& v) const noexcept {
+        return CBV;
+    }
+    DescriptorType operator()(const uint32_t& v) const noexcept {
+        return CBV;
+    }
+    DescriptorType operator()(const int32_t& v) const noexcept {
+        return CBV;
+    }
+    DescriptorType operator()(const half& v) const noexcept {
         return CBV;
     }
 
-    DescriptorRangeType operator()(const FloatRange& v) {
+    DescriptorType operator()(const FloatRange& v) const noexcept {
         return CBV;
     }
-    DescriptorRangeType operator()(const HalfRange& v) {
+    DescriptorType operator()(const HalfRange& v) const noexcept {
         return CBV;
     }
 
-    DescriptorRangeType operator()(const InputPatch_& v) {
+    DescriptorType operator()(const InputPatch_& v) const {
         throw std::invalid_argument("InputPatch not supported");
     }
-    DescriptorRangeType operator()(const OutputPatch_& v) {
+    DescriptorType operator()(const OutputPatch_& v) const {
         throw std::invalid_argument("OutputPatch not supported");
     }
 
-    DescriptorRangeType operator()(const ConstantBuffer_& v) {
+    DescriptorType operator()(const CBuffer_& v) const noexcept {
         return CBV;
     }
-    DescriptorRangeType operator()(const Buffer_& v) {
+    DescriptorType operator()(const Buffer_& v) const noexcept {
         return CBV;
     }
-    DescriptorRangeType operator()(const ByteAddressBuffer_& v) {
+    DescriptorType operator()(const ByteAddressBuffer_& v) const noexcept {
         return CBV;
     }
-    DescriptorRangeType operator()(const StructuredBuffer_& v) {
+    DescriptorType operator()(const StructuredBuffer_& v) const noexcept {
         return CBV;
     }
 
-    DescriptorRangeType operator()(const Texture1D_& v) {
+    DescriptorType operator()(const Texture1D_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const Texture1DArray_& v) {
+    DescriptorType operator()(const Texture1DArray_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const Texture2D_& v) {
+    DescriptorType operator()(const Texture2D_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const Texture2DArray_& v) {
+    DescriptorType operator()(const Texture2DArray_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const Texture2DMS_& v) {
+    DescriptorType operator()(const Texture2DMS_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const Texture2DMSArray_& v) {
+    DescriptorType operator()(const Texture2DMSArray_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const Texture3D_& v) {
+    DescriptorType operator()(const Texture3D_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const TextureCube_& v) {
+    DescriptorType operator()(const TextureCube_& v) const noexcept {
         return SRV;
     }
-    DescriptorRangeType operator()(const TextureCubeArray_& v) {
+    DescriptorType operator()(const TextureCubeArray_& v) const noexcept {
         return SRV;
     }
 
     template<class T>
-    DescriptorRangeType operator()(const T& v) {
+    DescriptorType operator()(const T& v) const noexcept {
         return UAV;
     }
 
-    DescriptorRangeType operator()(const SamplerState_& v) {
+    DescriptorType operator()(const SamplerState_& v) const noexcept {
         return SSV;
     }
 };
@@ -189,35 +110,11 @@ struct AttributeDescriptorTypeVisitor {
 }
 
 RootParameterType getRootParameterType(const ShaderAttribute& attr) {
-    auto type = getDescriptorType(attr);
-
-    return visit(overload(
-        [&](CBV_) -> RootParameterType {
-            if (attr.mFlags & RootConstant) {
-                return Constants;
-            } else if (attr.mFlags & RootLevel) {
-                return CBV;
-            } else {
-                return Table;
-            }
-        },
-        [&](auto v) -> RootParameterType {
-            if (attr.mFlags & RootLevel) {
-                return v;
-            } else {
-                return Table;
-            }
-        }
-    ), type);
+    return attr.mDescriptor.mRootParameterType;
 }
 
-DescriptorRangeType getDescriptorType(const ShaderAttribute& attr) {
-    AttributeDescriptorTypeVisitor visitor{ attr, 0 };
-    return visit(visitor, attr.mType);
-}
-
-Descriptor getDescriptor(const ShaderAttribute& attr, uint32_t space) {
-    AttributeDescriptorVisitor visitor{ attr, space };
+DescriptorType getDescriptorType(const ShaderAttribute& attr) {
+    AttributeDescriptorTypeVisitor visitor;
     return visit(visitor, attr.mType);
 }
 
@@ -352,28 +249,76 @@ const char* getName(const AttributeType& attr) noexcept {
 
 const char* getHLSLName(const AttributeType& attr) noexcept {
     return visit(overload(
-#define FOR_NAME_ELEM(r, _, i, NAME) [&](const NAME&) { return BOOST_PP_STRINGIZE(NAME); },
+#define FOR_NAME_ELEM(r, __, i, NAME) [&](const BOOST_PP_CAT(NAME, _)&) { return BOOST_PP_STRINGIZE(NAME); },
 #define FOR_NAME(...) BOOST_PP_SEQ_FOR_EACH_I(FOR_NAME_ELEM, _, BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__)))
-        FOR_NAME(matrix, float4, uint4, int4, float2, uint2, int2, half4, half2, fixed4)
+        FOR_NAME(matrix, float4, uint4, int4, float2, uint2, int2, half4, half2, fixed4, float1, uint1, int1, half1)
 #undef FOR_NAME
 #undef FOR_NAME_ELEM
-        [&](const float1&) {
-            return "float";
-        },
-        [&](const uint1&) {
-            return "uint";
-        },
-        [&](const int1&) {
-            return "int";
-        },
-        [&](const half1&) {
-            return "half";
-        },
         [&](const auto& v) {
             using namespace Star;
             return getName(v);
         }
     ), attr);
+}
+
+void compileShaderAttribute(ShaderAttribute& attr) {
+    attr.mDescriptor.mDescriptorType = getDescriptorType(attr);
+    attr.mDescriptor.mName = attr.mName;
+}
+
+bool isConstant(const ShaderAttribute& attr) {
+    IsConstant visitor;
+    return visit(visitor, attr.mType);
+}
+
+DescriptorIndex getDescriptorIndex(const AttributeDescriptor& d, ShaderVisibilityType vis) {
+    return DescriptorIndex{
+        d.mUpdate,
+        d.mRootParameterType,
+        vis,
+        d.mPersistency,
+    };
+}
+
+uint32_t getDescriptorCapacity(const ShaderAttribute& attr) {
+    uint32_t capacity = 0;
+    visit(overload(
+        [&](DefaultView_) {
+            capacity += 1;
+        },
+        [&](const TextureView& view) {
+            uint32_t sz = 0;
+            visit(overload(
+                [&](std::monostate) {
+                    sz = 1;
+                },
+                [&](const ArrayRange& range) {
+                    sz = range.mArraySize;
+                },
+                [&](const DepthRange& range) {
+                    sz = 1;
+                },
+                [&](const CubeSlice& range) {
+                    sz = 1;
+                },
+                [&](const CubeRange& range) {
+                    sz = range.mNumCubes;
+                }
+            ), view.mArrayOrDepthView);
+            capacity += sz;
+        }
+    ), attr.mData);
+    return capacity;
+}
+
+uint32_t getDescriptorCapacity(const DescriptorRange& range) {
+    uint32_t capacity = 0;
+    for (const auto& [source, subrange] : range.mSubranges) {
+        for (const auto& attr : subrange.mAttributes) {
+            capacity += getDescriptorCapacity(attr);
+        }
+    }
+    return capacity;
 }
 
 AttributeMap getAttributes(const AttributeMap& attrs, const AttributeUsageMap& usages) {

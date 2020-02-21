@@ -283,32 +283,15 @@ struct RenderNode {
         : mName(std::move(name))
         , mOutputs(std::move(outputs))
     {}
-    RenderNode(std::string name, ResourceDataViewMap<RenderValue> outputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mOutputs(std::move(outputs))
-        , mQueue(std::move(queue))
-    {}
     RenderNode(std::string name, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs)
         : mName(std::move(name))
         , mOutputs(std::move(outputs))
         , mInputs(std::move(inputs))
     {}
-    RenderNode(std::string name, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mOutputs(std::move(outputs))
-        , mInputs(std::move(inputs))
-        , mQueue(std::move(queue))
-    {}
     RenderNode(std::string name, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs)
         : mName(std::move(name))
         , mColorSpace(std::move(colorSpace))
         , mOutputs(std::move(outputs))
-    {}
-    RenderNode(std::string name, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mColorSpace(std::move(colorSpace))
-        , mOutputs(std::move(outputs))
-        , mQueue(std::move(queue))
     {}
     RenderNode(std::string name, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs)
         : mName(std::move(name))
@@ -316,23 +299,10 @@ struct RenderNode {
         , mOutputs(std::move(outputs))
         , mInputs(std::move(inputs))
     {}
-    RenderNode(std::string name, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mColorSpace(std::move(colorSpace))
-        , mOutputs(std::move(outputs))
-        , mInputs(std::move(inputs))
-        , mQueue(std::move(queue))
-    {}
     RenderNode(std::string name, ResourceSampling sampling, ResourceDataViewMap<RenderValue> outputs)
         : mName(std::move(name))
         , mSampling(std::move(sampling))
         , mOutputs(std::move(outputs))
-    {}
-    RenderNode(std::string name, ResourceSampling sampling, ResourceDataViewMap<RenderValue> outputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mSampling(std::move(sampling))
-        , mOutputs(std::move(outputs))
-        , mQueue(std::move(queue))
     {}
     RenderNode(std::string name, ResourceSampling sampling, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs)
         : mName(std::move(name))
@@ -340,25 +310,11 @@ struct RenderNode {
         , mOutputs(std::move(outputs))
         , mInputs(std::move(inputs))
     {}
-    RenderNode(std::string name, ResourceSampling sampling, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mSampling(std::move(sampling))
-        , mOutputs(std::move(outputs))
-        , mInputs(std::move(inputs))
-        , mQueue(std::move(queue))
-    {}
     RenderNode(std::string name, ResourceSampling sampling, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs)
         : mName(std::move(name))
         , mSampling(std::move(sampling))
         , mColorSpace(std::move(colorSpace))
         , mOutputs(std::move(outputs))
-    {}
-    RenderNode(std::string name, ResourceSampling sampling, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mSampling(std::move(sampling))
-        , mColorSpace(std::move(colorSpace))
-        , mOutputs(std::move(outputs))
-        , mQueue(std::move(queue))
     {}
     RenderNode(std::string name, ResourceSampling sampling, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs)
         : mName(std::move(name))
@@ -367,20 +323,11 @@ struct RenderNode {
         , mOutputs(std::move(outputs))
         , mInputs(std::move(inputs))
     {}
-    RenderNode(std::string name, ResourceSampling sampling, ColorSpace colorSpace, ResourceDataViewMap<RenderValue> outputs, ResourceDataViewMap<RenderValue> inputs, std::vector<UnorderedRenderContent> queue)
-        : mName(std::move(name))
-        , mSampling(std::move(sampling))
-        , mColorSpace(std::move(colorSpace))
-        , mOutputs(std::move(outputs))
-        , mInputs(std::move(inputs))
-        , mQueue(std::move(queue))
-    {}
     std::string mName;
     ColorSpace mColorSpace;
     ResourceDataViewMap<RenderValue> mOutputs;
     ResourceDataViewMap<RenderValue> mInputs;
     ResourceSampling mSampling;
-    std::vector<UnorderedRenderContent> mQueue;
     std::string mRootSignature;
 };
 

@@ -19,6 +19,7 @@
 #include "SDX12SwapChain.h"
 #include <Star/DX12Engine/SDX12Types.h>
 #include <Star/Graphics/SCamera.h>
+#include <Star/Graphics/SContentUtils.h>
 
 namespace Star::Graphics::Render {
 
@@ -225,33 +226,112 @@ void DX12FrameQueue::renderFrame(const DX12FrameContext* pContext, std::pmr::mem
             //---------------------------------------------------
             // Subpass
             {
+                Camera cam{};
+                cam.mViewSpace = OpenGL;
+                cam.mNDC = Direct3D;
+                //cam.lookAt(Vector3f(0, 2.0f, 0), Vector3f(0, 1, 0), Vector3f(0, 0, 1));
+                cam.lookTo(Vector3f(0, 0, 1.7f), Vector3f(-1.f, 0, 0.0f), Vector3f(0, 0.0f, 1.0f));
+                cam.perspective(0.25f * S_PI, 16.0f / 9.0f, 0.25f, 512.0f);
+
                 D3D12_PRIMITIVE_TOPOLOGY prevTopology = {};
                 ID3D12PipelineState* pPrevPSO = nullptr;
                 for (const auto& queue : subpass.mOrderedRenderQueue) {
                     pCommandList->SetGraphicsRootSignature(subpass.mRootSignature.get());
-                    // Per-Subpass
-                    Camera cam{};
-                    cam.mViewSpace = OpenGL;
-                    cam.mNDC = Direct3D;
-                    //cam.lookAt(Vector3f(0, 2.0f, 0), Vector3f(0, 1, 0), Vector3f(0, 0, 1));
-                    cam.lookTo(Vector3f(0, 0, 1.7f), Vector3f(-1.f, 0, 0.0f), Vector3f(0, 0.0f, 1.0f));
-                    cam.perspective(0.25f * S_PI, 16.0f / 9.0f, 0.25f, 512.0f);
 
-                    auto sizeCB = sizeof(Matrix4f) * 2;
-                    sizeCB = boost::alignment::align_up(sizeCB, 256);
-                    perPassCB.resize(sizeCB);
-                    memcpy(perPassCB.data(), &cam.mProj, sizeof(cam.mProj));
-                    memcpy(perPassCB.data() + sizeof(Matrix4f), &cam.mView, sizeof(cam.mView));
-                    auto pos = mUploadBuffer.upload(perPassCB.data(), gsl::narrow_cast<uint32_t>(perPassCB.size()), 1, 256);
-                    D3D12_CONSTANT_BUFFER_VIEW_DESC desc{
-                        pos.mResource->GetGPUVirtualAddress() + pos.mBufferOffset, (uint32_t)perPassCB.size()
-                    };
-                    auto range = mDescriptors.allocateCircular(1);
-                    for (size_t i = 0; i != 1; ++i) {
-                        auto d = mDescriptors.advance(range.first, i);
-                        mDevice->CreateConstantBufferView(&desc, d.mCpuHandle);
+                    // PerPass Descriptors
+                    for (const auto& collection : subpass.mDescriptors) {
+                        if (collection.mIndex.mUpdate != UpdateEnum::PerPass) {
+                            continue;
+                        }
+                        if (std::holds_alternative<SSV_>(collection.mIndex.mType)) {
+                            continue;
+                        }
+                        for (const auto& list : collection.mResourceViewLists) {
+                            Expects(std::holds_alternative<Table_>(collection.mIndex.mType));
+                            Expects(list.mCapacity);
+                            auto descs = mDescriptors.allocateCircular(list.mCapacity);
+                            size_t descID = 0;
+                            for (const auto& range : list.mRanges) {
+                                for (const auto& subrange : range.mSubranges) {
+                                    visit(overload(
+                                        [&](EngineSource_) {
+                                            for (const auto& attr : subrange.mDescriptors) {
+                                                visit(overload(
+                                                    [&](Descriptor::ConstantBuffer_) {
+                                                        bool foundDescriptor = false;
+                                                        for (const auto& cb : subpass.mConstantBuffers) {
+                                                            if (cb.mIndex != collection.mIndex)
+                                                                continue;
+
+                                                            Expects(cb.mSize);
+                                                            auto sizeCB = boost::alignment::align_up(cb.mSize, 256);
+                                                            perPassCB.clear();
+                                                            perPassCB.resize(sizeCB);
+                                                            auto* pData = perPassCB.data();
+                                                            for (const auto& constant : cb.mConstants) {
+                                                                visit(overload(
+                                                                    [&](EngineSource_) {
+                                                                        visit(overload(
+                                                                            [&](Data::Proj_) {
+                                                                                Expects(pData + sizeof(Matrix4f) <= perPassCB.data() + perPassCB.size());
+                                                                                memcpy(pData, &cam.mProj, sizeof(Matrix4f));
+                                                                                pData += sizeof(Matrix4f);
+                                                                            },
+                                                                            [&](Data::View_) {
+                                                                                Expects(pData + sizeof(Matrix4f) <= perPassCB.data() + perPassCB.size());
+                                                                                memcpy(pData, &cam.mView, sizeof(Matrix4f));
+                                                                                pData += sizeof(Matrix4f);
+                                                                            },
+                                                                            [&](Data::WorldView_) {
+                                                                                throw std::runtime_error("WorldView cannot be per pass");
+                                                                            },
+                                                                            [](std::monostate) {
+                                                                                throw std::runtime_error("engine source constant cannot be monostate");
+                                                                            }
+                                                                        ), constant.mDataType);
+                                                                    },
+                                                                    [&](MaterialSource_) {
+                                                                        throw std::runtime_error("dynamic constant cannot be material source");
+                                                                    }
+                                                                ), constant.mSource);
+                                                            }
+                                                            auto pos = mUploadBuffer.upload(perPassCB.data(), gsl::narrow_cast<uint32_t>(perPassCB.size()), 1, 256);
+                                                            D3D12_CONSTANT_BUFFER_VIEW_DESC desc{
+                                                                pos.mResource->GetGPUVirtualAddress() + pos.mBufferOffset, (uint32_t)perPassCB.size()
+                                                            };
+
+                                                            auto d = mDescriptors.advance(descs.first, descID);
+                                                            mDevice->CreateConstantBufferView(&desc, d.mCpuHandle);
+                                                            foundDescriptor = true;
+                                                            break;
+                                                        }
+                                                        if (!foundDescriptor) {
+                                                            throw std::runtime_error("constant buffer not found");
+                                                        }
+                                                    },
+                                                    [&](auto) {
+                                                        throw std::runtime_error("not supported yet");
+                                                    }
+                                                ), attr.mDataType);
+                                                ++descID;
+                                            }
+                                        },
+                                        [&](MaterialSource_) {
+                                            for (const auto& attr : subrange.mDescriptors) {
+                                                ++descID;
+                                            }
+                                            throw std::runtime_error("not supported yet");
+                                        }
+                                    ), subrange.mSource);
+                                }
+                            }
+                            pCommandList->SetGraphicsRootDescriptorTable(list.mSlot, descs.first.mGpuHandle);
+                        }
+                            
+                        for (const auto& list : collection.mSamplerLists) {
+                            throw std::runtime_error("not supported yet");
+                        }
                     }
-                    pCommandList->SetGraphicsRootDescriptorTable(2, range.first.mGpuHandle);
 
                     for (const auto& pContent : queue.mContents) {
                         const auto& content = *pContent;
@@ -304,24 +384,6 @@ void DX12FrameQueue::renderFrame(const DX12FrameContext* pContext, std::pmr::mem
                                                             pCommandList->IASetIndexBuffer(nullptr);
                                                         }
 
-                                                        auto sizeCB = sizeof(Matrix4f);
-                                                        sizeCB = boost::alignment::align_up(sizeCB, 256);
-                                                        Matrix4f worldView = cam.mView * batch.mWorldTransforms[i].mTransform.matrix();
-                                                        perPassCB.clear();
-                                                        perPassCB.resize(sizeCB);
-                                                        memcpy(perPassCB.data(), worldView.data(), sizeof(worldView));
-                                                        auto pos2 = mUploadBuffer.upload(perPassCB.data(), gsl::narrow_cast<uint32_t>(perPassCB.size()), 1, 256);
-                                                        Expects(perPassCB.size() == 256);
-                                                        D3D12_CONSTANT_BUFFER_VIEW_DESC desc{
-                                                            pos2.mResource->GetGPUVirtualAddress() + pos2.mBufferOffset, (uint32_t)perPassCB.size()
-                                                        };
-                                                        auto range = mDescriptors.allocateCircular(1);
-                                                        for (size_t i = 0; i != 1; ++i) {
-                                                            auto d = mDescriptors.advance(range.first, i);
-                                                            mDevice->CreateConstantBufferView(&desc, d.mCpuHandle);
-                                                        }
-                                                        pCommandList->SetGraphicsRootDescriptorTable(0, range.first.mGpuHandle);
-
                                                         // materials
                                                         auto levelID = 0;
                                                         auto variantID = 0;
@@ -336,13 +398,110 @@ void DX12FrameQueue::renderFrame(const DX12FrameContext* pContext, std::pmr::mem
 
                                                             const auto& subpassData = material->mShaderData.at(shaderSolutionID).mPipelines.at(shaderPipelineID).mQueues.at(shaderQueueID).
                                                                 mLevels.at(levelID).mPasses.at(variantID).mSubpasses.at(subpassID);
-                                                            
-                                                            if (subpassData.mPersistentCountSRV) {
-                                                                pCommandList->SetGraphicsRootDescriptorTable(1, subpassData.mPersistentGpuOffsetSRV);
-                                                            } else {
-                                                                pCommandList->SetGraphicsRootDescriptorTable(1, {});
-                                                            }
 
+                                                            // upload descriptors
+                                                            for (const auto& collection : subpassData.mCollections) {
+                                                                Expects(std::holds_alternative<Table_>(collection.mIndex.mType));
+                                                                visit(overload(
+                                                                    [&](Persistent_) {
+                                                                        for (const auto& list : collection.mResourceViewLists) {
+                                                                            pCommandList->SetGraphicsRootDescriptorTable(list.mSlot, list.mGpuOffset);
+                                                                        }
+                                                                        for (const auto& list : collection.mSamplerLists) {
+                                                                            pCommandList->SetGraphicsRootDescriptorTable(list.mSlot, list.mGpuOffset);
+                                                                        }
+                                                                    },
+                                                                    [&](Dynamic_) {
+                                                                        Expects(collection.mIndex.mUpdate < UpdateEnum::PerPass);
+                                                                        for (const auto& list : collection.mResourceViewLists) {
+                                                                            Expects(!list.mRanges.empty());
+                                                                            Expects(list.mCapacity);
+                                                                            auto descs = mDescriptors.allocateCircular(list.mCapacity);
+                                                                            size_t descID = 0;
+                                                                            for (const auto& range : list.mRanges) {
+                                                                                for (const auto& subrange : range.mSubranges) {
+                                                                                    visit(overload(
+                                                                                        [&](EngineSource_) {
+                                                                                            for (const auto& attr : subrange.mDescriptors) {
+                                                                                                visit(overload(
+                                                                                                    [&](Descriptor::ConstantBuffer_) {
+                                                                                                        bool foundDescriptor = false;
+                                                                                                        for (const auto& cb : shaderSubpass.mConstantBuffers) {
+                                                                                                            if (cb.mIndex != collection.mIndex)
+                                                                                                                continue;
+
+                                                                                                            Expects(cb.mSize);
+                                                                                                            auto sizeCB = boost::alignment::align_up(cb.mSize, 256);
+                                                                                                            perInstanceCB.clear();
+                                                                                                            perInstanceCB.resize(sizeCB);
+                                                                                                            auto* pData = perInstanceCB.data();
+                                                                                                            for (const auto& constant : cb.mConstants) {
+                                                                                                                visit(overload(
+                                                                                                                    [&](EngineSource_) {
+                                                                                                                        visit(overload(
+                                                                                                                            [&](Data::Proj_) {
+                                                                                                                                throw std::runtime_error("Proj cannot be per instance");
+                                                                                                                            },
+                                                                                                                            [&](Data::View_) {
+                                                                                                                                throw std::runtime_error("View cannot be per instance");
+                                                                                                                            },
+                                                                                                                            [&](Data::WorldView_) {
+                                                                                                                                Matrix4f worldView = cam.mView * batch.mWorldTransforms[i].mTransform.matrix();
+                                                                                                                                Expects(pData + sizeof(worldView) <= perInstanceCB.data() + perInstanceCB.size());
+                                                                                                                                memcpy(pData, worldView.data(), sizeof(worldView));
+                                                                                                                                pData += sizeof(worldView);
+                                                                                                                            },
+                                                                                                                            [](std::monostate) {
+                                                                                                                                throw std::runtime_error("engine source constant cannot be monostate");
+                                                                                                                            }
+                                                                                                                        ), constant.mDataType);
+                                                                                                                    },
+                                                                                                                    [&](MaterialSource_) {
+                                                                                                                        throw std::runtime_error("dynamic constant cannot be material source");
+                                                                                                                    }
+                                                                                                                ), constant.mSource);
+                                                                                                            }
+                                                                                                            auto pos2 = mUploadBuffer.upload(perInstanceCB.data(), gsl::narrow_cast<uint32_t>(perInstanceCB.size()), 1, 256);
+                                                                                                            D3D12_CONSTANT_BUFFER_VIEW_DESC desc{
+                                                                                                                pos2.mResource->GetGPUVirtualAddress() + pos2.mBufferOffset, (uint32_t)perInstanceCB.size()
+                                                                                                            };
+
+                                                                                                            auto d = mDescriptors.advance(descs.first, descID);
+                                                                                                            mDevice->CreateConstantBufferView(&desc, d.mCpuHandle);
+                                                                                                            foundDescriptor = true;
+                                                                                                            break;
+                                                                                                        }
+                                                                                                        if (!foundDescriptor) {
+                                                                                                            throw std::runtime_error("constant buffer not found");
+                                                                                                        }
+                                                                                                    },
+                                                                                                    [&](auto) {
+                                                                                                        throw std::runtime_error("not supported yet");
+                                                                                                    }
+                                                                                                ), attr.mDataType);
+
+                                                                                                ++descID;
+                                                                                            }
+                                                                                        },
+                                                                                        [&](MaterialSource_) {
+                                                                                            for (const auto& attr : subrange.mDescriptors) {
+                                                                                                ++descID;
+                                                                                            }
+                                                                                            throw std::runtime_error("not supported yet");
+                                                                                        }
+                                                                                    ), subrange.mSource);
+                                                                                }
+                                                                            }
+                                                                            pCommandList->SetGraphicsRootDescriptorTable(list.mSlot, descs.first.mGpuHandle);
+                                                                        }
+                                                                        for (const auto& list : collection.mSamplerLists) {
+                                                                            Expects(std::holds_alternative<Table_>(collection.mIndex.mType));
+                                                                            throw std::runtime_error("not supported yet");
+                                                                        }
+                                                                    }
+                                                                ), collection.mIndex.mPersistency);
+                                                            }
+                                                            
                                                             pCommandList->DrawIndexedInstanced(submesh.mIndexCount, 1, submesh.mIndexOffset, 0, 0);
                                                             ++subpassID;
                                                         } // shader subpass

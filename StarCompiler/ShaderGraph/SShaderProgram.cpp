@@ -86,7 +86,7 @@ bool ShaderProgram::stageEnd(ShaderStageType stage) {
                 Attributes{},
                 Outputs{},
                 Inputs{
-                    { "clipPos", float4(), SV_Position }
+                    { "clipPos", float4, SV_Position }
                 }
             ), PS);
 
@@ -172,15 +172,13 @@ void ShaderProgram::buildConstantBuffers(const AttributeMap& attrs, RootSignatur
         const auto& stage = mGraph.mNodeStages[nodeID];
         for (const auto& usage : node.mAttributes) {
             const auto& attr = at(attrs, get_key(usage));
-            rsg.addConstant(attr, stage);
+            rsg.addConstant(attr, getShaderVisibilityType(stage));
         }
     }
 }
 
 void ShaderProgram::buildDescriptors(const AttributeMap& attrs, RootSignature& rsg) const {
-    for (const auto& [index, cb] : rsg.mConstantBuffers) {
-        rsg.addConstantBufferDescriptor(index, cb);
-    }
+    rsg.addConstantBuffersDescriptors();
 
     for (const auto& nodeID : mGraph.mNodeSorted) {
         const auto& node = mGraph.mNodeGraph[nodeID];
@@ -209,6 +207,17 @@ bool ShaderProgram::hasIA() const {
     }
 
     return hasIA;
+}
+
+void ShaderProgram::collectAttributes(const AttributeMap& attrs, AttributeDatabase& database) const {
+    for (const auto& nodeID : mGraph.mNodeSorted) {
+        const auto& node = mGraph.mNodeGraph[nodeID];
+        const auto& stage = mGraph.mNodeStages[nodeID];
+        for (const auto& usage : node.mAttributes) {
+            const auto& attr = at(attrs, get_key(usage));
+            database.mAttributes.emplace(attr.mDescriptor);
+        }
+    }
 }
 
 }

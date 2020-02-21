@@ -38,6 +38,8 @@ struct DX12ShaderQueueData;
 struct DX12ShaderPipelineData;
 struct DX12ShaderSolutionData;
 struct DX12ShaderData;
+struct DX12MaterialDescriptorList;
+struct DX12MaterialDescriptorCollection;
 struct DX12MaterialSubpassData;
 struct DX12MaterialPassData;
 struct DX12MaterialLevelData;

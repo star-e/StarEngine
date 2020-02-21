@@ -42,9 +42,6 @@
     <ClInclude Include="SFetch.h">
       <Filter>2.Manager</Filter>
     </ClInclude>
-    <ClInclude Include="..\SUnorderedMap.h">
-      <Filter>0.Common</Filter>
-    </ClInclude>
     <ClInclude Include="..\PrecompiledHeaders\SCore.h">
       <Filter>3.PCH</Filter>
     </ClInclude>

@@ -49,7 +49,7 @@ LuminousDesktop::LuminousDesktop(HINSTANCE hInstance, int nCmd)
     // pool
     //, mPool(&mPoolMonotonic)
     , mAssetManager(std::make_unique<Asset::AssetFactory>(
-        R"(SAsset)", R"(windows2)",
+        R"(asset)", R"(windows2)",
         std::pmr::get_default_resource()))
     , mCmd(nCmd)
 {

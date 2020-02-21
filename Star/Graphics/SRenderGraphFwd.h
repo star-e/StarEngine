@@ -45,6 +45,35 @@ struct DescriptorHandle;
 struct Attachment;
 struct RenderViewTransition;
 struct UnorderedRenderQueue;
+
+namespace Descriptor {
+
+struct ConstantBuffer_;
+struct BaseColor_;
+struct LinearSampler_;
+
+using Type = std::variant<std::monostate, ConstantBuffer_, BaseColor_, LinearSampler_>;
+
+} // namespace Descriptor
+
+namespace Data {
+
+struct Proj_;
+struct View_;
+struct WorldView_;
+
+using Type = std::variant<std::monostate, Proj_, View_, WorldView_>;
+
+} // namespace Data
+
+struct ShaderDescriptor;
+struct ShaderDescriptorSubrange;
+struct ShaderDescriptorRange;
+struct ShaderUnboundedDescriptor;
+struct ShaderDescriptorList;
+struct ShaderDescriptorCollection;
+struct ShaderConstant;
+struct ShaderConstantBuffer;
 struct RenderSubpass;
 struct RenderSubpassDependency;
 struct RenderPass;

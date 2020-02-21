@@ -16,36 +16,3 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "SRenderTypes.h"
-
-namespace Star {
-
-namespace Graphics {
-
-namespace Render {
-
-ConstantBuffer::allocator_type ConstantBuffer::get_allocator() const noexcept {
-    return allocator_type(mBuffer.get_allocator().resource());
-}
-
-ConstantBuffer::ConstantBuffer(const allocator_type& alloc)
-    : mBuffer(alloc)
-    , mIndex(alloc)
-{}
-
-ConstantBuffer::ConstantBuffer(ConstantBuffer const& rhs, const allocator_type& alloc)
-    : mBuffer(rhs.mBuffer, alloc)
-    , mIndex(rhs.mIndex, alloc)
-{}
-
-ConstantBuffer::ConstantBuffer(ConstantBuffer&& rhs, const allocator_type& alloc)
-    : mBuffer(std::move(rhs.mBuffer), alloc)
-    , mIndex(std::move(rhs.mIndex), alloc)
-{}
-
-ConstantBuffer::~ConstantBuffer() = default;
-
-} // namespace Render
-
-} // namespace Graphics
-
-} // namespace Star

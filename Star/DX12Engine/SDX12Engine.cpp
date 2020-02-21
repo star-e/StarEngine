@@ -98,7 +98,7 @@ void DX12Engine::start() {
         desc.SampleDesc = { 1, 0 };
         white.mTexture = DX12::createTexture2D(mDevice.get(), desc);
 
-        fixed4 pixel{ 255, 255, 255, 255 };
+        Unorm4 pixel{ 255, 255, 255, 255 };
         //uploadBuffer.upload(&pixel, sizeof(pixel), )
         auto buffer = creation.upload(&pixel, sizeof(pixel), sSliceAlignment);
         D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout{};

@@ -75,4 +75,10 @@ void visitShaderSubpassData(ShaderData& sc, const Visitor& visitor) {
     }
 }
 
+inline std::pair<const void*, uint32_t> getConstant(const ConstantMap& map, uint32_t key) {
+    auto desc = map.mIndex.at(key);
+    auto* pSrc = map.mBuffer.data() + desc.mOffset;
+    return std::pair{ pSrc, desc.mSize };
+}
+
 }

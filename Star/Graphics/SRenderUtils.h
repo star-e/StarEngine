@@ -16,19 +16,11 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include <StarCompiler/ShaderGraph/SShaderTypes.h>
+#include <Star/Graphics/SConfig.h>
+#include <Star/Graphics/SRenderFwd.h>
 
-namespace Star::Graphics::Render::Shader {
+namespace Star::Graphics::Render {
 
-class ShaderRegister {
-public:
-    uint32_t get(ShaderVisibilityType stage, DescriptorRangeType type, uint32_t space);
-    uint32_t increase(ShaderVisibilityType stage, DescriptorRangeType type, uint32_t space, uint32_t count = 1);
-    void reserveAll(DescriptorRangeType type, uint32_t space, uint32_t count = 1);
-private:
-    using SpaceMap = boost::container::flat_map<uint32_t, uint32_t>;
-    using TypeMap = boost::container::flat_map<DescriptorRangeType, SpaceMap>;
-    boost::container::flat_map<ShaderVisibilityType, TypeMap> mSlots;
-};
+STAR_GRAPHICS_API uint32_t getSize(const AttributeType& type);
 
 }

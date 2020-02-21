@@ -54,7 +54,7 @@ int buildUnityShaders(const ShaderModules& modules, ShaderDatabase& db) {
 #include "UnityPBSLighting.cginc"
 #include "AutoLight.cginc"
 )";
-        PixelShader({ "color", half4(), SV_Target }) {
+        PixelShader({ "color", half4, SV_Target }) {
             // Shading
             Group(SUnityLightingStandard);
 
@@ -95,7 +95,7 @@ int buildTestShaders(const ShaderModules& modules, ShaderDatabase& db) {
         SinglePass("Desktop", "ImageEffects", "Color", 0) {
             Pass << ZWrite{ false };
             Pass << ZTest{ Always };
-            PixelShader({ "color", half4(), SV_Target }) {
+            PixelShader({ "color", half4, SV_Target }) {
                 Group(ScreenGreen);
             }
             VertexShader() {
@@ -103,7 +103,7 @@ int buildTestShaders(const ShaderModules& modules, ShaderDatabase& db) {
             }
         }
         SinglePass("Desktop", "Forward", "Lighting", 0) {
-            PixelShader({ "color", half4(), SV_Target }) {
+            PixelShader({ "color", half4, SV_Target }) {
                 Group(VisualizeWorldNormal)
             }
 
@@ -112,7 +112,7 @@ int buildTestShaders(const ShaderModules& modules, ShaderDatabase& db) {
             }
         }
         SinglePass("Desktop", "Deferred", "Lighting", 0) {
-            PixelShader({ "color", half4(), SV_Target }) {
+            PixelShader({ "color", half4, SV_Target }) {
                 Group(DeferredLambertian);
                 Group(UnpackGBuffers);
             }
@@ -122,7 +122,7 @@ int buildTestShaders(const ShaderModules& modules, ShaderDatabase& db) {
             }
         }
         SinglePass("Desktop", "Deferred", "PostProcessing", 0) {
-            PixelShader({ "color", half4(), SV_Target }) {
+            PixelShader({ "color", half4, SV_Target }) {
                 Group(CopyRadiance)
             }
 
@@ -134,7 +134,7 @@ int buildTestShaders(const ShaderModules& modules, ShaderDatabase& db) {
 
     Shader("Star/BuildGBuffer") {
         SinglePass("Desktop", "Deferred", "Geometry", 0) {
-            PixelShader({ "color0", half4(), SV_Target }, { "color1", half4(), SV_Target }) {
+            PixelShader({ "color0", half4, SV_Target }, { "color1", half4, SV_Target }) {
                 Group(PackGBuffers)
                 Group(BaseColorAndTransparency)
             }

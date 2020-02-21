@@ -16,16 +16,31 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
+#include <Star/Graphics/SConfig.h>
+#include <Star/Graphics/SRenderGraphFwd.h>
 
 namespace Star {
 
-template<class T>
-using UnorderedUUIDMap = std::unordered_map<boost::uuids::uuid, T>;
+namespace Graphics {
 
-template<class T>
-using PmrUnorderedUUIDMap = std::unordered_map<boost::uuids::uuid, T,
-    std::hash<boost::uuids::uuid>, std::equal_to<boost::uuids::uuid>,
-    std::pmr::polymorphic_allocator<std::pair<const boost::uuids::uuid, T>>
->;
+namespace Render {
 
-}
+namespace Descriptor {
+
+STAR_GRAPHICS_API bool try_getType(std::string_view name, Type& type) noexcept;
+STAR_GRAPHICS_API void getType(std::string_view name, Type& type);
+
+} // namespace Descriptor
+
+namespace Data {
+
+STAR_GRAPHICS_API bool try_getType(std::string_view name, Type& type) noexcept;
+STAR_GRAPHICS_API void getType(std::string_view name, Type& type);
+
+} // namespace Data
+
+} // namespace Render
+
+} // namespace Graphics
+
+} // namespace Star

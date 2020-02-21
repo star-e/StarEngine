@@ -527,6 +527,13 @@ void AssetFbxScene::createMaterials(const std::function<void(std::string_view, c
         Map<std::string, std::string> textures;
 
         FbxProperty prop = pMat->FindProperty("DiffuseColor");
+        auto type = prop.GetPropertyDataType();
+        auto typeEnum = type.GetType();
+        std::string typeName = type.GetName();
+        std::ignore = type;
+        std::ignore = typeEnum;
+        std::ignore = typeName;
+        
         if (prop.IsValid()) {
             auto pTex = FbxCast<FbxFileTexture>(prop.GetSrcObject<FbxTexture>(0));
             if (pTex) {
@@ -752,7 +759,7 @@ void AssetFbxScene::readMesh(std::string_view layoutName,
 
     auto& mesh = iter->second;
     mesh.mLayoutName = layoutName;
-    mesh.mLayoutID = resources.mSettings.mIndex.at(mesh.mLayoutName);
+    mesh.mLayoutID = resources.mSettings.mVertexLayoutIndex.at(mesh.mLayoutName);
     const auto& layout = resources.mSettings.mVertexLayouts.at(mesh.mLayoutID);
     checkLayoutRequirement(layout, pMesh);
 

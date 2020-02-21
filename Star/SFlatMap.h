@@ -32,30 +32,6 @@ using PmrFlatMap = boost::container::flat_map<Key, Value, std::less<>,
     std::pmr::polymorphic_allocator<std::pair<Key, Value>>
 >;
 
-template<class Value>
-using FlatStringMap = boost::container::flat_map<std::string, Value, std::less<>>;
-
-template<class Value>
-using PmrFlatStringMap = boost::container::flat_map<std::pmr::string, Value, std::less<>,
-    std::pmr::polymorphic_allocator<std::pair<std::pmr::string, Value>>
->;
-
-template<class Value>
-using FlatUInt32Map = boost::container::flat_map<uint32_t, Value>;
-
-template<class Value>
-using PmrFlatUInt32Map = boost::container::flat_map<uint32_t, Value, std::less<uint32_t>,
-    std::pmr::polymorphic_allocator<std::pair<uint32_t, Value>>
->;
-
-template<class Value>
-using FlatUInt64Map = boost::container::flat_map<uint64_t, Value>;
-
-template<class Value>
-using PmrFlatUInt64Map = boost::container::flat_map<uint64_t, Value, std::less<uint64_t>,
-    std::pmr::polymorphic_allocator<std::pair<uint64_t, Value>>
->;
-
 template<class Key, class Value, class Allocator, class KeyLike>
 inline bool exists(const boost::container::flat_map<Key, Value, std::less<>, Allocator>& m, const KeyLike& key) noexcept {
     auto iter = m.find(key);

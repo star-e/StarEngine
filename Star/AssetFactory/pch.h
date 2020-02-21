@@ -44,6 +44,7 @@
 #include <Star/Serialization/SOptional.h>
 #include <Star/Serialization/SPmrVector.h>
 #include <Star/Serialization/SPmrString.h>
+#include <Star/Serialization/SAlignedBuffer.h>
 #include <Star/Serialization/SVariant.h>
 #include <Star/Serialization/SMath.h>
 #include <Star/Serialization/SFlatMap.h>

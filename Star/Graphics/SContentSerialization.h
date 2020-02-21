@@ -257,7 +257,8 @@ void serialize(Archive& ar, Star::Graphics::Render::ShaderSubpassData& v, const 
     ar & v.mProgram;
     ar & v.mInputLayout;
     ar & v.mVertexLayouts;
-    ar & v.mTextures;
+    ar & v.mConstantBuffers;
+    ar & v.mDescriptors;
 }
 
 template<class Archive>
@@ -401,13 +402,43 @@ inline void load_construct_data(
     ::new(t) std::pair<K, Star::Graphics::Render::ShaderData>(std::piecewise_construct, std::forward_as_tuple(), std::forward_as_tuple(ar.resource()));
 }
 
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::ConstantDescriptor, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::ConstantDescriptor, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::ConstantDescriptor& v, const uint32_t version) {
+    ar & v.mOffset;
+    ar & v.mSize;
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::ConstantMap, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::ConstantMap, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::ConstantMap& v, const uint32_t version) {
+    ar & v.mIndex;
+    ar & v.mBuffer;
+}
+
+template<class Archive>
+inline void load_construct_data(
+    Archive& ar, std::pair<const std::pmr::string, Star::Graphics::Render::ConstantMap>* t, const unsigned int file_version
+) {
+    ::new(t) std::pair<const std::pmr::string, Star::Graphics::Render::ConstantMap>(std::piecewise_construct, std::forward_as_tuple(ar.resource()), std::forward_as_tuple(ar.resource()));
+}
+
+template<class Archive, class K>
+inline void load_construct_data(
+    Archive& ar, std::pair<K, Star::Graphics::Render::ConstantMap>* t, const unsigned int file_version
+) {
+    ::new(t) std::pair<K, Star::Graphics::Render::ConstantMap>(std::piecewise_construct, std::forward_as_tuple(), std::forward_as_tuple(ar.resource()));
+}
+
 STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::MaterialData, object_serializable);
 STAR_CLASS_TRACKING(Star::Graphics::Render::MaterialData, track_never);
 template<class Archive>
 void serialize(Archive& ar, Star::Graphics::Render::MaterialData& v, const uint32_t version) {
     ar & v.mShader;
     ar & v.mTextures;
-    ar & v.mConstantBuffer;
+    ar & v.mConstantMap;
 }
 
 template<class Archive>
@@ -439,7 +470,7 @@ void serialize(Archive& ar, Star::Graphics::Render::DrawCallData& v, const uint3
     ar & v.mMaterial;
     ar & v.mInstanceSize;
     ar & v.mInstanceCount;
-    ar & v.mConstantBuffer;
+    ar & v.mConstantMap;
 }
 
 template<class Archive>
@@ -560,7 +591,7 @@ STAR_CLASS_TRACKING(Star::Graphics::Render::ContentSettings, track_never);
 template<class Archive>
 void serialize(Archive& ar, Star::Graphics::Render::ContentSettings& v, const uint32_t version) {
     ar & v.mVertexLayouts;
-    ar & v.mIndex;
+    ar & v.mVertexLayoutIndex;
 }
 
 template<class Archive>

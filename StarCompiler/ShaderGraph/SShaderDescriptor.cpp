@@ -19,68 +19,6 @@
 
 namespace Star::Graphics::Render::Shader {
 
-bool isUnbounded(const DescriptorModel& model) noexcept {
-    return visit(overload(
-        [](const auto& v) -> bool {
-            return visit(overload(
-                [](const DescriptorArray& r) {
-                    if (std::holds_alternative<RangeUnbounded>(r))
-                        return true;
-                    else
-                        return false;
-                },
-                [](const auto&) {
-                    return false;
-                }
-            ), v);
-        }
-    ), model);
-}
-
-DescriptorRangeType getDescriptorType(const DescriptorModel& model) {
-    return visit(overload(
-        [](const DescriptorCBV&) ->DescriptorRangeType { return CBV; },
-        [](const DescriptorUAV&) ->DescriptorRangeType { return UAV; },
-        [](const DescriptorSRV&) ->DescriptorRangeType { return SRV; },
-        [](const DescriptorSSV&) ->DescriptorRangeType { return SSV; }
-    ), model);
-}
-
-DescriptorArray getDescriptorRange(const DescriptorModel& model, uint32_t count) noexcept {
-    return visit(overload(
-        [&](const auto& v) -> DescriptorArray {
-            return visit(overload(
-                [&](const DescriptorArray& r) -> DescriptorArray {
-                    if (std::holds_alternative<RangeUnbounded>(r))
-                        return RangeUnbounded{};
-                    else
-                        return RangeBounded{ count };
-                },
-                [&](const auto&) -> DescriptorArray {
-                    return RangeBounded{ count };
-                }
-            ), v);
-        }
-    ), model);
-}
-
-Descriptor makeDescriptorRange(const DescriptorRangeType& type, uint32_t space, const DescriptorArray& range) {
-    return visit(overload(
-        [&](CBV_ v) {
-            return Descriptor{ v, space, DescriptorCBV{ range } };
-        },
-        [&](UAV_ v) {
-            return Descriptor{ v, space, DescriptorUAV{ range } };
-        },
-        [&](SRV_ v) {
-            return Descriptor{ v, space, DescriptorSRV{ range } };
-        },
-        [&](SSV_ v) {
-            return Descriptor{ v, space, DescriptorSSV{ range } };
-        }
-    ), type);
-}
-
 ShaderVisibilityType getShaderVisibilityType(ShaderStageType stage) {
     return visit(overload(
         [](OM_ v) -> ShaderVisibilityType { throw std::invalid_argument("output merger do not support root signature"); },
@@ -103,7 +41,7 @@ ShaderStageType getShaderStageType(ShaderVisibilityType e) {
     ), e);
 }
 
-const char* getRootDescriptorName(const DescriptorRangeType& type) noexcept {
+const char* getRootDescriptorName(const DescriptorType& type) noexcept {
     return visit(overload(
         [&](CBV_ v) {
             return "CBV";
@@ -120,7 +58,7 @@ const char* getRootDescriptorName(const DescriptorRangeType& type) noexcept {
     ), type);
 }
 
-char getRegisterPrefix(const DescriptorRangeType& type) noexcept {
+char getRegisterPrefix(const DescriptorType& type) noexcept {
     return visit(overload(
         [&](CBV_ v) {
             return 'b';

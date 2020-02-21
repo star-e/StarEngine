@@ -263,7 +263,6 @@
     <ClInclude Include="..\SMathFwd.h" />
     <ClInclude Include="..\SMetaID.h" />
     <ClInclude Include="..\SScopeExit.h" />
-    <ClInclude Include="..\SUnorderedMap.h" />
     <ClInclude Include="..\SWinRT.h" />
     <ClInclude Include="..\SWinThread.h" />
     <ClInclude Include="pch.h" />

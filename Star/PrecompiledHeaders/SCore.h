@@ -134,7 +134,6 @@
 #include <Star/SAlignedBuffer.h>
 #include <Star/SMap.h>
 #include <Star/SFlatMap.h>
-#include <Star/SUnorderedMap.h>
 #include <Star/SMultiIndex.h>
 #include <Star/SMultiIndexUtils.h>
 #include <Star/SUUID.h>

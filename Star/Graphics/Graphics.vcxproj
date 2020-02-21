@@ -262,6 +262,7 @@
     <ClInclude Include="SDescriptorPools.h" />
     <ClInclude Include="SRenderEngine.h" />
     <ClInclude Include="SRenderGraphNames.h" />
+    <ClInclude Include="SRenderGraphReflection.h" />
     <ClInclude Include="SRenderResource.h" />
     <ClInclude Include="SRenderFormat.h" />
     <ClInclude Include="SRenderFormatDXGI.h" />
@@ -275,6 +276,7 @@
     <ClInclude Include="SRenderNames.h" />
     <ClInclude Include="SRenderSerialization.h" />
     <ClInclude Include="SRenderTypes.h" />
+    <ClInclude Include="SRenderUtils.h" />
     <ClInclude Include="SWindowMessages.h" />
   </ItemGroup>
   <ItemGroup>
@@ -293,8 +295,10 @@
     <ClCompile Include="SRenderEngine.cpp" />
     <ClCompile Include="SRenderFormatTextureUtils.cpp" />
     <ClCompile Include="SRenderFormatUtils.cpp" />
+    <ClCompile Include="SRenderGraphReflection.cpp" />
     <ClCompile Include="SRenderGraphTypes.cpp" />
     <ClCompile Include="SRenderTypes.cpp" />
+    <ClCompile Include="SRenderUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Serialization\Serialization.vcxproj">

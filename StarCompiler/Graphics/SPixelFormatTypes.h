@@ -83,11 +83,11 @@ inline bool operator!=(const PixelModel& lhs, const PixelModel& rhs) noexcept {
 }
 
 struct Interleaved {
-    fixed4 mChannels = {};
+    Unorm4 mChannels = {};
 };
 
 struct Planar {
-    fixed4 mChannels = {};
+    Unorm4 mChannels = {};
 };
 
 using PixelMemoryLayout = std::variant<Interleaved, Planar>;

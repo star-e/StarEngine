@@ -43,6 +43,18 @@ void ShaderGroups::bindProgram(const ShaderProgram& program, std::string_view sh
     }
 }
 
+void ShaderGroups::collectAttributes(const ShaderModules& modules, AttributeDatabase& database) const {
+    for (auto& [bundleName, bundle] : mSolutions) {
+        for (auto& [pipelineName, pipeline] : bundle) {
+            for (uint32_t i = 0; i != UpdateEnum::UpdateCount; ++i) {
+                for (auto& [name, group] : pipeline[i]) {
+                    group.collectAttributes(modules.mAttributes, database);
+                }
+            }
+        }
+    }
+}
+
 void ShaderGroups::buildRootSignatures(const ShaderModules& modules, UpdateEnum frequency) {
     // collect shader usages
     for (auto& [bundleName, bundle] : mSolutions) {
@@ -52,6 +64,16 @@ void ShaderGroups::buildRootSignatures(const ShaderModules& modules, UpdateEnum 
                     group.buildProgramConstantBuffers(modules.mAttributes);
                     group.collectConstantBuffers();
                     group.collectDescriptors(modules.mAttributes);
+                }
+            }
+        }
+    }
+
+    for (auto& [bundleName, bundle] : mSolutions) {
+        for (auto& [pipelineName, pipeline] : bundle) {
+            for (uint32_t i = 0; i != UpdateEnum::UpdateCount; ++i) {
+                for (auto& [name, group] : pipeline[i]) {
+                    group.buildRegisters();
                 }
             }
         }
