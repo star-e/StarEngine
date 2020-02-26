@@ -102,7 +102,11 @@ bool ShaderProgram::stageEnd(ShaderStageType stage) {
                     if (semantic & SS_Value) {
                         ++count;
                     } else {
-                        throw std::invalid_argument("SV not supported yet");
+                        if (std::holds_alternative<std::monostate>(input.mSemantic)) {
+                            throw std::invalid_argument("input value has no semantics");
+                        } else {
+                            throw std::invalid_argument("SV not supported yet");
+                        }
                     }
                 }
             }
@@ -186,10 +190,10 @@ void ShaderProgram::buildDescriptors(const AttributeMap& attrs, RootSignature& r
         for (const auto& usage : node.mAttributes) {
             const auto& attr = at(attrs, get_key(usage));
             if (attr.mFlags & VisibleAll) {
-                rsg.addDescriptor(attr, std::monostate{});
+                rsg.try_addDescriptor(attr, std::monostate{});
             } else {
                 auto ra = getShaderVisibilityType(stage);
-                rsg.addDescriptor(attr, ra);
+                rsg.try_addDescriptor(attr, ra);
             }
         }
     }

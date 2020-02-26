@@ -382,14 +382,14 @@ struct DX12UnorderedRenderQueue {
     std::pmr::vector<boost::intrusive_ptr<DX12ContentData>> mContents;
 };
 
-struct DX12RenderSubpass {
+struct DX12RasterSubpass {
     using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
     allocator_type get_allocator() const noexcept;
 
-    DX12RenderSubpass(const allocator_type& alloc);
-    DX12RenderSubpass(DX12RenderSubpass&& rhs, const allocator_type& alloc);
-    DX12RenderSubpass(DX12RenderSubpass const& rhs, const allocator_type& alloc);
-    ~DX12RenderSubpass();
+    DX12RasterSubpass(const allocator_type& alloc);
+    DX12RasterSubpass(DX12RasterSubpass&& rhs, const allocator_type& alloc);
+    DX12RasterSubpass(DX12RasterSubpass const& rhs, const allocator_type& alloc);
+    ~DX12RasterSubpass();
 
     DXGI_SAMPLE_DESC mSampleDesc;
     std::pmr::vector<Attachment> mInputAttachments;
@@ -415,11 +415,11 @@ struct DX12RenderPass {
     DX12RenderPass(DX12RenderPass const& rhs, const allocator_type& alloc);
     ~DX12RenderPass();
 
-    std::pmr::vector<DX12RenderSubpass> mSubpasses;
+    std::pmr::vector<DX12RasterSubpass> mRasterSubpasses;
     std::pmr::vector<VIEWPORT> mViewports;
     std::pmr::vector<RECT> mScissorRects;
     std::pmr::vector<FramebufferHandle> mFramebuffers;
-    std::pmr::vector<RenderSubpassDependency> mDependencies;
+    std::pmr::vector<RasterSubpassDependency> mDependencies;
 };
 
 struct DX12RenderPipeline {

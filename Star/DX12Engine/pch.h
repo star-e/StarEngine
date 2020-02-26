@@ -30,13 +30,17 @@
 // msvc
 #include <D3Dcompiler.h>
 #pragma comment(lib, "D3DCompiler.lib")
-#include <DXGI1_4.h>
+#include <dxgi1_6.h>
 #include <d3d12.h>
 #include <d3d12sdklayers.h>
 #include <3rdparty/d3dx12.h>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxgi.lib")
+
+#ifdef STAR_DEV
+#include <dxgidebug.h>
+#endif
 
 // Star
 #include <Star/SWinRT.h>

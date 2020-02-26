@@ -52,6 +52,7 @@ namespace Data {
 inline const char* getName(const Proj_& v) noexcept { return "Proj"; }
 inline const char* getName(const View_& v) noexcept { return "View"; }
 inline const char* getName(const WorldView_& v) noexcept { return "WorldView"; }
+inline const char* getName(const WorldInvT_& v) noexcept { return "WorldInvT"; }
 
 } // namespace Data
 inline const char* getName(const ShaderDescriptor& v) noexcept { return "ShaderDescriptor"; }
@@ -62,8 +63,10 @@ inline const char* getName(const ShaderDescriptorList& v) noexcept { return "Sha
 inline const char* getName(const ShaderDescriptorCollection& v) noexcept { return "ShaderDescriptorCollection"; }
 inline const char* getName(const ShaderConstant& v) noexcept { return "ShaderConstant"; }
 inline const char* getName(const ShaderConstantBuffer& v) noexcept { return "ShaderConstantBuffer"; }
-inline const char* getName(const RenderSubpass& v) noexcept { return "RenderSubpass"; }
-inline const char* getName(const RenderSubpassDependency& v) noexcept { return "RenderSubpassDependency"; }
+inline const char* getName(const RasterSubpass& v) noexcept { return "RasterSubpass"; }
+inline const char* getName(const RasterSubpassDependency& v) noexcept { return "RasterSubpassDependency"; }
+inline const char* getName(const ComputeSubpass& v) noexcept { return "ComputeSubpass"; }
+inline const char* getName(const RaytracingSubpass& v) noexcept { return "RaytracingSubpass"; }
 inline const char* getName(const RenderPass& v) noexcept { return "RenderPass"; }
 inline const char* getName(const RenderPassDependency& v) noexcept { return "RenderPassDependency"; }
 inline const char* getName(const RenderSubpassDesc& v) noexcept { return "RenderSubpassDesc"; }

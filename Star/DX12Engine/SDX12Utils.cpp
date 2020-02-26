@@ -335,7 +335,7 @@ void createIndex(DX12ShaderData& prototype, const ShaderData& prototypeData,
     }
 }
 
-void createShaderResources(const DX12RenderSolution& renderSolution, const DX12RenderSubpass& renderSubpass,
+void createShaderResources(const DX12RenderSolution& renderSolution, const DX12RasterSubpass& renderSubpass,
     DX12ShaderSubpassData& subpass, const ShaderSubpassData& subpassData,
     const ContentSettings& settings, ID3D12Device* pDevice, std::pmr::monotonic_buffer_resource* mr
 ) {
@@ -464,7 +464,7 @@ std::pair<DX12ShaderData*, bool> try_createDX12ShaderData(CreationContext& conte
                         for (auto&& [queue, queueData] : boost::combine(pipeline.mQueues, pipelineData.get<0>().second.mQueues)) {
                             const auto& passDesc = renderPipeline.mSubpassIndex.at(queueData.get<0>().first);
                             const auto& renderPass = renderPipeline.mPasses.at(passDesc.mPassID);
-                            const auto& renderSubpass = renderPass.mSubpasses.at(passDesc.mSubpassID);
+                            const auto& renderSubpass = renderPass.mRasterSubpasses.at(passDesc.mSubpassID);
                             for (auto&& [level, levelData] : boost::combine(queue.mLevels, queueData.get<0>().second.mLevels)) {
                                 for (auto&& [variant, variantData] : boost::combine(level.mPasses, levelData.get<0>().mPasses)) {
                                     for (auto&& [subpass, subpassData0] : boost::combine(variant.mSubpasses, variantData.get<0>().second.mSubpasses)) {
@@ -562,6 +562,7 @@ std::pair<DX12MaterialData*, bool> try_createDX12MaterialData(CreationContext& c
                                                                 [&](EngineSource_) {
                                                                     for (const auto& attr : subrange.mDescriptors) {
                                                                         ++i;
+                                                                        throw std::runtime_error("EngineSource Descriptor not supported yet");
                                                                     }
                                                                 },
                                                                 [&](MaterialSource_) {
@@ -616,6 +617,19 @@ std::pair<DX12MaterialData*, bool> try_createDX12MaterialData(CreationContext& c
                                                                     }
                                                                 }
                                                             ), subrange.mSource);
+                                                        }
+                                                        {
+                                                            // Set Null
+                                                            D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{
+                                                                DXGI_FORMAT_R8G8B8A8_UNORM,
+                                                                D3D12_SRV_DIMENSION_TEXTURE2D,
+                                                                D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+                                                            };
+                                                            viewDesc.Texture2D = D3D12_TEX2D_SRV{ 0, (uint32_t)-1, 0, 0.f };
+                                                            for (; i != range.mCapacity; ++i) {
+                                                                context.mDevice->CreateShaderResourceView(nullptr,
+                                                                    &viewDesc, descs[i].mCpuHandle);
+                                                            }
                                                         }
                                                         offset += range.mCapacity;
                                                     }
@@ -691,14 +705,14 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
 
                     for (const auto& passData : pipelineData.mPasses) {
                         auto& pass = pipeline.mPasses.emplace_back();
-                        pass.mSubpasses.reserve(passData.mSubpasses.size());
+                        pass.mRasterSubpasses.reserve(passData.mRasterSubpasses.size());
                         pass.mViewports = passData.mViewports;
                         pass.mScissorRects = passData.mScissorRects;
                         pass.mFramebuffers = passData.mFramebuffers;
                         pass.mDependencies = passData.mDependencies;
                         
-                        for (const auto& subpassData : passData.mSubpasses) {
-                            auto& subpass = pass.mSubpasses.emplace_back();
+                        for (const auto& subpassData : passData.mRasterSubpasses) {
+                            auto& subpass = pass.mRasterSubpasses.emplace_back();
                             subpass.mSampleDesc = getDXGI(subpassData.mSampleDesc);
                             subpass.mInputAttachments = subpassData.mInputAttachments;
                             subpass.mOutputAttachments = subpassData.mOutputAttachments;
@@ -740,8 +754,8 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                     for (auto&& [pass, passData0] : boost::combine(pipeline.mPasses, pipelineData.mPasses)) {
                         const auto& passData = passData0.get<0>();
 
-                        Expects(pass.mSubpasses.size() == passData.mSubpasses.size());
-                        for (auto&& [subpass, subpassData0] : boost::combine(pass.mSubpasses, passData.mSubpasses)) {
+                        Expects(pass.mRasterSubpasses.size() == passData.mRasterSubpasses.size());
+                        for (auto&& [subpass, subpassData0] : boost::combine(pass.mRasterSubpasses, passData.mRasterSubpasses)) {
                             const auto& subpassData = subpassData0.get<0>();
 
                             subpass.mOrderedRenderQueue.reserve(subpassData.mOrderedRenderQueue.size());

@@ -289,7 +289,14 @@ void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modu
                                                     for (const auto& attr : shaderSubrange.mAttributes) {
                                                         auto& d = subrange.mDescriptors.emplace_back();
                                                         d.mAttributeType = attr.mType;
-                                                        getType(attr.mName, d.mDataType);
+                                                        visit(overload(
+                                                            [&](EngineSource_) {
+                                                                getType(attr.mName, d.mDataType);
+                                                            },
+                                                            [&](MaterialSource_) {
+                                                                try_getType(attr.mName, d.mDataType);
+                                                            }
+                                                        ), attr.mDescriptor.mSource);
                                                         if (attr.mName.empty()) {
                                                             Expects(std::holds_alternative<CBuffer_>(attr.mType));
                                                             Expects(std::holds_alternative<Descriptor::ConstantBuffer_>(d.mDataType));

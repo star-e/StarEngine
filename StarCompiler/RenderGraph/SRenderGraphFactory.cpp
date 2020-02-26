@@ -192,7 +192,7 @@ void RenderSolutionFactory::addContentOrdered(const UnorderedRenderQueue& conten
     auto& pipeline = renderWorks.mPipelines.at(pipelineID);
     auto passID = at(pipeline.mSubpassIndex, passName);
     auto& pass = pipeline.mPasses.at(passID.mPassID);
-    auto& subpass = pass.mSubpasses.at(passID.mSubpassID);
+    auto& subpass = pass.mRasterSubpasses.at(passID.mSubpassID);
     subpass.mOrderedRenderQueue.emplace_back(content);
 }
 
@@ -493,8 +493,8 @@ void RenderSolutionFactory::compile(std::string solutionName, RenderSolution& rw
             pipeline.mPasses.emplace_back();
             auto& pass = pipeline.mPasses.back();
 
-            pass.mSubpasses.emplace_back();
-            Ensures(pass.mSubpasses.size() == 1);
+            pass.mRasterSubpasses.emplace_back();
+            Ensures(pass.mRasterSubpasses.size() == 1);
         }
     }
 }
@@ -649,8 +649,8 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
             const auto& node = graph.mNodeGraph[nodeID];
             const auto& subpassIndex = at(pipeline.mSubpassIndex, node.mName);
             auto& pass = pipeline.mPasses.at(subpassIndex.mPassID);
-            auto& subpass = pass.mSubpasses.at(subpassIndex.mSubpassID);
-            Expects(pass.mSubpasses.size() == 1);
+            auto& subpass = pass.mRasterSubpasses.at(subpassIndex.mSubpassID);
+            Expects(pass.mRasterSubpasses.size() == 1);
 
             visit(overload(
                 [&](const Multisampling& s) {

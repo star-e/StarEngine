@@ -562,11 +562,11 @@ DX12UnorderedRenderQueue::DX12UnorderedRenderQueue(DX12UnorderedRenderQueue&& rh
 
 DX12UnorderedRenderQueue::~DX12UnorderedRenderQueue() = default;
 
-DX12RenderSubpass::allocator_type DX12RenderSubpass::get_allocator() const noexcept {
+DX12RasterSubpass::allocator_type DX12RasterSubpass::get_allocator() const noexcept {
     return allocator_type(mInputAttachments.get_allocator().resource());
 }
 
-DX12RenderSubpass::DX12RenderSubpass(const allocator_type& alloc)
+DX12RasterSubpass::DX12RasterSubpass(const allocator_type& alloc)
     : mInputAttachments(alloc)
     , mOutputAttachments(alloc)
     , mResolveAttachments(alloc)
@@ -579,7 +579,7 @@ DX12RenderSubpass::DX12RenderSubpass(const allocator_type& alloc)
     , mDescriptors(alloc)
 {}
 
-DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass const& rhs, const allocator_type& alloc)
+DX12RasterSubpass::DX12RasterSubpass(DX12RasterSubpass const& rhs, const allocator_type& alloc)
     : mSampleDesc(rhs.mSampleDesc)
     , mInputAttachments(rhs.mInputAttachments, alloc)
     , mOutputAttachments(rhs.mOutputAttachments, alloc)
@@ -595,7 +595,7 @@ DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass const& rhs, const allocat
     , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
-DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass&& rhs, const allocator_type& alloc)
+DX12RasterSubpass::DX12RasterSubpass(DX12RasterSubpass&& rhs, const allocator_type& alloc)
     : mSampleDesc(std::move(rhs.mSampleDesc))
     , mInputAttachments(std::move(rhs.mInputAttachments), alloc)
     , mOutputAttachments(std::move(rhs.mOutputAttachments), alloc)
@@ -611,14 +611,14 @@ DX12RenderSubpass::DX12RenderSubpass(DX12RenderSubpass&& rhs, const allocator_ty
     , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
-DX12RenderSubpass::~DX12RenderSubpass() = default;
+DX12RasterSubpass::~DX12RasterSubpass() = default;
 
 DX12RenderPass::allocator_type DX12RenderPass::get_allocator() const noexcept {
-    return allocator_type(mSubpasses.get_allocator().resource());
+    return allocator_type(mRasterSubpasses.get_allocator().resource());
 }
 
 DX12RenderPass::DX12RenderPass(const allocator_type& alloc)
-    : mSubpasses(alloc)
+    : mRasterSubpasses(alloc)
     , mViewports(alloc)
     , mScissorRects(alloc)
     , mFramebuffers(alloc)
@@ -626,7 +626,7 @@ DX12RenderPass::DX12RenderPass(const allocator_type& alloc)
 {}
 
 DX12RenderPass::DX12RenderPass(DX12RenderPass const& rhs, const allocator_type& alloc)
-    : mSubpasses(rhs.mSubpasses, alloc)
+    : mRasterSubpasses(rhs.mRasterSubpasses, alloc)
     , mViewports(rhs.mViewports, alloc)
     , mScissorRects(rhs.mScissorRects, alloc)
     , mFramebuffers(rhs.mFramebuffers, alloc)
@@ -634,7 +634,7 @@ DX12RenderPass::DX12RenderPass(DX12RenderPass const& rhs, const allocator_type& 
 {}
 
 DX12RenderPass::DX12RenderPass(DX12RenderPass&& rhs, const allocator_type& alloc)
-    : mSubpasses(std::move(rhs.mSubpasses), alloc)
+    : mRasterSubpasses(std::move(rhs.mRasterSubpasses), alloc)
     , mViewports(std::move(rhs.mViewports), alloc)
     , mScissorRects(std::move(rhs.mScissorRects), alloc)
     , mFramebuffers(std::move(rhs.mFramebuffers), alloc)

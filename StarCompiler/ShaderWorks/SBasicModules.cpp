@@ -43,7 +43,7 @@ void createBasicModules(ShaderModules& modules) {
         { "DepthStencil", float1, Texture2D, TypePass },
 
         { "BaseColor", half4, Texture2D, TypeMaterial },
-        { "WorldNormalMap", half3, Texture2D, TypeMaterial },
+        { "NormalMap", half3, Texture2D, TypeMaterial },
     });
 
     ADD_MODULE(Empty, Inline);
@@ -118,14 +118,16 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
 )" }
     );
 
-    ADD_MODULE(VisualizeWorldNormal, Inline,
+    ADD_MODULE(LocalTangent, Inline,
+        Attributes{
+        },
         Outputs{
-            { "color", half4 },
+            { "tangent", half4, TEXCOORD },
         },
         Inputs{
-            { "worldNormal", half3 }
+            { "tangent", half4, TANGENT },
         },
-        Content{ R"(color = half4(0.5f * (worldNormal.xyz + 1.0f), 1.0f);
+        Content{ R"(
 )" }
     );
 
@@ -217,25 +219,279 @@ color1 = half4(worldNormal, 1.0h);
             { "uv", float2, TEXCOORD },
         },
         Content{ R"({
-half4 tmp = BaseColor.Sample(LinearSampler, uv);
-baseColor = tmp.xyz;
-transparency = tmp.w;
+    half4 tmp = BaseColor.Sample(LinearSampler, uv);
+    baseColor = tmp.xyz;
+    transparency = tmp.w;
 }
 )" }
     );
-
-    ADD_MODULE(WorldNormalMap, Inline,
+    
+    ADD_MODULE(InitColor, Inline,
         Attributes{
-            { "WorldNormalMap", Texture2D },
+        },
+        Outputs{
+            { "color", half4 },
+        },
+        Inputs{
+        },
+        Content{ R"(color = half4(0, 0, 0, 1);
+)" }
+
+    );
+    ADD_MODULE(DirectionalLight, Inline,
+        Attributes{
+        },
+        Outputs{
+            { "lightDirection", half3 },
+            { "lightIntensity", half3 },
+        },
+        Inputs{
+        },
+        Content{ R"(lightDirection = normalize(half3(1.0h, 1.0h, 1.0h));
+lightIntensity = half3(1.0h, 1.0h, 1.0h);
+)" }
+    );
+
+    ADD_MODULE(NdotL, Inline,
+        Attributes{
+        },
+        Outputs{
+            { "ndotl", half1 },
+        },
+        Inputs{
+            { "worldNormal", half3 },
+            { "lightDirection", half3 },
+        },
+        Content{ R"(ndotl = saturate(dot(worldNormal, lightDirection));
+)" }
+    );
+
+    ADD_MODULE(EvaluateDirectionalLight, Inline,
+        Attributes{
+        },
+        Outputs{
+            { "color", half4 },
+        },
+        Inputs{
+            { "color", half4 },
+            { "ndotl", half1 },
+            //{ "albedo", half3 },
+            //{ "lightDirection", half3 }
+            { "lightIntensity", half3 },
+            { "baseColor", half3 },
+            { "transparency", half1 },
+        },
+        Content{ R"(color.xyz += baseColor * ndotl * lightIntensity;
+color.w = transparency;
+)" }
+    );
+
+    // Normal Mapping
+    ADD_MODULE(WorldNormal, Inline,
+        Attributes{
+            { "WorldInvT", matrix },
+        },
+        Outputs{
+            { "worldNormal", half3, TEXCOORD },
+        },
+        Inputs{
+            { "normal", half3, NORMAL },
+        },
+        Contents{
+            { "worldNormal = normalize(mul(WorldInvT, half4(normal.xyz, 0.0h)).xyz);\n" },
+        }
+    );
+    
+    ADD_MODULE(WorldTangent, Inline,
+        Attributes{
+            { "WorldInvT", matrix },
+        },
+        Outputs{
+            { "worldTangent", half3, TEXCOORD },
+        },
+        Inputs{
+            { "tangent", half4, TANGENT },
+        },
+        Contents{
+            { "worldTangent = normalize(mul(WorldInvT, half4(tangent.xyz, 0.0h)).xyz);\n" },
+        }
+    );
+
+    ADD_MODULE(CalculateWorldBinormal, Inline,
+        Outputs{
+            { "worldBinormal", half3, TEXCOORD },
+        },
+        Inputs{
+            { "worldTangent", half3 },
+            { "worldNormal", half3 },
+            { "tangent", half4, TANGENT },
+        },
+        Contents{
+            { "worldBinormal = cross(worldNormal, worldTangent) * tangent.w;\n" },
+        }
+    );
+
+    ADD_MODULE(PackTangentSpace, Inline,
+        Outputs{
+            { "tangentToWorld0", half4, TEXCOORD },
+            { "tangentToWorld1", half4, TEXCOORD },
+            { "tangentToWorld2", half4, TEXCOORD },
+        },
+        Inputs{
+            { "worldTangent", half3 },
+            { "worldBinormal", half3 },
+            { "worldNormal", half3 },
+        },
+        Contents{
+            { R"(tangentToWorld0 = half4(worldTangent.x, worldBinormal.x, worldNormal.x, 0.0h);
+tangentToWorld1 = half4(worldTangent.y, worldBinormal.y, worldNormal.y, 0.0h);
+tangentToWorld2 = half4(worldTangent.z, worldBinormal.z, worldNormal.z, 0.0h);
+)" }
+        }
+    );
+
+    ADD_MODULE(NormalMap, Inline,
+        Attributes{
+            { "NormalMap", Texture2D },
             { "LinearSampler", SamplerState },
         },
         Outputs{
-            { "worldNormal", half3 },
+            { "tangentNormal", half3 },
         },
         Inputs{
             { "uv", float2, TEXCOORD },
         },
-        Content{ R"(worldNormal = WorldNormalMap.Sample(LinearSampler, uv).xyz;
+        Content{ R"(tangentNormal = NormalMap.Sample(LinearSampler, uv).xyz * 2 - 1;
+)" }
+    );
+
+    ADD_MODULE(TangentNormalToWorld, Inline,
+        Outputs{
+            { "worldNormal", half3 }
+        },
+        Inputs{
+            { "tangentNormal", half3 },
+            { "tangentToWorld0", half4, TEXCOORD },
+            { "tangentToWorld1", half4, TEXCOORD },
+            { "tangentToWorld2", half4, TEXCOORD },
+        },
+        Content{ R"(worldNormal.x = dot(tangentToWorld0.xyz, tangentNormal);
+worldNormal.y = dot(tangentToWorld1.xyz, tangentNormal);
+worldNormal.z = dot(tangentToWorld2.xyz, tangentNormal);
+worldNormal = normalize(worldNormal);
+)" });
+    
+    ADD_MODULE(UnpackTangent, Inline,
+        Outputs{
+            { "worldTangent", half3 },
+        },
+        Inputs{
+            { "tangentToWorld0", half4, TEXCOORD },
+            { "tangentToWorld1", half4, TEXCOORD },
+            { "tangentToWorld2", half4, TEXCOORD },
+        },
+        Contents{
+            { "worldTangent = half3(tangentToWorld0.x, tangentToWorld1.x, tangentToWorld2.x);\n" }
+        }
+    );
+
+    ADD_MODULE(UnpackBinormal, Inline,
+        Outputs{
+            { "worldBinormal", half3 },
+        },
+        Inputs{
+            { "tangentToWorld0", half4, TEXCOORD },
+            { "tangentToWorld1", half4, TEXCOORD },
+            { "tangentToWorld2", half4, TEXCOORD },
+        },
+        Contents{
+            { "worldBinormal = half3(tangentToWorld0.y, tangentToWorld1.y, tangentToWorld2.y);\n" }
+        }
+    );
+
+    ADD_MODULE(UnpackNormal, Inline,
+        Outputs{
+            { "worldNormal", half3 },
+        },
+        Inputs{
+            { "tangentToWorld0", half4, TEXCOORD },
+            { "tangentToWorld1", half4, TEXCOORD },
+            { "tangentToWorld2", half4, TEXCOORD },
+        },
+        Contents{
+            { "worldNormal = half3(tangentToWorld0.z, tangentToWorld1.z, tangentToWorld2.z);\n" }
+        }
+    );
+    
+    ADD_MODULE(VisualizeWorldTangent, Inline,
+        Outputs{
+            { "color", half4 },
+        },
+        Inputs{
+            { "worldTangent", half3 }
+        },
+        Content{ R"(color = saturate(half4(0.5f * (worldTangent.xyz + 1.0f), 1.0f));
+color.xyz = pow(color.xyz, 2.2h);
+)" }
+    );
+
+    ADD_MODULE(VisualizeWorldBinormal, Inline,
+        Outputs{
+            { "color", half4 },
+        },
+        Inputs{
+            { "worldBinormal", half3 }
+        },
+        Content{ R"(color = saturate(half4(0.5f * (worldBinormal.xyz + 1.0f), 1.0f));
+color.xyz = pow(color.xyz, 2.2h);
+)" }
+    );
+
+    ADD_MODULE(VisualizeWorldNormal, Inline,
+        Outputs{
+            { "color", half4 },
+        },
+        Inputs{
+            { "worldNormal", half3 }
+        },
+        Content{ R"(color = saturate(half4(0.5f * (worldNormal.xyz + 1.0f), 1.0f));
+color.xyz = pow(color.xyz, 2.2h);
+)" }
+    );
+
+    ADD_MODULE(VisualizeTangentW, Inline,
+        Outputs{
+            { "color", half4 },
+        },
+        Inputs{
+            { "tangent", half4, TEXCOORD },
+        },
+        Content{ R"(color.xyz = tangent.w * 0.5h + 0.5h;
+color.w = 1.0h;
+)" }
+    );
+
+    ADD_MODULE(VisualizeNormalMap, Inline,
+        Outputs{
+            { "color", half4 },
+        },
+        Inputs{
+            { "tangentNormal", half3 },
+        },
+        Content{ R"(color = saturate(half4(0.5f * (tangentNormal.xyz + 1.0f), 1.0f));
+color.xyz = pow(color.xyz, 2.2h);
+)" }
+    );
+
+    // Alpha Test
+    ADD_MODULE(AlphaTest, Inline,
+        Outputs{
+            { "transparency", half1 },
+        },
+        Inputs{
+            { "transparency", half1 },
+        },
+        Content{ R"(clip(transparency - 0.5f);
 )" }
     );
 }

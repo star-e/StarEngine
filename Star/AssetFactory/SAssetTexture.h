@@ -21,6 +21,9 @@
 
 namespace Star::Asset {
 
+uint32_t getNumChannelsPNG(std::istream& is);
+bool isAlphaTestPNG(std::istream& is);
+
 void loadPNG(std::istream& is, std::pmr::memory_resource* mr, const TextureImportSettings& settings, Graphics::Render::TextureData& tex);
 void loadTGA(std::istream& is, std::pmr::memory_resource* mr, const TextureImportSettings& settings, Graphics::Render::TextureData& tex);
 

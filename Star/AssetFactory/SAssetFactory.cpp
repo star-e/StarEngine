@@ -29,6 +29,7 @@
 #include <StarCompiler/RenderGraph/SRenderGraphFactory.h>
 #include <StarCompiler/ShaderWorks/SShaderAssetBuilder.h>
 #include <Star/Graphics/SContentUtils.h>
+#include <Star/Graphics/SRenderFormatUtils.h>
 
 namespace Star::Asset {
 
@@ -53,10 +54,10 @@ struct AssetFactory::Impl final : public Core::Producer {
         desc.mElements = {
             { SV_Position, 0, Format::R32G32B32_SFLOAT },
             { NORMAL, 12, Format::R32G32B32_SFLOAT },
-            { TANGENT, 24, Format::R32G32B32_SFLOAT },
-            { TEXCOORD, 36, Format::R32G32_SFLOAT },
+            { TANGENT, 24, Format::R32G32B32A32_SFLOAT },
+            { TEXCOORD, 40, Format::R32G32_SFLOAT },
         };
-        desc.mVertexSize = 44;
+        desc.mVertexSize = 48;
         meshLayout.mIndex = {
             { "vertex", { 0, 0 } },
             { "normal", { 0, 1 } },
@@ -664,28 +665,33 @@ public:
 
         for (const auto& shaderAsset : mDatabase.mShaderInfo) {
             auto& shaderData = mResources.mShaders.at(shaderAsset.mMetaID);
-            auto& layouts = at(shaderVertexLayouts, shaderData.mName);
-            visitShaderSubpassData(shaderData, [&](ShaderSubpassData& pass) {
-                pass.mVertexLayouts.clear();
-                for (const auto& layout : layouts) {
-                    pass.mVertexLayouts.emplace_back(layout.second);
-                }
-            });
+            auto iter = shaderVertexLayouts.find(sv(shaderData.mName));
+            if (iter != shaderVertexLayouts.end()) {
+                auto& layouts = iter->second;
+                visitShaderSubpassData(shaderData, [&](ShaderSubpassData& pass) {
+                    pass.mVertexLayouts.clear();
+                    for (const auto& layout : layouts) {
+                        pass.mVertexLayouts.emplace_back(layout.second);
+                    }
+                });
+            }
 
             updateResource(shaderAsset.mName, shaderData);
         }
-
+                
         for (const auto& materialAsset : mDatabase.mMaterialInfo) {
             MaterialData materialData(std::pmr::get_default_resource());
             materialData.mShader = materialAsset.mShader;
             materialData.mTextures.reserve(materialAsset.mTextures.size());
             for (const auto& texID : materialAsset.mTextures) {
-                auto id = attributes.mIndex.at(texID.first);
-                materialData.mTextures.emplace(id, texID.second);
+                auto iter = attributes.mIndex.find(texID.first);
+                if (iter != attributes.mIndex.end()) {
+                    const auto& id = iter->second;
+                    materialData.mTextures.emplace(id, texID.second);
+                }
             }
             updateResource(materialAsset.mName, materialData);
         }
-
         TextureImportSettings settings;
         std::for_each(std::execution::par_unseq,
             mDatabase.mTextureInfo.begin(),
@@ -763,11 +769,36 @@ public:
                     auto metaID = res.first->mMetaID;
                     auto name = res.first->mName;
                     auto res2 = mDatabase.mMaterialInfo.modify(res.first, [&](MaterialInfo& asset) {
-                        asset.mShader = "Star/Diffuse";
+                        bool normalMap = false;
+                        bool alphaTest = false;
                         for (const auto& [attr, texturePath] : textures) {
                             const auto& texMetaID = getAssetMetaID(texturePath, mDatabase.mTextureInfo);
                             asset.mTextures.emplace(attr, texMetaID);
+                            if (boost::algorithm::contains(texturePath, "normal")) {
+                                normalMap = true;
+                            }
+                            if (boost::algorithm::contains(texturePath, "albedo") ||
+                                boost::algorithm::contains(texturePath, "diffuse") ||
+                                boost::algorithm::contains(texturePath, "basecolor"))
+                            {
+                                if (std::filesystem::path(texturePath).extension() == ".png") {
+                                    std::ifstream ifs(mFolder / texturePath, std::ios::binary);
+                                    Expects(ifs);
+                                    if (isAlphaTestPNG(ifs)) {
+                                        alphaTest = true;
+                                    }
+                                }
+                            }
                         }
+                        asset.mShader = "Star/Diffuse";
+                        if (normalMap) {
+                            asset.mShader += " NormalMap";
+                        }
+                        if (alphaTest) {
+                            asset.mShader += " AlphaTest";
+                        }
+
+                        S_INFO << "Shader: " << asset.mShader;
                     });
                     Ensures(res2);
                     Ensures(res.first->mMetaID == metaID);
@@ -845,7 +876,7 @@ public:
                 Ensures(res.second);
                 iter = res.first;
                 bool bSrgb = true;
-                if (boost::algorithm::icontains(iterInfo->mName, ".normal")) {
+                if (boost::algorithm::contains(iterInfo->mName, "normal")) {
                     bSrgb = false;
                 }
                 loadDDS(ifs, std::pmr::get_default_resource(), iter->second, bSrgb);
@@ -1009,7 +1040,7 @@ public:
         auto& pipeline = solution.mPipelines.at(at(solution.mPipelineIndex, pipelineName));
         const auto& passDesc = at(pipeline.mSubpassIndex, passName);
         auto& pass = pipeline.mPasses.at(passDesc.mPassID);
-        auto& queue = pass.mSubpasses.at(passDesc.mSubpassID).mOrderedRenderQueue.emplace_back();
+        auto& queue = pass.mRasterSubpasses.at(passDesc.mSubpassID).mOrderedRenderQueue.emplace_back();
         queue.mContents.emplace_back(contentID);
     }
 

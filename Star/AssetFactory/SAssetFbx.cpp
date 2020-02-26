@@ -21,6 +21,7 @@
 #include "SAssetFbxUtils.h"
 #include "SAssetUtils.h"
 #include <Star/Graphics/SContentSerialization.h>
+#include <3rdparty/mikktspace/mikktspace.h>
 
 using namespace fbxsdk;
 
@@ -117,9 +118,209 @@ void checkLayoutRequirement(const MeshBufferLayout& layout, const fbxsdk::FbxMes
     }
 }
 
+int getNumFaces(const SMikkTSpaceContext* pContext) {
+    Expects(pContext && pContext->m_pUserData);
+    const auto* mesh = static_cast<const MeshData*>(pContext->m_pUserData);
+    return mesh->mIndexBuffer.mPrimitiveCount;
+}
+
+int getNumVerticesOfFace(const SMikkTSpaceContext* pContext, const int iFace) {
+    Expects(pContext && pContext->m_pUserData);
+    const auto* mesh = static_cast<const MeshData*>(pContext->m_pUserData);
+    Expects(mesh->mIndexBuffer.mPrimitiveTopology == GFX_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    return 3;
+}
+
+void getPosition(const SMikkTSpaceContext* pContext, float fvPosOut[], const int iFace, const int iVert) {
+    Expects(pContext && pContext->m_pUserData);
+    const auto* mesh = static_cast<const MeshData*>(pContext->m_pUserData);
+    Expects(mesh->mIndexBuffer.mElementSize);
+    uint32_t id = -1;
+    if (mesh->mIndexBuffer.mElementSize == 2) {
+        auto* pIndex = reinterpret_cast<const uint16_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    } else {
+        auto* pIndex = reinterpret_cast<const uint32_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    }
+    Ensures(id != -1);
+
+    for (const auto& vb : mesh->mVertexBuffers) {
+        Expects(id < vb.mVertexCount);
+        for (const auto& elem : vb.mDesc.mElements) {
+            if (std::holds_alternative<SV_Position_>(elem.mType)) {
+                switch (elem.mFormat) {
+                case Format::R32G32B32_SFLOAT:
+                case Format::R32G32B32A32_SFLOAT:
+                {
+                    const auto* pPos = reinterpret_cast<const float*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    fvPosOut[0] = pPos[0];
+                    fvPosOut[1] = pPos[1];
+                    fvPosOut[2] = pPos[2];
+                }
+                break;
+                case Format::R16G16B16A16_SFLOAT:
+                {
+                    const auto* pPos = reinterpret_cast<const half*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    fvPosOut[0] = pPos[0];
+                    fvPosOut[1] = pPos[1];
+                    fvPosOut[2] = pPos[2];
+                }
+                break;
+                default:
+                    throw std::invalid_argument("unsupported position format");
+                }
+            }
+        }
+    }
+}
+
+void getNormal(const SMikkTSpaceContext* pContext, float fvNormOut[], const int iFace, const int iVert) {
+    Expects(pContext && pContext->m_pUserData);
+    const auto* mesh = static_cast<const MeshData*>(pContext->m_pUserData);
+    Expects(mesh->mIndexBuffer.mElementSize);
+    uint32_t id = -1;
+    if (mesh->mIndexBuffer.mElementSize == 2) {
+        auto* pIndex = reinterpret_cast<const uint16_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    } else {
+        auto* pIndex = reinterpret_cast<const uint32_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    }
+    Ensures(id != -1);
+
+    for (const auto& vb : mesh->mVertexBuffers) {
+        Expects(id < vb.mVertexCount);
+        for (const auto& elem : vb.mDesc.mElements) {
+            if (std::holds_alternative<NORMAL_>(elem.mType)) {
+                switch (elem.mFormat) {
+                case Format::R32G32B32_SFLOAT:
+                case Format::R32G32B32A32_SFLOAT:
+                {
+                    const auto* pPos = reinterpret_cast<const float*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    fvNormOut[0] = pPos[0];
+                    fvNormOut[1] = pPos[1];
+                    fvNormOut[2] = pPos[2];
+                }
+                break;
+                case Format::R16G16B16A16_SFLOAT:
+                {
+                    const auto* pPos = reinterpret_cast<const half*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    fvNormOut[0] = pPos[0];
+                    fvNormOut[1] = pPos[1];
+                    fvNormOut[2] = pPos[2];
+                }
+                break;
+                default:
+                    throw std::invalid_argument("unsupported normal format");
+                }
+            }
+        }
+    }
+}
+
+void getTexCoord(const SMikkTSpaceContext* pContext, float fvTexcOut[], const int iFace, const int iVert) {
+    Expects(pContext && pContext->m_pUserData);
+    const auto* mesh = static_cast<const MeshData*>(pContext->m_pUserData);
+    Expects(mesh->mIndexBuffer.mElementSize);
+    uint32_t id = -1;
+    if (mesh->mIndexBuffer.mElementSize == 2) {
+        auto* pIndex = reinterpret_cast<const uint16_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    } else {
+        auto* pIndex = reinterpret_cast<const uint32_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    }
+    Ensures(id != -1);
+
+    for (const auto& vb : mesh->mVertexBuffers) {
+        Expects(id < vb.mVertexCount);
+        for (const auto& elem : vb.mDesc.mElements) {
+            if (std::holds_alternative<TEXCOORD_>(elem.mType)) {
+                switch (elem.mFormat) {
+                case Format::R32G32B32A32_SFLOAT:
+                case Format::R32G32B32_SFLOAT:
+                case Format::R32G32_SFLOAT:
+                {
+                    const auto* pPos = reinterpret_cast<const float*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    fvTexcOut[0] = pPos[0];
+                    fvTexcOut[1] = pPos[1];
+                }
+                break;
+                case Format::R16G16B16A16_SFLOAT:
+                case Format::R16G16_SFLOAT:
+                {
+                    const auto* pPos = reinterpret_cast<const half*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    fvTexcOut[0] = pPos[0];
+                    fvTexcOut[1] = pPos[1];
+                }
+                break;
+                default:
+                    throw std::invalid_argument("unsupported texcoord format");
+                }
+            }
+        }
+    }
+}
+
+void setTSpaceBasic(const SMikkTSpaceContext* pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert) {
+    Expects(pContext && pContext->m_pUserData);
+    auto* mesh = static_cast<MeshData*>(pContext->m_pUserData);
+    Expects(mesh->mIndexBuffer.mElementSize);
+    uint32_t id = -1;
+    if (mesh->mIndexBuffer.mElementSize == 2) {
+        auto* pIndex = reinterpret_cast<const uint16_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    } else {
+        auto* pIndex = reinterpret_cast<const uint32_t*>(mesh->mIndexBuffer.mBuffer.data());
+        id = pIndex[3 * iFace + iVert];
+    }
+    Ensures(id != -1);
+
+    for (auto& vb : mesh->mVertexBuffers) {
+        Expects(id < vb.mVertexCount);
+        for (auto& elem : vb.mDesc.mElements) {
+            if (std::holds_alternative<TANGENT_>(elem.mType)) {
+                switch (elem.mFormat) {
+                case Format::R32G32B32A32_SFLOAT:
+                {
+                    auto* pPos = reinterpret_cast<float*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    pPos[0] = fvTangent[0];
+                    pPos[1] = fvTangent[1];
+                    pPos[2] = fvTangent[2];
+                    pPos[3] = fSign;
+                }
+                break;
+                case Format::R32G32B32_SFLOAT:
+                {
+                    auto* pPos = reinterpret_cast<float*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    pPos[0] = fvTangent[0];
+                    pPos[1] = fvTangent[1];
+                    pPos[2] = fvTangent[2];
+                }
+                break;
+                case Format::R16G16B16A16_SFLOAT:
+                {
+                    auto* pPos = reinterpret_cast<half*>(vb.mBuffer.data() + id * vb.mDesc.mVertexSize + elem.mAlignedByteOffset);
+                    pPos[0] = half(fvTangent[0]);
+                    pPos[1] = half(fvTangent[1]);
+                    pPos[2] = half(fvTangent[2]);
+                    pPos[3] = half(fSign);
+                }
+                break;
+                default:
+                    throw std::invalid_argument("unsupported texcoord format");
+                }
+            }
+        }
+    }
+}
+
 void fillBufferByVertex(const MeshBufferLayout& layout,
     const fbxsdk::FbxMesh* pMesh, MeshData& mesh
 ) {
+    bool mikktspace = false;
+
     static const int PolygonSize = 3;
     const int faceCount = pMesh->GetPolygonCount();
     const int vertexCount = PolygonSize * faceCount;
@@ -142,18 +343,22 @@ void fillBufferByVertex(const MeshBufferLayout& layout,
             auto stride = vb.mDesc.mVertexSize;
             visit(overload(
                 [&](BINORMAL_) {
-                    switch (e.mFormat) {
-                    case Format::R32G32B32A32_SFLOAT:
-                        readByVertex<PolygonSize, Vector4fu>(pMesh, pMesh->GetElementBinormal(slot), buffer, stride);
-                        break;
-                    case Format::R32G32B32_SFLOAT:
-                        readByVertex<PolygonSize, Vector3fu>(pMesh, pMesh->GetElementBinormal(slot), buffer, stride);
-                        break;
-                    case Format::R16G16B16A16_SFLOAT:
-                        readByVertex<PolygonSize, Vector4hu>(pMesh, pMesh->GetElementBinormal(slot), buffer, stride);
-                        break;
-                    default:
-                        throw std::invalid_argument("binormal Format not support");
+                    if (mikktspace) {
+                        // do not import
+                    } else {
+                        switch (e.mFormat) {
+                        case Format::R32G32B32A32_SFLOAT:
+                            readByVertex<PolygonSize, Vector4fu>(pMesh, pMesh->GetElementBinormal(slot), buffer, stride);
+                            break;
+                        case Format::R32G32B32_SFLOAT:
+                            readByVertex<PolygonSize, Vector3fu>(pMesh, pMesh->GetElementBinormal(slot), buffer, stride);
+                            break;
+                        case Format::R16G16B16A16_SFLOAT:
+                            readByVertex<PolygonSize, Vector4hu>(pMesh, pMesh->GetElementBinormal(slot), buffer, stride);
+                            break;
+                        default:
+                            throw std::invalid_argument("binormal Format not support");
+                        }
                     }
                 },
                 [&](BLENDINDICES_) {
@@ -184,18 +389,22 @@ void fillBufferByVertex(const MeshBufferLayout& layout,
                     throw std::invalid_argument("psize not supported yet");
                 },
                 [&](TANGENT_) {
-                    switch (e.mFormat) {
-                    case Format::R32G32B32A32_SFLOAT:
-                        readByVertex<PolygonSize, Vector4fu>(pMesh, pMesh->GetElementTangent(slot), buffer, stride);
-                        break;
-                    case Format::R32G32B32_SFLOAT:
-                        readByVertex<PolygonSize, Vector3fu>(pMesh, pMesh->GetElementTangent(slot), buffer, stride);
-                        break;
-                    case Format::R16G16B16A16_SFLOAT:
-                        readByVertex<PolygonSize, Vector4hu>(pMesh, pMesh->GetElementTangent(slot), buffer, stride);
-                        break;
-                    default:
-                        throw std::invalid_argument("tangent Format not support");
+                    if (mikktspace) {
+                        // do not import
+                    } else {
+                        switch (e.mFormat) {
+                        case Format::R32G32B32A32_SFLOAT:
+                            readByVertex<PolygonSize, Vector4fu>(pMesh, pMesh->GetElementTangent(slot), buffer, stride);
+                            break;
+                        case Format::R32G32B32_SFLOAT:
+                            readByVertex<PolygonSize, Vector3fu>(pMesh, pMesh->GetElementTangent(slot), buffer, stride);
+                            break;
+                        case Format::R16G16B16A16_SFLOAT:
+                            readByVertex<PolygonSize, Vector4hu>(pMesh, pMesh->GetElementTangent(slot), buffer, stride);
+                            break;
+                        default:
+                            throw std::invalid_argument("tangent Format not support");
+                        }
                     }
                 },
                 [&](TEXCOORD_) {
@@ -275,6 +484,34 @@ void fillBufferByVertex(const MeshBufferLayout& layout,
     } else if (mesh.mIndexBuffer.mElementSize == 4) {
         for (uint32_t i = 0; i != indexCount; ++i) {
             reinterpret_cast<uint32_t*>(mesh.mIndexBuffer.mBuffer.data())[i] = i;
+        }
+    }
+
+    // mikktspace
+    if (mikktspace) {
+        bool hasTangent = false;
+        for (auto& vb : mesh.mVertexBuffers) {
+            for (auto& elem : vb.mDesc.mElements) {
+                if (std::holds_alternative<TANGENT_>(elem.mType)) {
+                    hasTangent = true;
+                    break;
+                }
+            }
+        }
+        if (hasTangent) {
+            SMikkTSpaceInterface interface {
+                &getNumFaces, & getNumVerticesOfFace, & getPosition, & getNormal, & getTexCoord, & setTSpaceBasic
+            };
+
+            SMikkTSpaceContext context{
+                &interface,
+                &mesh
+            };
+
+            auto res = genTangSpaceDefault(&context);
+            if (!res) {
+                throw std::runtime_error("calculate mikktspace failed");
+            }
         }
     }
 }
@@ -540,6 +777,15 @@ void AssetFbxScene::createMaterials(const std::function<void(std::string_view, c
                 auto texFilename = std::filesystem::path(getRelativeFilename(mAssetPath, pTex->GetRelativeFileName()));
                 auto texAssetName = getAssetNameFromFullPath(texFilename, mAssetFolder);
                 textures.try_emplace("BaseColor", texAssetName);
+
+                auto normalFilename = texAssetName;
+                boost::algorithm::replace_last(normalFilename, "_albedo", "_normal");
+                boost::algorithm::replace_last(normalFilename, "_diffuse", "_normal");
+                if (exists(mAssetFolder / normalFilename)) {
+                    textures.try_emplace("NormalMap", normalFilename);
+                } else {
+                    throw std::runtime_error("normal map not found");
+                }
             }
         }
         func(materialName, textures);

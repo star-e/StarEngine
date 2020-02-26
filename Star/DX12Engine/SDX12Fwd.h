@@ -52,7 +52,7 @@ struct DX12MeshRenderer;
 struct DX12FlattenedObjects;
 struct DX12ContentData;
 struct DX12UnorderedRenderQueue;
-struct DX12RenderSubpass;
+struct DX12RasterSubpass;
 struct DX12RenderPass;
 struct DX12RenderPipeline;
 struct DX12RenderSolution;

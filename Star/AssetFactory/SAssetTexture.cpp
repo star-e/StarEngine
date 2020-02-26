@@ -181,6 +181,7 @@ void loadImage(std::istream& is, std::pmr::memory_resource* mr,
     tex.mDesc.mSampleDesc = { 1u, 0u };
     tex.mDesc.mLayout = TEXTURE_LAYOUT_UNKNOWN;
     tex.mDesc.mFlags = {};
+    tex.mFormat = info.mFormat;
 
     // src
     uint32_t mipCount = mip_count(boost::alignment::align_up(width, BlockX), boost::alignment::align_up(height, BlockY));
@@ -261,6 +262,45 @@ void loadImage(std::istream& is, std::pmr::memory_resource* mr,
     }
 }
 
+}
+
+uint32_t getNumChannelsPNG(std::istream& is) {
+    const auto& img = read_image_info(is, png_tag())._info;
+    return img._num_channels;
+}
+
+bool isAlphaTestPNG(std::istream& is) {
+    const auto& img = read_image_info(is, png_tag())._info;
+    is.seekg(0);
+
+    if (img._num_channels < 4)
+        return false;
+
+    rgba8_image_t im;
+    read_image(is, im, png_tag());
+
+    uint32_t whiteCount = 0;
+    uint32_t blackCount = 0;
+    auto imv = const_view(im);
+    for (uint32_t i = 0; i != imv.height(); ++i) {
+        for (uint32_t j = 0; j != imv.width(); ++j) {
+            auto alpha = imv(j, i)[3];
+            if (alpha == 255) {
+                ++whiteCount;
+            } else if (alpha == 0) {
+                ++blackCount;
+            }
+        }
+    }
+
+    bool alphaTest = true;
+    if (whiteCount == imv.height() * imv.width() ||
+        blackCount == imv.height() * imv.width())
+    {
+        alphaTest = false;
+    }
+    
+    return alphaTest;
 }
 
 void loadPNG(std::istream& is, std::pmr::memory_resource* mr, const TextureImportSettings& settings, TextureData& tex) {

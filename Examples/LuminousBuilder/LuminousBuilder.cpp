@@ -32,12 +32,12 @@
 #include <StarCompiler/ShaderGraph/SShaderDSL.h>
 
 #include "SBuildShaders.h"
-
 using namespace Star;
 using namespace Star::Graphics;
 using namespace Star::Graphics::Render;
 using namespace Star::Graphics::Render::Shader;
 using namespace Star::Graphics::Render::Shader::DSL;
+using namespace std::string_literals;
 
 void buildForwardSolution(RenderSolutionFactory& renderSolutionFactory) {
     boost::uuids::name_generator_sha1 gen(boost::uuids::ns::oid());
@@ -211,6 +211,12 @@ void buildMaterials(Resources& resources) {
     //mat.mShader = "Star/RenderPipeline";
 }
 
+std::string to_underscore(const std::string& name) {
+    auto name2 = boost::algorithm::replace_all_copy(name, " ", "_");
+    boost::algorithm::to_lower(name2);
+    return name2;
+}
+
 int buildForwardShaders(const ShaderModules& modules, ShaderDatabase& db) {
     //Shader("Star/RenderPipeline") {
     //    SinglePass("Forward", "Forward", "Lighting", 0) {
@@ -243,23 +249,36 @@ int buildForwardShaders(const ShaderModules& modules, ShaderDatabase& db) {
     //    }
     //}
 
-    Shader("Star/Diffuse", "diffuse.shader") {
-        SinglePass("Forward", "Diffuse", "Lighting", 0) {
-            PixelShader({ "color", half4, SV_Target }) {
-                Node(OutputAlbedo, Inline,
-                    Outputs{
-                        { "color", half4 },
-                    },
-                    Inputs{
-                        { "baseColor", half3  },
-                        { "transparency", half1 },
-                    },
-                    Content{ R"(color = half4(baseColor, transparency);
-)" });
-                Group(BaseColorAndTransparency);
-            }
-            VertexShader() {
-                Group(ClipPos, WorldPos, WorldGeometryNormal);
+    for (const auto& alphatest : { ""s, " AlphaTest"s }) {
+        for (const auto& normalmap : { ""s, " NormalMap"s }) {
+            Shader("Star/Diffuse" + normalmap + alphatest,
+                "diffuse" + to_underscore(normalmap) + to_underscore(alphatest) + ".shader")
+            {
+                SinglePass("Forward", "Diffuse", "Lighting", 0) {
+                    PixelShader({ "color", half4, SV_Target }) {
+                        Group(EvaluateDirectionalLight);
+                        Group(InitColor);
+                        Group(NdotL);
+                        Group(DirectionalLight);
+                        if (!normalmap.empty()) {
+                            Group(TangentNormalToWorld);
+                            Group(NormalMap);
+                            Group(UnpackTangent, UnpackBinormal, UnpackNormal);
+                        }
+                        if (!alphatest.empty()) {
+                            Group(AlphaTest);
+                        }
+                        Group(BaseColorAndTransparency);
+                    }
+                    VertexShader() {
+                        if (!normalmap.empty()) {
+                            Group(PackTangentSpace);
+                            Group(CalculateWorldBinormal);
+                            Group(WorldNormal, WorldTangent);
+                        }
+                        Group(ClipPos, WorldPos, WorldGeometryNormal, LocalTangent);
+                    }
+                }
             }
         }
     }

@@ -169,8 +169,8 @@ void DX12FrameQueue::renderFrame(const DX12FrameContext* pContext, std::pmr::mem
                 alias_cast<const D3D12_RECT*>(&pass.mScissorRects[0]));
         }
         
-        for (uint32_t subpassID = 0; subpassID != pass.mSubpasses.size(); ++subpassID) {
-            const auto& subpass = pass.mSubpasses[subpassID];
+        for (uint32_t subpassID = 0; subpassID != pass.mRasterSubpasses.size(); ++subpassID) {
+            const auto& subpass = pass.mRasterSubpasses[subpassID];
             //---------------------------------------------------
             // Pre-Subpass
             rtvs.clear();
@@ -284,6 +284,9 @@ void DX12FrameQueue::renderFrame(const DX12FrameContext* pContext, std::pmr::mem
                                                                             },
                                                                             [&](Data::WorldView_) {
                                                                                 throw std::runtime_error("WorldView cannot be per pass");
+                                                                            },
+                                                                            [&](Data::WorldInvT_) {
+                                                                                throw std::runtime_error("WorldInvT cannot be per pass");
                                                                             },
                                                                             [](std::monostate) {
                                                                                 throw std::runtime_error("engine source constant cannot be monostate");
@@ -450,6 +453,12 @@ void DX12FrameQueue::renderFrame(const DX12FrameContext* pContext, std::pmr::mem
                                                                                                                                 Expects(pData + sizeof(worldView) <= perInstanceCB.data() + perInstanceCB.size());
                                                                                                                                 memcpy(pData, worldView.data(), sizeof(worldView));
                                                                                                                                 pData += sizeof(worldView);
+                                                                                                                            },
+                                                                                                                            [&](Data::WorldInvT_) {
+                                                                                                                                const Matrix4f& worldInvT = batch.mWorldTransformInvs[i].mTransform.matrix();
+                                                                                                                                Expects(pData + sizeof(worldInvT) <= perInstanceCB.data() + perInstanceCB.size());
+                                                                                                                                memcpy(pData, worldInvT.data(), sizeof(worldInvT));
+                                                                                                                                pData += sizeof(worldInvT);
                                                                                                                             },
                                                                                                                             [](std::monostate) {
                                                                                                                                 throw std::runtime_error("engine source constant cannot be monostate");

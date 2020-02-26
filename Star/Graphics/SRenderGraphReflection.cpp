@@ -57,6 +57,7 @@ bool try_getType(std::string_view name, Type& type) noexcept {
         { std::string_view("Proj"), Type(std::in_place_type_t<Proj_>()) },
         { std::string_view("View"), Type(std::in_place_type_t<View_>()) },
         { std::string_view("WorldView"), Type(std::in_place_type_t<WorldView_>()) },
+        { std::string_view("WorldInvT"), Type(std::in_place_type_t<WorldInvT_>()) },
     };
 
     auto iter = index.find(name);

@@ -34,6 +34,9 @@
     <ClInclude Include="SAssetTexture.h">
       <Filter>2.Texture</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\3rdparty\mikktspace\mikktspace.h">
+      <Filter>1.Fbx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -55,6 +58,9 @@
     </ClCompile>
     <ClCompile Include="SAssetTexture.cpp">
       <Filter>2.Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\mikktspace\mikktspace.c">
+      <Filter>1.Fbx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -61,8 +61,9 @@ namespace Data {
 struct Proj_;
 struct View_;
 struct WorldView_;
+struct WorldInvT_;
 
-using Type = std::variant<std::monostate, Proj_, View_, WorldView_>;
+using Type = std::variant<std::monostate, Proj_, View_, WorldView_, WorldInvT_>;
 
 } // namespace Data
 
@@ -74,8 +75,10 @@ struct ShaderDescriptorList;
 struct ShaderDescriptorCollection;
 struct ShaderConstant;
 struct ShaderConstantBuffer;
-struct RenderSubpass;
-struct RenderSubpassDependency;
+struct RasterSubpass;
+struct RasterSubpassDependency;
+struct ComputeSubpass;
+struct RaytracingSubpass;
 struct RenderPass;
 struct RenderPassDependency;
 struct RenderSubpassDesc;

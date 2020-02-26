@@ -37,6 +37,14 @@ void RootSignature::addDescriptor(const ShaderAttribute& attr, ShaderVisibilityT
     mDatabase.addAttribute(attr, stage);
 }
 
+bool RootSignature::try_addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage) {
+    IsConstant visitor;
+    if (visit(visitor, attr.mType)) {
+        return false;
+    }
+    return mDatabase.try_addAttribute(attr, stage);
+}
+
 void RootSignature::reserveCapacities(UpdateEnum update, RootSignature& rhs) const {
     mDatabase.reserveDescriptors(update, rhs.mDatabase);
 }

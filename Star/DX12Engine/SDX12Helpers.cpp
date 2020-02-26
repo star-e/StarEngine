@@ -35,57 +35,97 @@ uint64_t waitForFence(ID3D12Fence* pFence, HANDLE FenceEvent, uint64_t waitValue
 
 com_ptr<IDXGIFactory4> createFactory() {
     com_ptr<IDXGIFactory4> factory;
-    UINT dxgiFactoryFlags = 0;
-#ifndef NDEBUG
-    dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+    bool debugDXGI = false;
+#ifdef STAR_DEV
+    com_ptr<IDXGIInfoQueue> dxgiInfoQueue;
+    if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(dxgiInfoQueue.put())))) {
+        debugDXGI = true;
+        V(CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(factory.put())));
+        dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR, true);
+        dxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION, true);
+    }
 #endif
-    V(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(factory.put())));
+    if (!debugDXGI) {
+        V(CreateDXGIFactory1(IID_PPV_ARGS(factory.put())));
+    }
+
+    // Determines whether tearing support is available for fullscreen borderless windows.
+    if (true) {
+        BOOL allowTearing = FALSE;
+
+        com_ptr<IDXGIFactory5> factory5 = factory.try_as<IDXGIFactory5>();
+
+        HRESULT hr = S_OK;
+        if (factory5) {
+            hr = factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing));
+        }
+
+        if (FAILED(hr)) {
+            OutputDebugStringA("WARNING: Variable refresh rate displays are not supported.\n");
+        }
+    }
     return factory;
 }
 
 com_ptr<IDXGIAdapter1> getHardwareAdapter(IDXGIFactory4* pFactory) {
-    com_ptr<IDXGIAdapter1> pAdapter;
+    com_ptr<IDXGIAdapter1> adapter;
 
-    for (UINT adapterIndex = 0; ; ++adapterIndex) {
-        if (DXGI_ERROR_NOT_FOUND == pFactory->EnumAdapters1(adapterIndex, pAdapter.put())) {
-            // No more adapters to enumerate.
-            break;
+    for (UINT adapterID = 0; DXGI_ERROR_NOT_FOUND != pFactory->EnumAdapters1(adapterID, adapter.put()); ++adapterID) {
+        DXGI_ADAPTER_DESC1 desc;
+        ThrowIfFailed(adapter->GetDesc1(&desc));
+
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
+            // Don't select the Basic Render Driver adapter.
+            continue;
         }
 
-        // Check to see if the adapter supports Direct3D 12, but don't create the
-        // actual device yet.
-        if (SUCCEEDED(D3D12CreateDevice(pAdapter.get(),
+        // Check to see if the adapter supports Direct3D 12, but don't create the actual device yet.
+        if (SUCCEEDED(D3D12CreateDevice(adapter.get(),
             D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
         {
-#ifndef NDEBUG
-            DXGI_ADAPTER_DESC chosenAdapterDesc;
-            V(pAdapter->GetDesc(&chosenAdapterDesc));
-            OutputDebugStringW(L"Chosen adapter: ");
-            OutputDebugStringW(chosenAdapterDesc.Description);
-            OutputDebugStringW(L"\n");
+#ifdef STAR_DEV
+            wchar_t buff[256] = {};
+            swprintf_s(buff, L"Direct3D Adapter (%u): VID:%04X, PID:%04X - %ls\n", adapterID, desc.VendorId, desc.DeviceId, desc.Description);
+            OutputDebugStringW(buff);
 #endif
-            return pAdapter;
+            return adapter;
         }
     }
 
     throw std::runtime_error("no adaptor support d3d12");
 }
 
+bool isDirectXRaytracingSupported(IDXGIAdapter1* adapter) {
+    com_ptr<ID3D12Device> testDevice;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureSupportData = {};
+
+    return SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(testDevice.put())))
+        && SUCCEEDED(testDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &featureSupportData, sizeof(featureSupportData)))
+        && featureSupportData.RaytracingTier != D3D12_RAYTRACING_TIER_NOT_SUPPORTED;
+}
+
 com_ptr<ID3D12Device> createDevice(IDXGIFactory4* pFactory) {
     com_ptr<ID3D12Device> device;
-
 #ifdef STAR_DEV
-    com_ptr<ID3D12Debug> debugController;
-    V(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.put())));
-    debugController->EnableDebugLayer();
-#ifdef _DEBUG
-    com_ptr<ID3D12Debug1> debugController1;
-    V(debugController->QueryInterface(IID_PPV_ARGS(debugController1.put())));
-    debugController1->SetEnableGPUBasedValidation(TRUE);
-#endif // _DEBUG
-#endif // NDEBUG
+    {
+        com_ptr<ID3D12Debug> debugController;
+        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugController.put())))) {
+            debugController->EnableDebugLayer();
+        } else {
+            OutputDebugStringA("WARNING: Direct3D Debug Device is not available\n");
+        }
+//#ifdef _DEBUG
+//        com_ptr<ID3D12Debug1> debugController1;
+//        V(debugController->QueryInterface(IID_PPV_ARGS(debugController1.put())));
+//        debugController1->SetEnableGPUBasedValidation(TRUE);
+//#endif // _DEBUG
+    }
+#endif // STAR_DEV
 
     com_ptr<IDXGIAdapter1> hardwareAdapter = getHardwareAdapter(pFactory);
+    //if (!isDirectXRaytracingSupported(hardwareAdapter.get())) {
+    //    throw std::runtime_error("ERROR: DirectX Raytracing is not supported by your OS, GPU and/or driver");
+    //}
 
     V(D3D12CreateDevice(hardwareAdapter.get(),
         D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(device.put())

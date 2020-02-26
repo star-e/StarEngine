@@ -175,11 +175,11 @@ ShaderConstantBuffer::ShaderConstantBuffer(ShaderConstantBuffer&& rhs, const all
 
 ShaderConstantBuffer::~ShaderConstantBuffer() = default;
 
-RenderSubpass::allocator_type RenderSubpass::get_allocator() const noexcept {
+RasterSubpass::allocator_type RasterSubpass::get_allocator() const noexcept {
     return allocator_type(mInputAttachments.get_allocator().resource());
 }
 
-RenderSubpass::RenderSubpass(const allocator_type& alloc)
+RasterSubpass::RasterSubpass(const allocator_type& alloc)
     : mInputAttachments(alloc)
     , mOutputAttachments(alloc)
     , mResolveAttachments(alloc)
@@ -193,7 +193,7 @@ RenderSubpass::RenderSubpass(const allocator_type& alloc)
     , mDescriptors(alloc)
 {}
 
-RenderSubpass::RenderSubpass(RenderSubpass const& rhs, const allocator_type& alloc)
+RasterSubpass::RasterSubpass(RasterSubpass const& rhs, const allocator_type& alloc)
     : mSampleDesc(rhs.mSampleDesc)
     , mInputAttachments(rhs.mInputAttachments, alloc)
     , mOutputAttachments(rhs.mOutputAttachments, alloc)
@@ -209,7 +209,7 @@ RenderSubpass::RenderSubpass(RenderSubpass const& rhs, const allocator_type& all
     , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
-RenderSubpass::RenderSubpass(RenderSubpass&& rhs, const allocator_type& alloc)
+RasterSubpass::RasterSubpass(RasterSubpass&& rhs, const allocator_type& alloc)
     : mSampleDesc(std::move(rhs.mSampleDesc))
     , mInputAttachments(std::move(rhs.mInputAttachments), alloc)
     , mOutputAttachments(std::move(rhs.mOutputAttachments), alloc)
@@ -225,7 +225,43 @@ RenderSubpass::RenderSubpass(RenderSubpass&& rhs, const allocator_type& alloc)
     , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
-RenderSubpass::~RenderSubpass() = default;
+RasterSubpass::~RasterSubpass() = default;
+
+ComputeSubpass::allocator_type ComputeSubpass::get_allocator() const noexcept {
+    return allocator_type(mAttachments.get_allocator().resource());
+}
+
+ComputeSubpass::ComputeSubpass(const allocator_type& alloc)
+    : mAttachments(alloc)
+{}
+
+ComputeSubpass::ComputeSubpass(ComputeSubpass const& rhs, const allocator_type& alloc)
+    : mAttachments(rhs.mAttachments, alloc)
+{}
+
+ComputeSubpass::ComputeSubpass(ComputeSubpass&& rhs, const allocator_type& alloc)
+    : mAttachments(std::move(rhs.mAttachments), alloc)
+{}
+
+ComputeSubpass::~ComputeSubpass() = default;
+
+RaytracingSubpass::allocator_type RaytracingSubpass::get_allocator() const noexcept {
+    return allocator_type(mOutputAttachments.get_allocator().resource());
+}
+
+RaytracingSubpass::RaytracingSubpass(const allocator_type& alloc)
+    : mOutputAttachments(alloc)
+{}
+
+RaytracingSubpass::RaytracingSubpass(RaytracingSubpass const& rhs, const allocator_type& alloc)
+    : mOutputAttachments(rhs.mOutputAttachments, alloc)
+{}
+
+RaytracingSubpass::RaytracingSubpass(RaytracingSubpass&& rhs, const allocator_type& alloc)
+    : mOutputAttachments(std::move(rhs.mOutputAttachments), alloc)
+{}
+
+RaytracingSubpass::~RaytracingSubpass() = default;
 
 RenderPass::allocator_type RenderPass::get_allocator() const noexcept {
     return allocator_type(mViewports.get_allocator().resource());
@@ -235,24 +271,30 @@ RenderPass::RenderPass(const allocator_type& alloc)
     : mViewports(alloc)
     , mScissorRects(alloc)
     , mFramebuffers(alloc)
-    , mSubpasses(alloc)
+    , mRasterSubpasses(alloc)
     , mDependencies(alloc)
+    , mComputeSubpasses(alloc)
+    , mRaytracingSubpasses(alloc)
 {}
 
 RenderPass::RenderPass(RenderPass const& rhs, const allocator_type& alloc)
     : mViewports(rhs.mViewports, alloc)
     , mScissorRects(rhs.mScissorRects, alloc)
     , mFramebuffers(rhs.mFramebuffers, alloc)
-    , mSubpasses(rhs.mSubpasses, alloc)
+    , mRasterSubpasses(rhs.mRasterSubpasses, alloc)
     , mDependencies(rhs.mDependencies, alloc)
+    , mComputeSubpasses(rhs.mComputeSubpasses, alloc)
+    , mRaytracingSubpasses(rhs.mRaytracingSubpasses, alloc)
 {}
 
 RenderPass::RenderPass(RenderPass&& rhs, const allocator_type& alloc)
     : mViewports(std::move(rhs.mViewports), alloc)
     , mScissorRects(std::move(rhs.mScissorRects), alloc)
     , mFramebuffers(std::move(rhs.mFramebuffers), alloc)
-    , mSubpasses(std::move(rhs.mSubpasses), alloc)
+    , mRasterSubpasses(std::move(rhs.mRasterSubpasses), alloc)
     , mDependencies(std::move(rhs.mDependencies), alloc)
+    , mComputeSubpasses(std::move(rhs.mComputeSubpasses), alloc)
+    , mRaytracingSubpasses(std::move(rhs.mRaytracingSubpasses), alloc)
 {}
 
 RenderPass::~RenderPass() = default;

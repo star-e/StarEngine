@@ -28,6 +28,7 @@ class RootSignature {
 public:
     void addConstant(const ShaderAttribute& attr, ShaderVisibilityType stage);
     void addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage);
+    bool try_addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage);
 
     void mergeConstantBuffers(UpdateEnum update, RootSignature& rhs) const;
     

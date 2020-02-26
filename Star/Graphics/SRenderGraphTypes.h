@@ -145,8 +145,9 @@ namespace Data {
 struct Proj_ {} static constexpr Proj;
 struct View_ {} static constexpr View;
 struct WorldView_ {} static constexpr WorldView;
+struct WorldInvT_ {} static constexpr WorldInvT;
 
-using Type = std::variant<std::monostate, Proj_, View_, WorldView_>;
+using Type = std::variant<std::monostate, Proj_, View_, WorldView_, WorldInvT_>;
 
 inline bool operator<(const Type& lhs, const Type& rhs) noexcept {
     return lhs.index() < rhs.index();
@@ -250,14 +251,14 @@ struct STAR_GRAPHICS_API ShaderConstantBuffer {
     std::pmr::vector<ShaderConstant> mConstants;
 };
 
-struct STAR_GRAPHICS_API RenderSubpass {
+struct STAR_GRAPHICS_API RasterSubpass {
     using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
     allocator_type get_allocator() const noexcept;
 
-    RenderSubpass(const allocator_type& alloc);
-    RenderSubpass(RenderSubpass&& rhs, const allocator_type& alloc);
-    RenderSubpass(RenderSubpass const& rhs, const allocator_type& alloc);
-    ~RenderSubpass();
+    RasterSubpass(const allocator_type& alloc);
+    RasterSubpass(RasterSubpass&& rhs, const allocator_type& alloc);
+    RasterSubpass(RasterSubpass const& rhs, const allocator_type& alloc);
+    ~RasterSubpass();
 
     DISP_SAMPLE_DESC mSampleDesc;
     std::pmr::vector<Attachment> mInputAttachments;
@@ -274,9 +275,33 @@ struct STAR_GRAPHICS_API RenderSubpass {
     std::pmr::vector<ShaderDescriptorCollection> mDescriptors;
 };
 
-struct RenderSubpassDependency {
+struct RasterSubpassDependency {
     uint32_t mSrcSubpass = 0;
     uint32_t mDstSubpass = 0;
+};
+
+struct STAR_GRAPHICS_API ComputeSubpass {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    ComputeSubpass(const allocator_type& alloc);
+    ComputeSubpass(ComputeSubpass&& rhs, const allocator_type& alloc);
+    ComputeSubpass(ComputeSubpass const& rhs, const allocator_type& alloc);
+    ~ComputeSubpass();
+
+    std::pmr::vector<Attachment> mAttachments;
+};
+
+struct STAR_GRAPHICS_API RaytracingSubpass {
+    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
+    allocator_type get_allocator() const noexcept;
+
+    RaytracingSubpass(const allocator_type& alloc);
+    RaytracingSubpass(RaytracingSubpass&& rhs, const allocator_type& alloc);
+    RaytracingSubpass(RaytracingSubpass const& rhs, const allocator_type& alloc);
+    ~RaytracingSubpass();
+
+    std::pmr::vector<Attachment> mOutputAttachments;
 };
 
 struct STAR_GRAPHICS_API RenderPass {
@@ -291,8 +316,10 @@ struct STAR_GRAPHICS_API RenderPass {
     std::pmr::vector<VIEWPORT> mViewports;
     std::pmr::vector<RECT> mScissorRects;
     std::pmr::vector<FramebufferHandle> mFramebuffers;
-    std::pmr::vector<RenderSubpass> mSubpasses;
-    std::pmr::vector<RenderSubpassDependency> mDependencies;
+    std::pmr::vector<RasterSubpass> mRasterSubpasses;
+    std::pmr::vector<RasterSubpassDependency> mDependencies;
+    std::pmr::vector<ComputeSubpass> mComputeSubpasses;
+    std::pmr::vector<RaytracingSubpass> mRaytracingSubpasses;
 };
 
 struct RenderPassDependency {

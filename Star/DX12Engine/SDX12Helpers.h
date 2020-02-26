@@ -46,6 +46,8 @@ com_ptr<IDXGIFactory4> createFactory();
 
 com_ptr<IDXGIAdapter1> getHardwareAdapter(IDXGIFactory4* pFactory);
 
+bool isDirectXRaytracingSupported(IDXGIAdapter1* adapter);
+
 com_ptr<ID3D12Device> createDevice(IDXGIFactory4* pFactory);
 
 com_ptr<ID3D12CommandQueue> createDirectQueue(ID3D12Device* pDevice);
