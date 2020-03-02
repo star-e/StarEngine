@@ -49,10 +49,11 @@ struct UnorderedRenderQueue;
 namespace Descriptor {
 
 struct ConstantBuffer_;
-struct BaseColor_;
+struct MainTex_;
+struct PointSampler_;
 struct LinearSampler_;
 
-using Type = std::variant<std::monostate, ConstantBuffer_, BaseColor_, LinearSampler_>;
+using Type = std::variant<std::monostate, ConstantBuffer_, MainTex_, PointSampler_, LinearSampler_>;
 
 } // namespace Descriptor
 
@@ -75,8 +76,8 @@ struct ShaderDescriptorList;
 struct ShaderDescriptorCollection;
 struct ShaderConstant;
 struct ShaderConstantBuffer;
-struct RasterSubpass;
-struct RasterSubpassDependency;
+struct GraphicsSubpass;
+struct GraphicsSubpassDependency;
 struct ComputeSubpass;
 struct RaytracingSubpass;
 struct RenderPass;

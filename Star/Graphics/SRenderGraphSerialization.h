@@ -139,10 +139,16 @@ template<class Archive>
 void serialize(Archive& ar, Star::Graphics::Render::Descriptor::ConstantBuffer_& v, const uint32_t version) {
 }
 
-STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::Descriptor::BaseColor_, object_serializable);
-STAR_CLASS_TRACKING(Star::Graphics::Render::Descriptor::BaseColor_, track_never);
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::Descriptor::MainTex_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::Descriptor::MainTex_, track_never);
 template<class Archive>
-void serialize(Archive& ar, Star::Graphics::Render::Descriptor::BaseColor_& v, const uint32_t version) {
+void serialize(Archive& ar, Star::Graphics::Render::Descriptor::MainTex_& v, const uint32_t version) {
+}
+
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::Descriptor::PointSampler_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::Descriptor::PointSampler_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::Descriptor::PointSampler_& v, const uint32_t version) {
 }
 
 STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::Descriptor::LinearSampler_, object_serializable);
@@ -331,18 +337,16 @@ inline void load_construct_data(
     ::new(t) std::pair<K, Star::Graphics::Render::ShaderConstantBuffer>(std::piecewise_construct, std::forward_as_tuple(), std::forward_as_tuple(ar.resource()));
 }
 
-STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::RasterSubpass, object_serializable);
-STAR_CLASS_TRACKING(Star::Graphics::Render::RasterSubpass, track_never);
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::GraphicsSubpass, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::GraphicsSubpass, track_never);
 template<class Archive>
-void serialize(Archive& ar, Star::Graphics::Render::RasterSubpass& v, const uint32_t version) {
+void serialize(Archive& ar, Star::Graphics::Render::GraphicsSubpass& v, const uint32_t version) {
     ar & v.mSampleDesc;
     ar & v.mInputAttachments;
     ar & v.mOutputAttachments;
     ar & v.mResolveAttachments;
     ar & v.mDepthStencilAttachment;
     ar & v.mPreserveAttachments;
-    ar & v.mSRVs;
-    ar & v.mUAVs;
     ar & v.mPostViewTransitions;
     ar & v.mOrderedRenderQueue;
     ar & v.mRootSignature;
@@ -352,22 +356,22 @@ void serialize(Archive& ar, Star::Graphics::Render::RasterSubpass& v, const uint
 
 template<class Archive>
 inline void load_construct_data(
-    Archive& ar, std::pair<const std::pmr::string, Star::Graphics::Render::RasterSubpass>* t, const unsigned int file_version
+    Archive& ar, std::pair<const std::pmr::string, Star::Graphics::Render::GraphicsSubpass>* t, const unsigned int file_version
 ) {
-    ::new(t) std::pair<const std::pmr::string, Star::Graphics::Render::RasterSubpass>(std::piecewise_construct, std::forward_as_tuple(ar.resource()), std::forward_as_tuple(ar.resource()));
+    ::new(t) std::pair<const std::pmr::string, Star::Graphics::Render::GraphicsSubpass>(std::piecewise_construct, std::forward_as_tuple(ar.resource()), std::forward_as_tuple(ar.resource()));
 }
 
 template<class Archive, class K>
 inline void load_construct_data(
-    Archive& ar, std::pair<K, Star::Graphics::Render::RasterSubpass>* t, const unsigned int file_version
+    Archive& ar, std::pair<K, Star::Graphics::Render::GraphicsSubpass>* t, const unsigned int file_version
 ) {
-    ::new(t) std::pair<K, Star::Graphics::Render::RasterSubpass>(std::piecewise_construct, std::forward_as_tuple(), std::forward_as_tuple(ar.resource()));
+    ::new(t) std::pair<K, Star::Graphics::Render::GraphicsSubpass>(std::piecewise_construct, std::forward_as_tuple(), std::forward_as_tuple(ar.resource()));
 }
 
-STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::RasterSubpassDependency, object_serializable);
-STAR_CLASS_TRACKING(Star::Graphics::Render::RasterSubpassDependency, track_never);
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::GraphicsSubpassDependency, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::GraphicsSubpassDependency, track_never);
 template<class Archive>
-void serialize(Archive& ar, Star::Graphics::Render::RasterSubpassDependency& v, const uint32_t version) {
+void serialize(Archive& ar, Star::Graphics::Render::GraphicsSubpassDependency& v, const uint32_t version) {
     ar & v.mSrcSubpass;
     ar & v.mDstSubpass;
 }
@@ -421,9 +425,9 @@ void serialize(Archive& ar, Star::Graphics::Render::RenderPass& v, const uint32_
     ar & v.mViewports;
     ar & v.mScissorRects;
     ar & v.mFramebuffers;
-    ar & v.mRasterSubpasses;
-    ar & v.mDependencies;
     ar & v.mComputeSubpasses;
+    ar & v.mGraphicsSubpasses;
+    ar & v.mDependencies;
     ar & v.mRaytracingSubpasses;
 }
 
@@ -498,8 +502,15 @@ void serialize(Archive& ar, Star::Graphics::Render::RenderSolution& v, const uin
     ar & v.mFramebuffers;
     ar & v.mRTVSources;
     ar & v.mDSVSources;
+    ar & v.mCBVSources;
+    ar & v.mSRVSources;
+    ar & v.mUAVSources;
     ar & v.mRTVs;
     ar & v.mDSVs;
+    ar & v.mCBVs;
+    ar & v.mSRVs;
+    ar & v.mUAVs;
+    ar & v.mAttributeIndex;
     ar & v.mPipelineIndex;
 }
 
@@ -535,8 +546,7 @@ void serialize(Archive& ar, Star::Graphics::Render::RenderSwapChain& v, const ui
     ar & v.mSolutions;
     ar & v.mNumBackBuffers;
     ar & v.mNumReserveFramebuffers;
-    ar & v.mNumReserveSRVs;
-    ar & v.mNumReserveUAVs;
+    ar & v.mNumReserveCBV_SRV_UAVs;
     ar & v.mNumReserveDSVs;
     ar & v.mNumReserveRTVs;
     ar & v.mSolutionIndex;

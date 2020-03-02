@@ -23,6 +23,7 @@
 #include <StarCompiler/ShaderGraph/SShaderDescriptor.h>
 #include <StarCompiler/ShaderGraph/SShaderRootSignature.h>
 #include <StarCompiler/ShaderGraph/SShaderAttribute.h>
+#include <StarCompiler/ShaderGraph/SShaderValue.h>
 
 namespace Star::Graphics::Render::Shader {
 
@@ -31,6 +32,7 @@ using namespace DSL;
 bool ShaderProgram::stageBegin(ShaderStageType stage, NameMap<ShaderValue> outputs) {
     visit(overload(
         [&](OM_) {
+            outputs.emplace(ShaderValue{});
             mGraph.createNode(createShaderModule( "Output",
                 Attributes{},
                 Outputs{ outputs },
@@ -40,7 +42,7 @@ bool ShaderProgram::stageBegin(ShaderStageType stage, NameMap<ShaderValue> outpu
         [&](CS_) {},
         [&](auto s) {
             if (!outputs.empty()) {
-                throw std::invalid_argument("Output["s + getName(s) + "] have no outputs");
+                throw std::invalid_argument("Output["s + getName(s) + "] have unknown outputs");
             }
         }
     ), stage);
@@ -66,7 +68,7 @@ bool ShaderProgram::stageEnd(ShaderStageType stage) {
         [&](PS_) {
             auto outputs = mGraph.getShaderOutputs();
             if (outputs.empty()) {
-                throw std::invalid_argument("PS has no output");
+                throw std::invalid_argument("PS has no shader output");
             }
             auto inputs = mGraph.getNodeInputsWithoutSource();
             std::set<std::string> positions;
@@ -103,36 +105,41 @@ bool ShaderProgram::stageEnd(ShaderStageType stage) {
                         ++count;
                     } else {
                         if (std::holds_alternative<std::monostate>(input.mSemantic)) {
-                            throw std::invalid_argument("input value has no semantics");
+                            if (!std::holds_alternative<std::monostate>(input.mValue)) {
+                                throw std::invalid_argument("input value has no semantics");
+                            }
                         } else {
                             throw std::invalid_argument("SV not supported yet");
                         }
                     }
                 }
             }
-            if (count) {
-                Outputs outputs;
-                Inputs inputs;
 
-                for (const auto& [nodeID, input] : inputsNeeded) {
-                    if (!std::holds_alternative<decltype(s)>(mGraph.mNodeStages[nodeID])) {
-                        auto semantic = getShaderStages(input.mSemantic);
-                        if (semantic & SS_Value) {
-                            ++count;
-                            outputs.emplace(input);
-                            inputs.emplace(input);
-                        }
+            Outputs outputs{ ShaderValue{} };
+            Inputs inputs{ ShaderValue{} };
+
+            for (const auto& [nodeID, input] : inputsNeeded) {
+                if (!std::holds_alternative<decltype(s)>(mGraph.mNodeStages[nodeID])) {
+                    auto semantic = getShaderStages(input.mSemantic);
+                    if (semantic & SS_Value) {
+                        ++count;
+                        outputs.emplace(input);
+                        inputs.emplace(input);
                     }
                 }
-                auto inputNodeID = mGraph.createNode(
-                    createShaderModule("Input["s + getName(s) + "]", System,
-                        Attributes{},
-                        std::move(outputs),
-                        std::move(inputs)
-                    ), s);
+            }
+            auto inputNodeID = mGraph.createNode(
+                createShaderModule("Input["s + getName(s) + "]", System,
+                    Attributes{},
+                    std::move(outputs),
+                    std::move(inputs)
+                ), s);
 
-                for (const auto& [nodeID, input] : inputsNeeded) {
-                    if (!std::holds_alternative<decltype(s)>(mGraph.mNodeStages[nodeID])) {
+            for (const auto& [nodeID, input] : inputsNeeded) {
+                if (!std::holds_alternative<decltype(s)>(mGraph.mNodeStages[nodeID])) {
+                    if (isGlobalState(input)) {
+                        mGraph.connectNodeAndValues(inputNodeID, nodeID);
+                    } else {
                         auto semantic = getShaderStages(input.mSemantic);
                         if (semantic & SS_Value) {
                             mGraph.connectNodeAndValues(inputNodeID, nodeID);

@@ -43,7 +43,7 @@ public:
     using key_type = std::pair<std::string/*name*/, ResourceDataView/*subresource*/>;
     using rtv_type = std::tuple<std::string/*name*/, ResourceDataView/*subresource*/, PixelModel>;
     using dsv_type = std::tuple<std::string/*name*/, ResourceDataView/*subresource*/, bool/*readonly*/>;
-    using descriptor_type = std::tuple<ShaderDescriptorType, std::string/*name*/, ResourceDataView/*subresource*/, PixelModel>;
+    using cbv_srv_uav_type = std::tuple<ShaderDescriptorType, std::string/*name*/, ResourceDataView/*subresource*/, PixelModel>;
 
     size_t createNode(RenderNode node);
 
@@ -96,8 +96,7 @@ public:
 
     OrderedIdentityMap<rtv_type> mRTVs;
     OrderedIdentityMap<dsv_type> mDSVs;
-    std::vector<descriptor_type> mCBV_SRV_UAVs;
-    std::vector<uint32_t> mRangeCBV_SRV_UAVs;
+    OrderedIdentityMap<cbv_srv_uav_type> mCBV_SRV_UAVs;
 };
 
 }

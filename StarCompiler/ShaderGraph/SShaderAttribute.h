@@ -24,7 +24,7 @@ const char* getName(const AttributeType& attr) noexcept;
 const char* getHLSLName(const AttributeType& attr) noexcept;
 
 void compileShaderAttribute(ShaderAttribute& attr);
-bool isConstant(const ShaderAttribute& attr);
+bool isConstant(const ShaderAttribute& attr) noexcept;
 DescriptorIndex getDescriptorIndex(const AttributeDescriptor& d, ShaderVisibilityType vis);
 
 uint32_t getDescriptorCapacity(const ShaderAttribute& attr);

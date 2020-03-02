@@ -19,6 +19,7 @@
 #include <StarCompiler/SMathNames.h>
 #include <StarCompiler/ShaderGraph/SShaderNames.h>
 #include "SShaderDescriptor.h"
+#include <Star/Graphics/SRenderUtils.h>
 
 namespace Star::Graphics::Render::Shader {
 
@@ -266,9 +267,8 @@ void compileShaderAttribute(ShaderAttribute& attr) {
     attr.mDescriptor.mName = attr.mName;
 }
 
-bool isConstant(const ShaderAttribute& attr) {
-    IsConstant visitor;
-    return visit(visitor, attr.mType);
+bool isConstant(const ShaderAttribute& attr) noexcept {
+    return isConstant(attr.mType);
 }
 
 DescriptorIndex getDescriptorIndex(const AttributeDescriptor& d, ShaderVisibilityType vis) {

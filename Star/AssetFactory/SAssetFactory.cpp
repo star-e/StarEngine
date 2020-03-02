@@ -49,6 +49,9 @@ struct AssetFactory::Impl final : public Core::Producer {
         , mResources(alloc)
         , mFlattenedFbx(std::pmr::get_default_resource())
     {
+        mResources.mSettings.mVertexLayouts.emplace_back();
+        mResources.mSettings.mVertexLayoutIndex.emplace("", 0);
+
         auto& meshLayout = mResources.mSettings.mVertexLayouts.emplace_back();
         auto& desc = meshLayout.mBuffers.emplace_back();
         desc.mElements = {
@@ -64,7 +67,7 @@ struct AssetFactory::Impl final : public Core::Producer {
             { "tangent", { 0, 2 } },
             { "uv", { 0, 3 } },
         };
-        mResources.mSettings.mVertexLayoutIndex.emplace("StaticMesh", 0);
+        mResources.mSettings.mVertexLayoutIndex.emplace("StaticMesh", 1);
     }
     Impl(const Impl&) = delete;
     Impl& operator=(const Impl&) = delete;
@@ -512,6 +515,9 @@ private:
             create_directories(mFolder / shaderFolder);
         }
         for (const auto& [prototypeName, prototype] : factory.mShaderDatabase.mPrototypes) {
+            if (prototype.mAssetPath.empty()) {
+                throw std::invalid_argument("shader path not specified in shader graph");
+            }
             auto assetPath = boost::algorithm::to_lower_copy((shaderFolder / prototype.mAssetPath).generic_string());
 
             ShaderData prototypeData(std::pmr::get_default_resource());
@@ -589,8 +595,8 @@ public:
                 fileRSG.replace_extension(".rsg");
                 updateFile(fileRSG, oss.str());
                 renderSwapChain.mNumReserveFramebuffers = std::max(renderSwapChain.mNumReserveFramebuffers, gsl::narrow<uint32_t>(solutionData.mFramebuffers.size()));
-                //renderSwapChain.mNumReserveSRVs = std::max(renderSwapChain.mNumReserveSRVs, gsl::narrow<uint32_t>(solutionData.mSRVs.size()));
-                //renderSwapChain.mNumReserveUAVs = std::max(renderSwapChain.mNumReserveUAVs, gsl::narrow<uint32_t>(solutionData.mUAVs.size()));
+                renderSwapChain.mNumReserveCBV_SRV_UAVs = std::max(renderSwapChain.mNumReserveCBV_SRV_UAVs,
+                    gsl::narrow<uint32_t>(solutionData.mCBVs.size() + solutionData.mSRVs.size() + solutionData.mUAVs.size()));
                 renderSwapChain.mNumReserveDSVs = std::max(renderSwapChain.mNumReserveDSVs, gsl::narrow<uint32_t>(solutionData.mDSVs.size()));
                 renderSwapChain.mNumReserveRTVs = std::max(renderSwapChain.mNumReserveRTVs, gsl::narrow<uint32_t>(solutionData.mRTVs.size()));
             }
@@ -634,20 +640,24 @@ public:
             updateResource(contentAsset.mName, contentData);
 
             auto addShader = [this, &shaderVertexLayouts](const MetaID& mesh, const MetaID& material) {
-                const auto& meshData = mResources.mMeshes.at(mesh);
                 const auto& materialAsset = at(mDatabase.mMaterialInfo, material);
                 const auto& shaderName = materialAsset.mShader;
 
-                auto vertexLayoutID = meshData.mLayoutID;
-                std::string layoutName(sv(meshData.mLayoutName));
-                Expects(!layoutName.empty());
-                Expects(at(mResources.mSettings.mVertexLayoutIndex, sv(layoutName)) == vertexLayoutID);
+                if (mesh.is_nil()) {
+                    shaderVertexLayouts[shaderName].try_emplace("", mResources.mSettings.mVertexLayoutIndex.at(""));
+                } else {
+                    const auto& meshData = mResources.mMeshes.at(mesh);
 
-                if (layoutName.empty()) {
-                    throw std::runtime_error("build shader failed, vertex layout not found");
+                    auto vertexLayoutID = meshData.mLayoutID;
+                    std::string layoutName(sv(meshData.mLayoutName));
+                    Expects(!layoutName.empty());
+                    Expects(at(mResources.mSettings.mVertexLayoutIndex, sv(layoutName)) == vertexLayoutID);
+
+                    if (layoutName.empty()) {
+                        throw std::runtime_error("build shader failed, vertex layout not found");
+                    }
+                    shaderVertexLayouts[shaderName].try_emplace(layoutName, vertexLayoutID);
                 }
-
-                shaderVertexLayouts[shaderName].try_emplace(layoutName, vertexLayoutID);
             };
 
             // update shader binding
@@ -664,6 +674,10 @@ public:
         }
 
         for (const auto& shaderAsset : mDatabase.mShaderInfo) {
+            auto shaderIter = mResources.mShaders.find(shaderAsset.mMetaID);
+            if (shaderIter == mResources.mShaders.end()) {
+                continue;
+            }
             auto& shaderData = mResources.mShaders.at(shaderAsset.mMetaID);
             auto iter = shaderVertexLayouts.find(sv(shaderData.mName));
             if (iter != shaderVertexLayouts.end()) {
@@ -771,6 +785,7 @@ public:
                     auto res2 = mDatabase.mMaterialInfo.modify(res.first, [&](MaterialInfo& asset) {
                         bool normalMap = false;
                         bool alphaTest = false;
+                        asset.mTextures.clear();
                         for (const auto& [attr, texturePath] : textures) {
                             const auto& texMetaID = getAssetMetaID(texturePath, mDatabase.mTextureInfo);
                             asset.mTextures.emplace(attr, texMetaID);
@@ -974,6 +989,25 @@ public:
         return objects;
     }
 
+    void contentAddFullscreenTriangle(std::string_view contentPath, std::string_view materialPath) {
+        auto& content = getResource(contentPath, mDatabase.mContentInfo, mResources.mContents);
+        MetaID materialID{};
+        {
+            auto iter = mDatabase.mMaterialInfo.get<Index::Name>().find(sv(getAssetName(materialPath)));
+            Expects(iter != mDatabase.mMaterialInfo.get<Index::Name>().end());
+            materialID = iter->mMetaID;
+        }
+        Ensures(!materialID.is_nil());
+        
+        content.mIDs.emplace_back(ContentID{ { DrawCall }, gsl::narrow<uint16_t>(content.mDrawCalls.size()) });
+        auto& dc = content.mDrawCalls.emplace_back();
+        dc.mType = FullScreenTriangle;
+        dc.mMesh = {};
+        dc.mMaterial = materialID;
+        dc.mInstanceSize = 0;
+        dc.mInstanceCount = 1;
+    }
+
     void clearContent(std::string_view contentPath) {
         clearResource(contentPath, mDatabase.mContentInfo, mResources.mContents);
     }
@@ -1040,7 +1074,7 @@ public:
         auto& pipeline = solution.mPipelines.at(at(solution.mPipelineIndex, pipelineName));
         const auto& passDesc = at(pipeline.mSubpassIndex, passName);
         auto& pass = pipeline.mPasses.at(passDesc.mPassID);
-        auto& queue = pass.mRasterSubpasses.at(passDesc.mSubpassID).mOrderedRenderQueue.emplace_back();
+        auto& queue = pass.mGraphicsSubpasses.at(passDesc.mSubpassID).mOrderedRenderQueue.emplace_back();
         queue.mContents.emplace_back(contentID);
     }
 
@@ -1144,10 +1178,6 @@ bool AssetFactory::try_createMaterial(std::string_view material, std::string_vie
     return mImpl->try_createMaterial(material, shaderName);
 }
 
-void AssetFactory::materialAddTexture(std::string_view material, std::string_view texture) {
-
-}
-
 std::pair<std::pair<const MetaID, Graphics::Render::ContentData>&, bool> AssetFactory::try_createContent(std::string_view assetPath) {
     return mImpl->try_createContent(assetPath);
 }
@@ -1162,6 +1192,10 @@ void AssetFactory::saveContent(std::string_view content) {
 
 FlattenedObjects& AssetFactory::contentInstantiateFlattenedObjects(std::string_view content, std::string_view fbx) {
     return mImpl->contentInstantiateFlattenedObjects(content, fbx);
+}
+
+void AssetFactory::contentAddFullscreenTriangle(std::string_view content, std::string_view material) {
+    return mImpl->contentAddFullscreenTriangle(content, material);
 }
 
 }

@@ -21,6 +21,7 @@
 #include <Star/Graphics/SRenderGraphNames.h>
 #include "SDX12UploadBuffer.h"
 #include <Star/Graphics/SRenderFormatTextureUtils.h>
+#include <Star/Graphics/SRenderUtils.h>
 #include "SDX12ShaderDescriptorHeap.h"
 
 namespace Star::Graphics::Render {
@@ -96,7 +97,7 @@ std::pair<DX12MeshData*, bool> try_createDX12MeshData(CreationContext& context,
                     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
                     barrier.Transition.pResource = mesh.mIndexBuffer.mBuffer.get();
                     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-                    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_INDEX_BUFFER;
+                    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_INDEX_BUFFER | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
                     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
                 }
                 for (const auto& vb : mesh.mVertexBuffers) {
@@ -105,7 +106,7 @@ std::pair<DX12MeshData*, bool> try_createDX12MeshData(CreationContext& context,
                     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
                     barrier.Transition.pResource = vb.mBuffer.get();
                     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-                    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+                    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
                     barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
                 }
                 Ensures(barrierCount == barriers.size());
@@ -335,7 +336,7 @@ void createIndex(DX12ShaderData& prototype, const ShaderData& prototypeData,
     }
 }
 
-void createShaderResources(const DX12RenderSolution& renderSolution, const DX12RasterSubpass& renderSubpass,
+void createShaderResources(const DX12RenderSolution& renderSolution, const DX12GraphicsSubpass& renderSubpass,
     DX12ShaderSubpassData& subpass, const ShaderSubpassData& subpassData,
     const ContentSettings& settings, ID3D12Device* pDevice, std::pmr::monotonic_buffer_resource* mr
 ) {
@@ -447,7 +448,8 @@ std::pair<DX12ShaderData*, bool> try_createDX12ShaderData(CreationContext& conte
     } else {
         std::tie(iter, created) = resources.mShaders.emplace(metaID);
         Ensures(created);
-        resources.mShaders.modify(iter, [&](DX12ShaderData& shader) {
+        auto& shader = const_cast<DX12ShaderData&>(*iter);
+        /*resources.mShaders.modify(iter, [&](DX12ShaderData& shader) */{
             shader.mShaderData.reset(metaID, async);
             if (!async) {
                 Ensures(shader.mShaderData);
@@ -464,7 +466,7 @@ std::pair<DX12ShaderData*, bool> try_createDX12ShaderData(CreationContext& conte
                         for (auto&& [queue, queueData] : boost::combine(pipeline.mQueues, pipelineData.get<0>().second.mQueues)) {
                             const auto& passDesc = renderPipeline.mSubpassIndex.at(queueData.get<0>().first);
                             const auto& renderPass = renderPipeline.mPasses.at(passDesc.mPassID);
-                            const auto& renderSubpass = renderPass.mRasterSubpasses.at(passDesc.mSubpassID);
+                            const auto& renderSubpass = renderPass.mGraphicsSubpasses.at(passDesc.mSubpassID);
                             for (auto&& [level, levelData] : boost::combine(queue.mLevels, queueData.get<0>().second.mLevels)) {
                                 for (auto&& [variant, variantData] : boost::combine(level.mPasses, levelData.get<0>().mPasses)) {
                                     for (auto&& [subpass, subpassData0] : boost::combine(variant.mSubpasses, variantData.get<0>().second.mSubpasses)) {
@@ -477,9 +479,125 @@ std::pair<DX12ShaderData*, bool> try_createDX12ShaderData(CreationContext& conte
                     }
                 }
             } // if async
-        });
+        }/*);*/
     }
     return { const_cast<DX12ShaderData*>(&*iter), created };
+}
+
+void buildDX12MaterialShaderDescriptors(ID3D12Device* pDevice, DX12ShaderDescriptorHeap* pHeap,
+    const DX12Resources& resources,
+    const DX12MaterialData& material,
+    const ShaderDescriptorCollection& collection,
+    DX12ShaderDescriptorCollection& dx12Collection
+) {
+    dx12Collection.mIndex = collection.mIndex;
+    dx12Collection.mResourceViewLists.reserve(collection.mResourceViewLists.size());
+    dx12Collection.mSamplerLists.reserve(collection.mSamplerLists.size());
+
+    for (const auto& list : collection.mResourceViewLists) {
+        auto& dx12List = dx12Collection.mResourceViewLists.emplace_back();
+        dx12List.mSlot = list.mSlot;
+        Expects(list.mCapacity);
+        dx12List.mCapacity = list.mCapacity;
+        if (std::holds_alternative<Persistent_>(collection.mIndex.mPersistency)) {
+            auto descs = pHeap->allocatePersistent(dx12List.mCapacity);
+            dx12List.mGpuOffset = descs.first.mGpuHandle;
+            dx12List.mCpuOffset = descs.first.mCpuHandle;
+            uint32_t offset = 0;
+            for (const auto& range : list.mRanges) {
+                size_t i = 0;
+                for (const auto& subrange : range.mSubranges) {
+                    visit(overload(
+                        [&](EngineSource_) {
+                            for (const auto& attr : subrange.mDescriptors) {
+                                ++i;
+                                throw std::runtime_error("EngineSource Descriptor not supported yet");
+                            }
+                        },
+                        [&](RenderTargetSource_) {
+                            throw std::runtime_error("RenderTargetSource Descriptor not supported yet");
+                        },
+                        [&](MaterialSource_) {
+                            for (const auto& attr : subrange.mDescriptors) {
+                                auto visitor = overload(
+                                    [&](Texture2D_) {
+                                        const DX12TextureData* pTex = nullptr;
+                                        auto iter = material.mMaterialData->mTextures.find(attr.mID);
+                                        if (iter != material.mMaterialData->mTextures.end()) {
+                                            const auto& texID = iter->second;
+                                            for (const auto& tex : material.mTextures) {
+                                                Expects(tex);
+                                                if (texID == tex->mMetaID) {
+                                                    pTex = tex.get();
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            pTex = &resources.mDefaultTextures.at(White);
+                                        }
+
+                                        Expects(pTex);
+                                        D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{
+                                            pTex->mFormat,
+                                            D3D12_SRV_DIMENSION_TEXTURE2D,
+                                            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+                                        };
+
+                                        viewDesc.Texture2D = D3D12_TEX2D_SRV{ 0, (uint32_t)-1, 0, 0.f };
+
+                                        pDevice->CreateShaderResourceView(pTex->mTexture.get(),
+                                            &viewDesc, descs[i].mCpuHandle);
+                                    },
+                                    [&](auto) {
+                                        throw std::runtime_error("currently only support Texture2D");
+                                    }
+                                );
+
+                                visit(overload(
+                                    [&](std::monostate) {
+                                        visit(visitor, attr.mAttributeType);
+                                    },
+                                    [&](Descriptor::MainTex_ t) {
+                                        visit(visitor, attr.mAttributeType);
+                                    },
+                                    [&](Descriptor::ConstantBuffer_) {
+                                    },
+                                    [&](Descriptor::PointSampler_) {
+                                    },
+                                    [&](Descriptor::LinearSampler_) {
+                                    }
+                                ), attr.mDataType);
+                                ++i;
+                            }
+                        }
+                    ), subrange.mSource);
+                }
+                {
+                    // Set Null
+                    D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{
+                        DXGI_FORMAT_R8G8B8A8_UNORM,
+                        D3D12_SRV_DIMENSION_TEXTURE2D,
+                        D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+                    };
+                    viewDesc.Texture2D = D3D12_TEX2D_SRV{ 0, (uint32_t)-1, 0, 0.f };
+                    for (; i != range.mCapacity; ++i) {
+                        pDevice->CreateShaderResourceView(nullptr,
+                            &viewDesc, descs[i].mCpuHandle);
+                    }
+                }
+                offset += range.mCapacity;
+            }
+            for (const auto& unbounded : list.mUnboundedDescriptors) {
+                throw std::runtime_error("material resource view list unbounded not supported yet");
+            }
+        } else {
+            dx12List.mRanges = list.mRanges;
+        }
+    }
+    for (const auto& list : collection.mSamplerLists) {
+        auto& dx12List = dx12Collection.mSamplerLists.emplace_back();
+        throw std::runtime_error("material sampler list not supported yet");
+    }
 }
 
 std::pair<DX12MaterialData*, bool> try_createDX12MaterialData(CreationContext& context,
@@ -492,7 +610,9 @@ std::pair<DX12MaterialData*, bool> try_createDX12MaterialData(CreationContext& c
     } else {
         std::tie(iter, created) = resources.mMaterials.emplace(metaID);
         Ensures(created);
-        resources.mMaterials.modify(iter, [&](DX12MaterialData& material) {
+        auto& material = const_cast<DX12MaterialData&>(*iter);
+
+        /*resources.mMaterials.modify(iter, [&](DX12MaterialData& material) */{
             material.mMaterialData.reset(metaID, async);
             if (!async) {
                 Ensures(material.mMaterialData);
@@ -541,109 +661,8 @@ std::pair<DX12MaterialData*, bool> try_createDX12MaterialData(CreationContext& c
                                         for (const auto& collection : pass.mDescriptors) {
                                             Expects(collection.mIndex.mUpdate <= UpdateEnum::PerBatch);
                                             auto& materialCollection = materialPass.mCollections.emplace_back();
-                                            materialCollection.mIndex = collection.mIndex;
-                                            materialCollection.mResourceViewLists.reserve(collection.mResourceViewLists.size());
-                                            materialCollection.mSamplerLists.reserve(collection.mSamplerLists.size());
-
-                                            for (const auto& list : collection.mResourceViewLists) {
-                                                auto& materialList = materialCollection.mResourceViewLists.emplace_back();
-                                                materialList.mSlot = list.mSlot;
-                                                Expects(list.mCapacity);
-                                                materialList.mCapacity = list.mCapacity;
-                                                if (std::holds_alternative<Persistent_>(collection.mIndex.mPersistency)) {
-                                                    auto descs = context.mDescriptorHeap->allocatePersistent(materialList.mCapacity);
-                                                    materialList.mGpuOffset = descs.first.mGpuHandle;
-                                                    materialList.mCpuOffset = descs.first.mCpuHandle;
-                                                    uint32_t offset = 0;
-                                                    for (const auto& range : list.mRanges) {
-                                                        size_t i = 0;
-                                                        for (const auto& subrange : range.mSubranges) {
-                                                            visit(overload(
-                                                                [&](EngineSource_) {
-                                                                    for (const auto& attr : subrange.mDescriptors) {
-                                                                        ++i;
-                                                                        throw std::runtime_error("EngineSource Descriptor not supported yet");
-                                                                    }
-                                                                },
-                                                                [&](MaterialSource_) {
-                                                                    for (const auto& attr : subrange.mDescriptors) {
-                                                                        auto visitor = overload(
-                                                                            [&](Texture2D_) {
-                                                                                DX12TextureData* pTex = nullptr;
-                                                                                auto iter = material.mMaterialData->mTextures.find(attr.mID);
-                                                                                if (iter != material.mMaterialData->mTextures.end()) {
-                                                                                    const auto& texID = iter->second;
-                                                                                    for (const auto& tex : material.mTextures) {
-                                                                                        Expects(tex);
-                                                                                        if (texID == tex->mMetaID) {
-                                                                                            pTex = tex.get();
-                                                                                            break;
-                                                                                        }
-                                                                                    }
-                                                                                } else {
-                                                                                    pTex = &resources.mDefaultTextures.at(White);
-                                                                                }
-
-                                                                                Expects(pTex);
-                                                                                D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{
-                                                                                    pTex->mFormat,
-                                                                                    D3D12_SRV_DIMENSION_TEXTURE2D,
-                                                                                    D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-                                                                                };
-
-                                                                                viewDesc.Texture2D = D3D12_TEX2D_SRV{ 0, (uint32_t)-1, 0, 0.f };
-
-                                                                                context.mDevice->CreateShaderResourceView(pTex->mTexture.get(),
-                                                                                    &viewDesc, descs[i].mCpuHandle);
-                                                                            },
-                                                                            [&](auto) {
-                                                                                throw std::runtime_error("currently only support Texture2D");
-                                                                            }
-                                                                        );
-
-                                                                        visit(overload(
-                                                                            [&](std::monostate) {
-                                                                                visit(visitor, attr.mAttributeType);
-                                                                            },
-                                                                            [&](Descriptor::BaseColor_ t) {
-                                                                                visit(visitor, attr.mAttributeType);
-                                                                            },
-                                                                            [&](Descriptor::ConstantBuffer_) {
-                                                                            },
-                                                                            [&](Descriptor::LinearSampler_) {
-                                                                            }
-                                                                        ), attr.mDataType);
-                                                                        ++i;
-                                                                    }
-                                                                }
-                                                            ), subrange.mSource);
-                                                        }
-                                                        {
-                                                            // Set Null
-                                                            D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc{
-                                                                DXGI_FORMAT_R8G8B8A8_UNORM,
-                                                                D3D12_SRV_DIMENSION_TEXTURE2D,
-                                                                D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
-                                                            };
-                                                            viewDesc.Texture2D = D3D12_TEX2D_SRV{ 0, (uint32_t)-1, 0, 0.f };
-                                                            for (; i != range.mCapacity; ++i) {
-                                                                context.mDevice->CreateShaderResourceView(nullptr,
-                                                                    &viewDesc, descs[i].mCpuHandle);
-                                                            }
-                                                        }
-                                                        offset += range.mCapacity;
-                                                    }
-                                                    for (const auto& unbounded : list.mUnboundedDescriptors) {
-                                                        throw std::runtime_error("material resource view list unbounded not supported yet");
-                                                    }
-                                                } else {
-                                                    materialList.mRanges = list.mRanges;
-                                                }
-                                            }
-                                            for (const auto& list : collection.mSamplerLists) {
-                                                auto& materialList = materialCollection.mSamplerLists.emplace_back();
-                                                throw std::runtime_error("material sampler list not supported yet");
-                                            }
+                                            buildDX12MaterialShaderDescriptors(context.mDevice, context.mDescriptorHeap,
+                                                resources, material, collection, materialCollection);
                                         }
                                     } // subpasses
                                 } // passes
@@ -652,10 +671,100 @@ std::pair<DX12MaterialData*, bool> try_createDX12MaterialData(CreationContext& c
                     } // pipeline
                 } // solution
             }
-        });
+        }/*);*/
     }
 
     return { const_cast<DX12MaterialData*>(&*iter), created };
+}
+
+void buildDX12GraphicsSubpassShaderDescriptors(ID3D12Device* pDevice, DX12ShaderDescriptorHeap* pHeap,
+    const DX12RenderWorks& renderGraph,
+    const DX12RenderSolution& renderSolution,
+    const ShaderDescriptorCollection& collection,
+    DX12ShaderDescriptorCollection& dx12Collection
+) {
+    dx12Collection.mIndex = collection.mIndex;
+    dx12Collection.mResourceViewLists.reserve(collection.mResourceViewLists.size());
+    dx12Collection.mSamplerLists.reserve(collection.mSamplerLists.size());
+
+    for (const auto& list : collection.mResourceViewLists) {
+        auto& dx12List = dx12Collection.mResourceViewLists.emplace_back();
+        dx12List.mSlot = list.mSlot;
+        Expects(list.mCapacity);
+        dx12List.mCapacity = list.mCapacity;
+        dx12List.mRanges = list.mRanges;
+
+        visit(overload(
+            [&](Persistent_) {
+                uint32_t offset = 0;
+                for (const auto& range : list.mRanges) {
+                    for (const auto& subrange : range.mSubranges) {
+                        size_t i = 0;
+                        visit(overload(
+                            [&](EngineSource_) {
+                                for (const auto& attr : subrange.mDescriptors) {
+                                    if (std::holds_alternative<SamplerState_>(attr.mAttributeType)) {
+                                        throw std::runtime_error("resource view should not have samplers");
+                                    } else if (!isConstant(attr.mAttributeType)) {
+                                        throw std::runtime_error("GraphicsSubpass EngineSource Descriptor not supported yet");
+                                    } else {
+                                        throw std::runtime_error("descriptor should not be constant");
+                                    }
+                                }
+                            },
+                            [&](RenderTargetSource_) {
+                                for (const auto& attr : subrange.mDescriptors) {
+                                    ++i;
+                                }
+                            },
+                            [&](MaterialSource_) {
+                                throw std::runtime_error("GraphicsSubpass MaterialSource Descriptor not supported yet");
+                            }
+                        ), subrange.mSource);
+                        Ensures(i == subrange.mDescriptors.size());
+                        offset += gsl::narrow_cast<uint32_t>(subrange.mDescriptors.size());
+                    }
+                }
+
+                if (collection.mIndex.mUpdate >= PerPass) {
+                    Ensures(offset == dx12List.mCapacity);
+                } else {
+                    Ensures(offset == 0);
+                }
+
+                for (const auto& unbounded : list.mUnboundedDescriptors) {
+                    throw std::runtime_error("material resource view list unbounded not supported yet");
+                }
+            },
+            [&](Dynamic_) {
+                // do nothing
+            }
+        ), collection.mIndex.mPersistency);
+    }
+
+    for (const auto& list : collection.mSamplerLists) {
+        auto& dx12List = dx12Collection.mSamplerLists.emplace_back();
+        dx12List.mSlot = list.mSlot;
+        Expects(list.mCapacity);
+        dx12List.mCapacity = list.mCapacity;
+        dx12List.mRanges = list.mRanges;
+        visit(overload(
+            [&](Persistent_) {
+                for (const auto& range : list.mRanges) {
+                    if (std::holds_alternative<SSV_>(range.mType)) {
+                        continue;
+                    }
+                    throw std::runtime_error("GraphicsSubpass sampler list not supported yet");
+                }
+                for (const auto& unbounded : list.mUnboundedDescriptors) {
+                    throw std::runtime_error("material resource view list unbounded not supported yet");
+                }
+            },
+            [&](Dynamic_) {
+                // do nothing
+            }
+        ), collection.mIndex.mPersistency);
+    }
 }
 
 std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationContext& context,
@@ -664,11 +773,14 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
     bool created = false;
     auto iter = resources.mRenderGraphs.find(metaID);
     if (iter != resources.mRenderGraphs.end()) {
-
+        // do nothing
     } else {
         std::tie(iter, created) = resources.mRenderGraphs.emplace(metaID);
         Ensures(created);
-        resources.mRenderGraphs.modify(iter, [&](DX12RenderGraphData& render) {
+        DX12RenderGraphData& render = const_cast<DX12RenderGraphData&>(*iter);
+        render.mDescriptorHeap = context.mDescriptorHeap;
+
+        /*resources.mRenderGraphs.modify(iter, [&](DX12RenderGraphData& render)*/ {
             // render graph is always sync loaded
             render.mRenderGraphData.reset(metaID, false);
             
@@ -681,6 +793,7 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
             render.mRenderGraph.mFramebuffers.resize(sc.mNumReserveFramebuffers);
             render.mRenderGraph.mDSVs.resize(context.mDevice, sc.mNumReserveDSVs);
             render.mRenderGraph.mRTVs.resize(context.mDevice, sc.mNumReserveRTVs);
+            render.mRenderGraph.mCBV_SRV_UAVs.resize(context.mDevice, sc.mNumReserveCBV_SRV_UAVs);
             render.mRenderGraph.mNumBackBuffers = sc.mNumBackBuffers;
             render.mRenderGraph.mSolutionIndex = sc.mSolutionIndex;
 
@@ -690,9 +803,16 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                 solution.mPipelines.reserve(solutionData.mPipelines.size());
                 solution.mRTVSources = solutionData.mRTVSources;
                 solution.mDSVSources = solutionData.mDSVSources;
+                solution.mCBVSources = solutionData.mCBVSources;
+                solution.mSRVSources = solutionData.mSRVSources;
+                solution.mUAVSources = solutionData.mUAVSources;
                 solution.mFramebuffers = solutionData.mFramebuffers;
                 solution.mRTVs = solutionData.mRTVs;
                 solution.mDSVs = solutionData.mDSVs;
+                solution.mCBVs = solutionData.mCBVs;
+                solution.mSRVs = solutionData.mSRVs;
+                solution.mUAVs = solutionData.mUAVs;
+                solution.mAttributeIndex = solutionData.mAttributeIndex;
                 solution.mPipelineIndex = solutionData.mPipelineIndex;
 
                 for (const auto& pipelineData : solutionData.mPipelines) {
@@ -705,25 +825,29 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
 
                     for (const auto& passData : pipelineData.mPasses) {
                         auto& pass = pipeline.mPasses.emplace_back();
-                        pass.mRasterSubpasses.reserve(passData.mRasterSubpasses.size());
+                        pass.mGraphicsSubpasses.reserve(passData.mGraphicsSubpasses.size());
                         pass.mViewports = passData.mViewports;
                         pass.mScissorRects = passData.mScissorRects;
                         pass.mFramebuffers = passData.mFramebuffers;
                         pass.mDependencies = passData.mDependencies;
                         
-                        for (const auto& subpassData : passData.mRasterSubpasses) {
-                            auto& subpass = pass.mRasterSubpasses.emplace_back();
+                        for (const auto& subpassData : passData.mGraphicsSubpasses) {
+                            auto& subpass = pass.mGraphicsSubpasses.emplace_back();
                             subpass.mSampleDesc = getDXGI(subpassData.mSampleDesc);
                             subpass.mInputAttachments = subpassData.mInputAttachments;
                             subpass.mOutputAttachments = subpassData.mOutputAttachments;
                             subpass.mResolveAttachments = subpassData.mResolveAttachments;
                             subpass.mDepthStencilAttachment = subpassData.mDepthStencilAttachment;
                             subpass.mPreserveAttachments = subpassData.mPreserveAttachments;
-                            subpass.mSRVs = subpassData.mSRVs;
-                            subpass.mUAVs = subpassData.mUAVs;
                             subpass.mPostViewTransitions = subpassData.mPostViewTransitions;
                             subpass.mConstantBuffers = subpassData.mConstantBuffers;
-                            subpass.mDescriptors = subpassData.mDescriptors;
+
+                            subpass.mDescriptors.reserve(subpassData.mDescriptors.size());
+                            for (const auto& collection : subpassData.mDescriptors) {
+                                auto& dx12Collection = subpass.mDescriptors.emplace_back();
+                                buildDX12GraphicsSubpassShaderDescriptors(context.mDevice, context.mDescriptorHeap,
+                                    render.mRenderGraph, solution, collection, dx12Collection);
+                            }
 
                             if (!subpassData.mRootSignature.empty()) {
                                 V(context.mDevice->CreateRootSignature(0,
@@ -735,27 +859,34 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                     }
                 }
             }
-        });
+        }/*);*/
 
-        resources.mRenderGraphs.modify(iter, [&](DX12RenderGraphData& render) {
-            Ensures(render.mRenderGraphData);
-            auto& renderData = *render.mRenderGraphData;
+        DX12RenderGraphData& render2 = const_cast<DX12RenderGraphData&>(*iter);
+
+        /*resources.mRenderGraphs.modify(iter, [&](DX12RenderGraphData& render2) */{
+            Ensures(render2.mRenderGraphData);
+            auto& renderData = *render2.mRenderGraphData;
             const auto& sc = renderData.mRenderGraph;
 
-            Expects(render.mRenderGraph.mSolutions.size() == sc.mSolutions.size());
-            for (auto&& [solution, solutionData0] : boost::combine(render.mRenderGraph.mSolutions, sc.mSolutions)) {
+            Expects(render2.mRenderGraph.mSolutions.size() == sc.mSolutions.size());
+            uint32_t solutionID = 0;
+            for (auto&& [solution, solutionData0] : boost::combine(render2.mRenderGraph.mSolutions, sc.mSolutions)) {
                 const auto& solutionData = solutionData0.get<0>();
 
                 Expects(solution.mPipelines.size() == solutionData.mPipelines.size());
+                uint32_t pipelineID = 0;
                 for (auto&& [pipeline, pipelineData0] : boost::combine(solution.mPipelines, solutionData.mPipelines)) {
+                    if (solutionID != context.mCurrentSolution || pipelineID != context.mCurrentPipeline)
+                        continue;
+
                     const auto& pipelineData = pipelineData0.get<0>();
 
                     Expects(pipeline.mPasses.size() == pipelineData.mPasses.size());
                     for (auto&& [pass, passData0] : boost::combine(pipeline.mPasses, pipelineData.mPasses)) {
                         const auto& passData = passData0.get<0>();
 
-                        Expects(pass.mRasterSubpasses.size() == passData.mRasterSubpasses.size());
-                        for (auto&& [subpass, subpassData0] : boost::combine(pass.mRasterSubpasses, passData.mRasterSubpasses)) {
+                        Expects(pass.mGraphicsSubpasses.size() == passData.mGraphicsSubpasses.size());
+                        for (auto&& [subpass, subpassData0] : boost::combine(pass.mGraphicsSubpasses, passData.mGraphicsSubpasses)) {
                             const auto& subpassData = subpassData0.get<0>();
 
                             subpass.mOrderedRenderQueue.reserve(subpassData.mOrderedRenderQueue.size());
@@ -770,11 +901,13 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                             }
                         }
                     }
+                    ++pipelineID;
                 }
+                ++solutionID;
             }
 
-            render.mRenderGraphData.reset();
-        });
+            render2.mRenderGraphData.reset();
+        }/*);*/
     }
 
     return { const_cast<DX12RenderGraphData*>(&*iter), created };
@@ -808,7 +941,9 @@ bool try_createDX12(CreationContext& context, DX12Resources& resources, const Me
             if (res.second) {
                 const auto& metaID2 = res.first->mMetaID;
                 Expects(res.first->mMetaID == metaID);
-                resources.mContents.modify(res.first, [&](DX12ContentData& content) {
+                auto& content = const_cast<DX12ContentData&>(*res.first);
+
+                /*resources.mContents.modify(res.first, [&](DX12ContentData& content) */{
                     content.mContentData.reset(metaID, async);
                     if (!async) {
                         auto iter = resources.mRenderGraphs.find(context.mRenderGraph);
@@ -827,8 +962,8 @@ bool try_createDX12(CreationContext& context, DX12Resources& resources, const Me
                                 dc.mMesh = nullptr;
                             } else {
                                 dc.mMesh = try_createDX12MeshData(context, resources, data.mMesh, async).first;
-                                dc.mMaterial = try_createDX12MaterialData(context, *iter, resources, data.mMesh, async).first;
                             }
+                            dc.mMaterial = try_createDX12MaterialData(context, *iter, resources, data.mMaterial, async).first;
                         }
                         for (const auto& data : contentData.mFlattenedObjects) {
                             auto& object = content.mFlattenedObjects.emplace_back();
@@ -847,7 +982,7 @@ bool try_createDX12(CreationContext& context, DX12Resources& resources, const Me
                             }
                         }
                     }
-                });
+                }/*);*/
 
                 return true;
             } else {

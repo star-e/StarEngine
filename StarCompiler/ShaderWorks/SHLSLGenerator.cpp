@@ -420,6 +420,8 @@ std::string HLSLGenerator::generateModule(const ShaderModule& node) const {
     int count = 0;
     // input
     for (const auto& v : node.mInputs) {
+        if (isGlobalState(v))
+            continue;
         auto iter = node.mOutputs.find(v.mName);
         if (iter != node.mOutputs.end()) {
             continue;
@@ -433,6 +435,8 @@ std::string HLSLGenerator::generateModule(const ShaderModule& node) const {
 
     // output and inout
     for (const auto& v : node.mOutputs) {
+        if (isGlobalState(v))
+            continue;
         if (count) {
             oss << ", ";
         }
@@ -597,6 +601,8 @@ std::string HLSLGenerator::generateModuleExec(const ShaderModule& node, std::set
 
     // declare input
     for (const auto& v : node.mInputs) {
+        if (isGlobalState(v))
+            continue;
         auto iter = locals.find(v.mName);
         if (iter == locals.end()) {
             throw std::runtime_error("variable not declared");
@@ -605,6 +611,8 @@ std::string HLSLGenerator::generateModuleExec(const ShaderModule& node, std::set
 
     // declare output
     for (const auto& v : node.mOutputs) {
+        if (isGlobalState(v))
+            continue;
         auto iter = locals.find(v.mName);
         if (iter == locals.end()) {
             locals.emplace(v.mName);
@@ -622,6 +630,8 @@ std::string HLSLGenerator::generateModuleExec(const ShaderModule& node, std::set
         int count = 0;
         // input
         for (const auto& v : node.mInputs) {
+            if (isGlobalState(v))
+                continue;
             auto iter = node.mOutputs.find(v.mName);
             if (iter != node.mOutputs.end()) {
                 continue;
@@ -635,6 +645,8 @@ std::string HLSLGenerator::generateModuleExec(const ShaderModule& node, std::set
 
         // output and inout
         for (const auto& v : node.mOutputs) {
+            if (isGlobalState(v))
+                continue;
             if (count) {
                 oss << ", ";
             }

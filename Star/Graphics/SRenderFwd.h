@@ -1332,9 +1332,10 @@ using Persistency = std::variant<Dynamic_, Persistent_>;
 
 struct DescriptorIndex;
 struct EngineSource_;
+struct RenderTargetSource_;
 struct MaterialSource_;
 
-using DescriptorSource = std::variant<EngineSource_, MaterialSource_>;
+using DescriptorSource = std::variant<EngineSource_, RenderTargetSource_, MaterialSource_>;
 
 struct matrix_;
 struct double4_;

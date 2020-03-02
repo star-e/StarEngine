@@ -470,21 +470,6 @@ void serialize(Archive& ar, Star::Graphics::Render::DrawCallData& v, const uint3
     ar & v.mMaterial;
     ar & v.mInstanceSize;
     ar & v.mInstanceCount;
-    ar & v.mConstantMap;
-}
-
-template<class Archive>
-inline void load_construct_data(
-    Archive& ar, std::pair<const std::pmr::string, Star::Graphics::Render::DrawCallData>* t, const unsigned int file_version
-) {
-    ::new(t) std::pair<const std::pmr::string, Star::Graphics::Render::DrawCallData>(std::piecewise_construct, std::forward_as_tuple(ar.resource()), std::forward_as_tuple(ar.resource()));
-}
-
-template<class Archive, class K>
-inline void load_construct_data(
-    Archive& ar, std::pair<K, Star::Graphics::Render::DrawCallData>* t, const unsigned int file_version
-) {
-    ::new(t) std::pair<K, Star::Graphics::Render::DrawCallData>(std::piecewise_construct, std::forward_as_tuple(), std::forward_as_tuple(ar.resource()));
 }
 
 STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::BasicTransform, object_serializable);

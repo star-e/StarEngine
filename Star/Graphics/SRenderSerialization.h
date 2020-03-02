@@ -787,6 +787,12 @@ template<class Archive>
 void serialize(Archive& ar, Star::Graphics::Render::EngineSource_& v, const uint32_t version) {
 }
 
+STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::RenderTargetSource_, object_serializable);
+STAR_CLASS_TRACKING(Star::Graphics::Render::RenderTargetSource_, track_never);
+template<class Archive>
+void serialize(Archive& ar, Star::Graphics::Render::RenderTargetSource_& v, const uint32_t version) {
+}
+
 STAR_CLASS_IMPLEMENTATION(Star::Graphics::Render::MaterialSource_, object_serializable);
 STAR_CLASS_TRACKING(Star::Graphics::Render::MaterialSource_, track_never);
 template<class Archive>

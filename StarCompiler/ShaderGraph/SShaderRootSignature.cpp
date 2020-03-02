@@ -18,30 +18,27 @@
 #include "SShaderRootSignature.h"
 #include "SShaderDescriptor.h"
 #include "SShaderAttribute.h"
+#include <Star/Graphics/SRenderUtils.h>
 
 namespace Star::Graphics::Render::Shader {
 
 void RootSignature::addConstant(const ShaderAttribute& attr, ShaderVisibilityType stageID) {
-    IsConstant visitor;
-    if (!visit(visitor, attr.mType)) {
+    if (!isConstant(attr.mType))
         return;
-    }
     mDatabase.addAttribute(attr, stageID);
 }
 
 void RootSignature::addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage) {
-    IsConstant visitor;
-    if (visit(visitor, attr.mType)) {
+    if (isConstant(attr.mType))
         return;
-    }
+
     mDatabase.addAttribute(attr, stage);
 }
 
 bool RootSignature::try_addDescriptor(const ShaderAttribute& attr, ShaderVisibilityType stage) {
-    IsConstant visitor;
-    if (visit(visitor, attr.mType)) {
+    if (isConstant(attr.mType))
         return false;
-    }
+
     return mDatabase.try_addAttribute(attr, stage);
 }
 

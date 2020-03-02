@@ -70,7 +70,11 @@ void DX12Engine::start() {
     DX12UploadBuffer uploadBuffer(mUploadBufferPool,
         gsl::narrow_cast<uint32_t>(mFrameQueue.mFrames.size()), 0);
 
-    CreationContext creation{ mDevice.get(), mFrameQueue.mDirectQueue.get(),
+    uint32_t currentSolution = 1;
+    uint32_t currentPipeline = 0;
+
+    CreationContext creation{ currentSolution, currentPipeline,
+        mDevice.get(), mFrameQueue.mDirectQueue.get(),
         mFrameQueue.mFrames.at(mFrameQueue.mNextFrameIndex).mCommandAllocator.get(),
         mFrameQueue.mFrames.at(mFrameQueue.mNextFrameIndex).mCommandList.get(),
         mMemory.mPerFrame,

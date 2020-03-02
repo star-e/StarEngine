@@ -42,6 +42,12 @@ inline bool isSemanticBlank(const ShaderValue& v) noexcept {
     return std::holds_alternative<std::monostate>(v.mSemantic);
 }
 
+inline bool isGlobalState(const ShaderValue& v) noexcept {
+    return
+        std::holds_alternative<std::monostate>(v.mValue) &&
+        std::holds_alternative<std::monostate>(v.mSemantic);
+}
+
 const char* getModelName(const ValueModel& v, Language l) noexcept;
 std::string getSemanticName(const SemanticType& type, size_t slot, const ShaderStageType& stage, bool bInput);
 

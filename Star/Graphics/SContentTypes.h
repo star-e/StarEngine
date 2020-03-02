@@ -335,21 +335,12 @@ struct FullScreenTriangle_ {} static constexpr FullScreenTriangle;
 
 using DrawCallType = std::variant<std::monostate, FullScreenTriangle_>;
 
-struct STAR_GRAPHICS_API DrawCallData {
-    using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
-    allocator_type get_allocator() const noexcept;
-
-    DrawCallData(const allocator_type& alloc);
-    DrawCallData(DrawCallData&& rhs, const allocator_type& alloc);
-    DrawCallData(DrawCallData const& rhs, const allocator_type& alloc);
-    ~DrawCallData();
-
+struct DrawCallData {
     DrawCallType mType;
     MetaID mMesh;
     MetaID mMaterial;
     uint16_t mInstanceSize;
     uint16_t mInstanceCount;
-    ConstantMap mConstantMap;
 };
 
 struct BasicTransform {

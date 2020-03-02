@@ -2982,9 +2982,10 @@ inline bool operator<(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noex
 }
 
 struct EngineSource_ {} static constexpr EngineSource;
+struct RenderTargetSource_ {} static constexpr RenderTargetSource;
 struct MaterialSource_ {} static constexpr MaterialSource;
 
-using DescriptorSource = std::variant<EngineSource_, MaterialSource_>;
+using DescriptorSource = std::variant<EngineSource_, RenderTargetSource_, MaterialSource_>;
 
 inline bool operator<(const DescriptorSource& lhs, const DescriptorSource& rhs) noexcept {
     return lhs.index() < rhs.index();

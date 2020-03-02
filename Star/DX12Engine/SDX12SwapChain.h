@@ -66,7 +66,7 @@ public:
     EngineMemory mMemory = {};
     com_ptr<IDXGISwapChain3> mSwapChain;
     winrt::handle mSwapEvent;
-    uint32_t mCurrentSolution = 0;
+    uint32_t mCurrentSolution = 1;
     uint32_t mCurrentPipeline = 0;
     boost::intrusive_ptr<DX12RenderGraphData> mRenderGraph;
 

@@ -37,12 +37,12 @@ void createBasicModules(ShaderModules& modules) {
         { "PointSampler", SamplerState, TypeStaticSampler },
         { "LinearSampler", SamplerState, TypeStaticSampler },
 
-        { "Normal", half3, Texture2D, TypePass },
-        { "Albedo", half3, Texture2D, TypePass },
-        { "Radiance", half3, Texture2D, TypePass },
-        { "DepthStencil", float1, Texture2D, TypePass },
+        { "Normal", half3, Texture2D, TypeRenderTarget },
+        { "BaseColor", half3, Texture2D, TypeRenderTarget },
+        { "Radiance", half3, Texture2D, TypeRenderTarget },
+        { "DepthStencil", float1, Texture2D, TypeRenderTarget },
 
-        { "BaseColor", half4, Texture2D, TypeMaterial },
+        { "MainTex", half4, Texture2D, TypeMaterial },
         { "NormalMap", half3, Texture2D, TypeMaterial },
     });
 
@@ -55,8 +55,8 @@ void createBasicModules(ShaderModules& modules) {
         Inputs{
             { "vertexID", uint1, SV_VertexID }
         },
-        Content{ R"(clipPos.x = (float)(vertexID / 2) * 4.0f - 1.0f;
-clipPos.y = (float)(vertexID % 2) * 4.0f - 1.0f;
+        Content{ R"(clipPos.x = (float)(vertexID % 2) * 4.0f - 1.0f;
+clipPos.y = (float)(vertexID / 2) * 4.0f - 1.0f;
 clipPos.z = 0.5f;
 clipPos.w = 1.0f;
 )"});
@@ -68,8 +68,8 @@ clipPos.w = 1.0f;
         Inputs{
             { "vertexID", uint1, SV_VertexID }
         },
-        Content{ R"(uv.x = (float)(vertexID / 2) * 2.0f;
-uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
+        Content{ R"(uv.x = (float)(vertexID % 2) * 2.0f;
+uv.y = 1.0 - (float)(vertexID / 2) * 2.0f;
 )"});
 
     ADD_MODULE(ClipPos, Inline,
@@ -159,35 +159,22 @@ uv.y = 1.0 - (float)(vertexID % 2) * 2.0f;
 
     ADD_MODULE(UnpackGBuffers, Inline,
         Attributes{
-            { "Albedo", Texture2D },
+            { "BaseColor", Texture2D },
             { "Normal", Texture2D },
             { "DepthStencil", Texture2D },
             { "PointSampler", SamplerState },
         },
         Outputs{
-            { "albedo", half3 },
+            { "baseColor", half3 },
             { "worldNormal", half3 },
             { "depth", float1 },
         },
         Inputs{
             { "uv", float2, TEXCOORD },
         },
-        Content{ R"(albedo = Albedo.Sample(PointSampler, uv).xyz;
-worldNormal = Normal.Sample(PointSampler, uv).xyz;
+        Content{ R"(baseColor = BaseColor.Sample(PointSampler, uv).xyz;
+worldNormal = 2.0h * Normal.Sample(PointSampler, uv).xyz - 1.0h;
 depth = DepthStencil.Sample(PointSampler, uv).x;
-)" }
-    );
-
-    ADD_MODULE(DeferredLambertian, Inline,
-        Outputs{
-            { "color", half4 },
-        },
-        Inputs{
-            { "albedo", half3 },
-            { "worldNormal", half3 },
-            { "depth", float1 },
-        },
-        Content{ R"(color = half4(albedo * normalize(dot(worldNormal, half3(1, 1, 1))) * depth, 1.0h);
 )" }
     );
 
@@ -198,28 +185,43 @@ depth = DepthStencil.Sample(PointSampler, uv).x;
         },
         Inputs{
             { "baseColor", half3  },
-            { "transparency", half1, {} },
+            { "transparency", half1 },
             { "worldNormal", half3  },
         },
         Content{ R"(color0 = half4(baseColor, transparency);
-color1 = half4(worldNormal, 1.0h);
+color1 = half4(worldNormal * 0.5h + 0.5h, 1.0h);
+)" }
+    );
+
+    ADD_MODULE(BaseColor, Inline,
+        Attributes{
+            { "MainTex", Texture2D },
+            { "LinearSampler", SamplerState },
+        },
+        Outputs{
+            { "baseColor", half3 },
+        },
+        Inputs{
+            { "uv", float2, TEXCOORD },
+        },
+        Content{ R"(baseColor = MainTex.Sample(LinearSampler, uv).xyz;
 )" }
     );
 
     ADD_MODULE(BaseColorAndTransparency, Inline,
         Attributes{
-            { "BaseColor", Texture2D },
+            { "MainTex", Texture2D },
             { "LinearSampler", SamplerState },
         },
         Outputs{
             { "baseColor", half3 },
-            { "transparency", half1, {} },
+            { "transparency", half1 },
         },
         Inputs{
             { "uv", float2, TEXCOORD },
         },
         Content{ R"({
-    half4 tmp = BaseColor.Sample(LinearSampler, uv);
+    half4 tmp = MainTex.Sample(LinearSampler, uv);
     baseColor = tmp.xyz;
     transparency = tmp.w;
 }
@@ -236,8 +238,20 @@ color1 = half4(worldNormal, 1.0h);
         },
         Content{ R"(color = half4(0, 0, 0, 1);
 )" }
-
     );
+        
+    ADD_MODULE(InitTransparency, Inline,
+        Attributes{
+        },
+        Outputs{
+            { "transparency", half1 },
+        },
+        Inputs{
+        },
+        Content{ R"(transparency = 1.0h;
+)" }
+    );
+
     ADD_MODULE(DirectionalLight, Inline,
         Attributes{
         },
@@ -274,15 +288,11 @@ lightIntensity = half3(1.0h, 1.0h, 1.0h);
         },
         Inputs{
             { "color", half4 },
-            { "ndotl", half1 },
-            //{ "albedo", half3 },
-            //{ "lightDirection", half3 }
-            { "lightIntensity", half3 },
             { "baseColor", half3 },
-            { "transparency", half1 },
+            { "ndotl", half1 },
+            { "lightIntensity", half3 },
         },
         Content{ R"(color.xyz += baseColor * ndotl * lightIntensity;
-color.w = transparency;
 )" }
     );
 
@@ -486,9 +496,10 @@ color.xyz = pow(color.xyz, 2.2h);
     // Alpha Test
     ADD_MODULE(AlphaTest, Inline,
         Outputs{
-            { "transparency", half1 },
+            {}, // global state
         },
         Inputs{
+            {}, // global state
             { "transparency", half1 },
         },
         Content{ R"(clip(transparency - 0.5f);

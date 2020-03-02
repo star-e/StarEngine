@@ -102,6 +102,12 @@ DEPTH_STENCIL_VIEW_DESC buildDepthStencilViewDesc(
     bool bReadOnly
 );
 
+SHADER_RESOURCE_VIEW_DESC buildShaderResourceViewDesc(
+    const Resource& resource,
+    const ResourceDataView& view,
+    const PixelModel& viewModel
+);
+
 inline RESOURCE_STATES buildResourceStates(const RenderTargetState& state) {
     return visit(overload(
         [](Common_) {

@@ -16,12 +16,11 @@
 // along with StarEngine.  If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include <Star/DX12Engine/SDX12Fwd.h>
 
 namespace Star::Graphics::Render {
 
-void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* pSwapChain,
-    DX12ShaderDescriptorHeap* pDescriptorHeap, DX12RenderWorks& rw, uint32_t solutionID, uint32_t pipelineID);
-void clearRenderTargets(DX12RenderWorks& rw, DX12ShaderDescriptorHeap* pDescriptorHeap, uint32_t solutionID, uint32_t pipelineID);
+const DX12ShaderQueueData& getSubpassData(const DX12MaterialData& material,
+    uint32_t solutionID, uint32_t pipelineID, uint32_t renderPassID, uint32_t renderSubpassID,
+    uint32_t& shaderSolutionID, uint32_t& shaderPipelineID, uint32_t& shaderQueueID);
 
 }

@@ -31,8 +31,11 @@ namespace DSL {
 static const AttributeDescriptor TypeFrame{ PerFrame, Table, Dynamic, EngineSource };
 static const AttributeDescriptor TypePass{ PerPass, Table, Dynamic, EngineSource };
 static const AttributeDescriptor TypeInstance{ PerInstance, Table, Dynamic, EngineSource };
+static const AttributeDescriptor TypeRenderTarget{ PerPass, Table, Persistent, RenderTargetSource };
 static const AttributeDescriptor TypeMaterial{ PerBatch, Table, Persistent, MaterialSource };
 static const AttributeDescriptor TypeStaticSampler{ PerFrame, SSV, Persistent, EngineSource };
+
+static const ShaderValue global_state = {};
 
 }
 
@@ -96,7 +99,7 @@ for (const ShaderStageType S_Stage = PS; Program.stageBegin(S_Stage); Program.st
 // Shader Prototype
 #define S_MAKE_CONST(NAME) if (const auto& NAME##0 = NAME; true) if (const auto& NAME = NAME##0; true)
 
-#define Shader(NAME, ...) if (auto& Shader = db.mPrototypes.try_emplace(NAME, ShaderPrototype{ NAME, __VA_ARGS__ }).first->second; true)
+#define Shader(NAME, ...) std::cout << "compile shader: " << NAME << std::endl; if (auto& Shader = db.mPrototypes.try_emplace(NAME, ShaderPrototype{ NAME, __VA_ARGS__ }).first->second; true)
 #define Bundle(NAME) if (auto& Bundle = Shader.mSolutions.try_emplace(NAME, ShaderSolution{ NAME }).first->second; true) S_MAKE_CONST(Shader)
 #define Pipeline(NAME) if (auto& Pipeline = Bundle.mPipelines.try_emplace(NAME, ShaderPipeline{ NAME }).first->second; true) S_MAKE_CONST(Bundle)
 #define Queue(NAME) if (auto& Queue = Pipeline.mQueues.try_emplace(NAME, ShaderQueue{ NAME }).first->second; true) S_MAKE_CONST(Pipeline)

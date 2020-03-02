@@ -264,6 +264,9 @@
     <ProjectReference Include="..\..\StarCompiler\ShaderWorks\ShaderWorks.vcxproj">
       <Project>{925ca6a0-f6ae-49b5-ba96-f1f8811cfecf}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\Star\Graphics\Graphics.vcxproj">
+      <Project>{51704244-5fa2-4eba-8f61-5d8c8ea54aad}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

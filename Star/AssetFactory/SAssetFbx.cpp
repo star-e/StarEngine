@@ -776,7 +776,7 @@ void AssetFbxScene::createMaterials(const std::function<void(std::string_view, c
             if (pTex) {
                 auto texFilename = std::filesystem::path(getRelativeFilename(mAssetPath, pTex->GetRelativeFileName()));
                 auto texAssetName = getAssetNameFromFullPath(texFilename, mAssetFolder);
-                textures.try_emplace("BaseColor", texAssetName);
+                textures.try_emplace("MainTex", texAssetName);
 
                 auto normalFilename = texAssetName;
                 boost::algorithm::replace_last(normalFilename, "_albedo", "_normal");

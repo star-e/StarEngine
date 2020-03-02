@@ -261,6 +261,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="SDX12Material.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SConfig.h" />
     <ClInclude Include="SDX12DescriptorArray.h" />
@@ -292,6 +293,7 @@
     <ClCompile Include="SDX12DescriptorArray.cpp" />
     <ClCompile Include="SDX12Factory.cpp" />
     <ClCompile Include="SDX12FrameQueue.cpp" />
+    <ClCompile Include="SDX12Material.cpp" />
     <ClCompile Include="SDX12Pointer.cpp" />
     <ClCompile Include="SDX12RenderWorks.cpp" />
     <ClCompile Include="SDX12SamplerDescriptorHeap.cpp" />

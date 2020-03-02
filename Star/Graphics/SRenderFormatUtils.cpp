@@ -203,7 +203,7 @@ Format makeTypelessUNorm(Format format) noexcept {
     case Format::R8G8_TYPELESS: return Format::R8G8_UNORM;
     case Format::R16_TYPELESS: return Format::R16_UNORM;
     case Format::R8_TYPELESS: return Format::R8_UNORM;
-    case Format::R24G8_TYPELESS_PACK32: return Format::D24_UNORM_S8_UINT;
+    case Format::R24G8_TYPELESS_PACK32: return Format::R24_UNORM_X8_TYPELESS_PACK32;
     case Format::BC1_TYPELESS_BLOCK: return Format::BC1_UNORM_BLOCK;
     case Format::BC2_TYPELESS_BLOCK: return Format::BC2_UNORM_BLOCK;
     case Format::BC3_TYPELESS_BLOCK: return Format::BC3_UNORM_BLOCK;
@@ -332,7 +332,7 @@ Format makeTypelessSFloat(Format format) noexcept {
     case Format::R16G16_TYPELESS: return Format::R16G16_SFLOAT;
     case Format::R32_TYPELESS: return Format::R32_SFLOAT;
     case Format::R16_TYPELESS: return Format::R16_SFLOAT;
-    case Format::R32G8X24_TYPELESS_2PACK32: return Format::D32_SFLOAT_S8_UINT;
+    case Format::R32G8X24_TYPELESS_2PACK32: return Format::R32_SFLOAT_X8X24_TYPELESS_2PACK32;
     case Format::BC6H_TYPELESS_BLOCK: return Format::BC6H_SFLOAT_BLOCK;
     default: return format;
     }

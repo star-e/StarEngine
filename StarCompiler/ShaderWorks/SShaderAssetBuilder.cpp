@@ -166,6 +166,10 @@ void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modu
 ) {
     prototypeData.mName = prototype.mName;
     for (const auto& [bundleName, bundle] : prototype.mSolutions) {
+        auto solutionIter = sw.mSolutions.find(bundleName);
+        if (solutionIter == sw.mSolutions.end()) {
+            continue;
+        }
         auto res = prototypeData.mSolutions.emplace(std::piecewise_construct,
             std::forward_as_tuple(bundleName), std::forward_as_tuple());
         Ensures(res.second);
@@ -183,6 +187,7 @@ void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modu
                 Ensures(res.second);
 
                 // get group
+                // if solution is found, pipeline and queue must exist
                 const auto& group = sw.getGroup(bundleName, pipelineName, queueName);
 
                 auto& queueData = res.first->second;
@@ -207,11 +212,11 @@ void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modu
                                 shaderName += passName;
                             shaderName = shaderName + "/" + prototype.mName;
 
-                            const auto& [pProgram, rsg] = group.mPrograms.at(shaderName);
-                            HLSLGenerator hlsl(*pProgram);
-
                             passData.mSubpasses.emplace_back();
                             auto& subpassData = passData.mSubpasses.back();
+
+                            const auto& [pProgram, rsg] = group.mPrograms.at(shaderName);
+                            HLSLGenerator hlsl(*pProgram);
 
                             subpassData.mState.mStreamOutput = {};
                             subpassData.mState.mBlendState = getRenderType(subpass.mShaderState.mBlendState);
@@ -242,6 +247,9 @@ void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modu
                                         visit(overload(
                                             [&](EngineSource_) {
                                                 getType(src.mName, dst.mDataType);
+                                            },
+                                            [&](RenderTargetSource_) {
+                                                throw std::runtime_error("constant buffer does not have render target source");
                                             },
                                             [&](MaterialSource_) {
                                                 try_getType(src.mName, dst.mDataType);
@@ -292,6 +300,10 @@ void buildShaderData(const ShaderPrototype& prototype, const ShaderModules& modu
                                                         visit(overload(
                                                             [&](EngineSource_) {
                                                                 getType(attr.mName, d.mDataType);
+                                                            },
+                                                            [&](RenderTargetSource_) {
+                                                                throw std::runtime_error("RenderTargetSource_ not implemented yet");
+                                                                //getType(attr.mName, d.mDataType);
                                                             },
                                                             [&](MaterialSource_) {
                                                                 try_getType(attr.mName, d.mDataType);

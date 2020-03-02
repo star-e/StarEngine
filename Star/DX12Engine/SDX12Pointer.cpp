@@ -81,10 +81,11 @@ void intrusive_ptr_release(DX12MaterialData* p) {
                                 for (const auto& collection : subpass.mCollections) {
                                     if (std::holds_alternative<Persistent_>(collection.mIndex.mPersistency)) {
                                         for (const auto& list : collection.mResourceViewLists) {
+                                            Expects(list.mCapacity);
                                             p->mDescriptorHeap->deallocatePersistent(list.mCpuOffset, list.mCapacity);
                                         }
                                         for (const auto& list : collection.mSamplerLists) {
-                                            p->mDescriptorHeap->deallocatePersistent(list.mCpuOffset, list.mCapacity);
+                                            throw std::runtime_error("sampler descriptor not supported yet");
                                         }
                                     }
                                 } // descriptor collection
@@ -124,10 +125,33 @@ void intrusive_ptr_add_ref(DX12RenderGraphData* p) {
 
 void intrusive_ptr_release(DX12RenderGraphData* p) {
     if (--p->mRefCount == 0) {
+        for (const auto& sl : p->mRenderGraph.mSolutions) {
+            for (const auto& pl : sl.mPipelines) {
+                for (const auto& rp : pl.mPasses) {
+                    for (const auto& g : rp.mGraphicsSubpasses) {
+                        for (const auto& c : g.mDescriptors) {
+                            for (const auto& list : c.mResourceViewLists) {
+                                if (list.mCpuOffset.ptr) {
+                                    Expects(list.mCapacity);
+                                    p->mDescriptorHeap->deallocatePersistent(list.mCpuOffset, list.mCapacity);
+                                }
+                            }
+                            for (const auto& list : c.mSamplerLists) {
+                                if (list.mCpuOffset.ptr) {
+                                    throw std::runtime_error("sampler descriptor not supported yet");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         p->mRenderGraph.mSolutions.clear();
         p->mRenderGraph.mFramebuffers.clear();
         p->mRenderGraph.mRTVs.clear();
         p->mRenderGraph.mDSVs.clear();
+        p->mRenderGraph.mCBV_SRV_UAVs.clear();
         p->mRenderGraph.mNumBackBuffers = 0;
         p->mRenderGraph.mSolutionIndex.clear();
         p->mShaderIndex.clear();

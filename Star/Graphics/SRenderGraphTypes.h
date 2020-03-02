@@ -129,10 +129,11 @@ struct STAR_GRAPHICS_API UnorderedRenderQueue {
 namespace Descriptor {
 
 struct ConstantBuffer_ {} static constexpr ConstantBuffer;
-struct BaseColor_ {} static constexpr BaseColor;
+struct MainTex_ {} static constexpr MainTex;
+struct PointSampler_ {} static constexpr PointSampler;
 struct LinearSampler_ {} static constexpr LinearSampler;
 
-using Type = std::variant<std::monostate, ConstantBuffer_, BaseColor_, LinearSampler_>;
+using Type = std::variant<std::monostate, ConstantBuffer_, MainTex_, PointSampler_, LinearSampler_>;
 
 inline bool operator<(const Type& lhs, const Type& rhs) noexcept {
     return lhs.index() < rhs.index();
@@ -251,14 +252,14 @@ struct STAR_GRAPHICS_API ShaderConstantBuffer {
     std::pmr::vector<ShaderConstant> mConstants;
 };
 
-struct STAR_GRAPHICS_API RasterSubpass {
+struct STAR_GRAPHICS_API GraphicsSubpass {
     using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
     allocator_type get_allocator() const noexcept;
 
-    RasterSubpass(const allocator_type& alloc);
-    RasterSubpass(RasterSubpass&& rhs, const allocator_type& alloc);
-    RasterSubpass(RasterSubpass const& rhs, const allocator_type& alloc);
-    ~RasterSubpass();
+    GraphicsSubpass(const allocator_type& alloc);
+    GraphicsSubpass(GraphicsSubpass&& rhs, const allocator_type& alloc);
+    GraphicsSubpass(GraphicsSubpass const& rhs, const allocator_type& alloc);
+    ~GraphicsSubpass();
 
     DISP_SAMPLE_DESC mSampleDesc;
     std::pmr::vector<Attachment> mInputAttachments;
@@ -266,8 +267,6 @@ struct STAR_GRAPHICS_API RasterSubpass {
     std::pmr::vector<Attachment> mResolveAttachments;
     std::optional<Attachment> mDepthStencilAttachment;
     std::pmr::vector<Attachment> mPreserveAttachments;
-    std::pmr::vector<Attachment> mSRVs;
-    std::pmr::vector<Attachment> mUAVs;
     std::pmr::vector<RenderViewTransition> mPostViewTransitions;
     std::pmr::vector<UnorderedRenderQueue> mOrderedRenderQueue;
     std::pmr::string mRootSignature;
@@ -275,7 +274,7 @@ struct STAR_GRAPHICS_API RasterSubpass {
     std::pmr::vector<ShaderDescriptorCollection> mDescriptors;
 };
 
-struct RasterSubpassDependency {
+struct GraphicsSubpassDependency {
     uint32_t mSrcSubpass = 0;
     uint32_t mDstSubpass = 0;
 };
@@ -316,9 +315,9 @@ struct STAR_GRAPHICS_API RenderPass {
     std::pmr::vector<VIEWPORT> mViewports;
     std::pmr::vector<RECT> mScissorRects;
     std::pmr::vector<FramebufferHandle> mFramebuffers;
-    std::pmr::vector<RasterSubpass> mRasterSubpasses;
-    std::pmr::vector<RasterSubpassDependency> mDependencies;
     std::pmr::vector<ComputeSubpass> mComputeSubpasses;
+    std::pmr::vector<GraphicsSubpass> mGraphicsSubpasses;
+    std::pmr::vector<GraphicsSubpassDependency> mDependencies;
     std::pmr::vector<RaytracingSubpass> mRaytracingSubpasses;
 };
 
@@ -372,8 +371,15 @@ struct STAR_GRAPHICS_API RenderSolution {
     std::pmr::vector<Framebuffer> mFramebuffers;
     std::pmr::vector<FramebufferHandle> mRTVSources;
     std::pmr::vector<FramebufferHandle> mDSVSources;
+    std::pmr::vector<FramebufferHandle> mCBVSources;
+    std::pmr::vector<FramebufferHandle> mSRVSources;
+    std::pmr::vector<FramebufferHandle> mUAVSources;
     std::pmr::vector<RENDER_TARGET_VIEW_DESC> mRTVs;
     std::pmr::vector<DEPTH_STENCIL_VIEW_DESC> mDSVs;
+    std::pmr::vector<CONSTANT_BUFFER_VIEW_DESC> mCBVs;
+    std::pmr::vector<SHADER_RESOURCE_VIEW_DESC> mSRVs;
+    std::pmr::vector<UNORDERED_ACCESS_VIEW_DESC> mUAVs;
+    PmrFlatMap<uint32_t, uint32_t> mAttributeIndex;
     PmrMap<std::pmr::string, uint32_t> mPipelineIndex;
 };
 
@@ -397,8 +403,7 @@ struct STAR_GRAPHICS_API RenderSwapChain {
     std::pmr::vector<RenderSolution> mSolutions;
     uint32_t mNumBackBuffers = 3;
     uint32_t mNumReserveFramebuffers = 0;
-    uint32_t mNumReserveSRVs = 0;
-    uint32_t mNumReserveUAVs = 0;
+    uint32_t mNumReserveCBV_SRV_UAVs = 0;
     uint32_t mNumReserveDSVs = 0;
     uint32_t mNumReserveRTVs = 0;
     PmrMap<std::pmr::string, uint32_t> mSolutionIndex;

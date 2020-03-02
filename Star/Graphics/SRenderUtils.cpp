@@ -19,7 +19,7 @@
 
 namespace Star::Graphics::Render {
 
-uint32_t getSize(const AttributeType& type) {
+uint32_t getSize(const AttributeType& type) noexcept {
     return visit(overload(
         [](matrix_) -> uint32_t { return 64; },
 
@@ -44,6 +44,29 @@ uint32_t getSize(const AttributeType& type) {
             return 0;
         }
     ), type);
+}
+
+namespace {
+
+struct IsConstant {
+#define MATH_TYPE_ELEM(r, _, i, NAME) bool operator()(const NAME& v) const noexcept { return true; }
+#define MATH_TYPES(...) BOOST_PP_SEQ_FOR_EACH_I(MATH_TYPE_ELEM, _, BOOST_PP_TUPLE_TO_SEQ((__VA_ARGS__)))
+
+    MATH_TYPES(matrix_, double4_, double3_, double2_, double1_, float4_, float3_, float2_, float1_, half4_, half3_, half2_, half1_, uint4_, uint3_, uint2_, uint1_, int4_, int3_, int2_, int1_, fixed4_, fixed3_, fixed2_, fixed1_)
+
+    template<class T>
+    bool operator()(const T&) const noexcept {
+        return false;
+    }
+
+#undef MATH_TYPE_ELEM
+#undef MATH_TYPES
+};
+
+}
+
+bool isConstant(const AttributeType& type) noexcept {
+    return visit(IsConstant{}, type);
 }
 
 }

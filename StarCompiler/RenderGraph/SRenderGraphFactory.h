@@ -36,6 +36,9 @@ public:
     using dsv_key = std::tuple<std::string/*graphName*/, size_t/*nodeID*/,
         std::string, ResourceDataView, bool/*readOnly*/>;
 
+    using cbv_srv_uav_key = std::tuple<std::string/*graphName*/, size_t/*nodeID*/,
+        ShaderDescriptorType, std::string, ResourceDataView, PixelModel>;
+
     RenderSolutionFactory(std::string name)
         : mName(std::move(name))
     {}
@@ -85,6 +88,12 @@ private:
         const OrderedNameMap<RenderTargetResource>& rts,
         OrderedIdentityMap<GraphicsRenderNodeGraph::dsv_type>& dsvs,
         std::map<dsv_key, size_t>& index
+    ) const;
+
+    void collectCBV_SRV_UAVsMinimal(const OrderedNameMap<RenderTargetResource>& bbs,
+        const OrderedNameMap<RenderTargetResource>& rts,
+        OrderedIdentityMap<GraphicsRenderNodeGraph::cbv_srv_uav_type>& views,
+        std::map<cbv_srv_uav_key, size_t>& index
     ) const;
 public:
     std::string mName;

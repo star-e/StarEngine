@@ -169,8 +169,10 @@ void ShaderGraph::validateNodes(bool bGraphCheck) const {
             if (edges.first == edges.second) {
                 // no input
                 if (isSemanticBlank(input)) {
-                    if (bGraphCheck)
-                        throw std::invalid_argument("node[" + node.mName + "], input[" + input.mName + "] has no source, and no input semantic");
+                    if (!std::holds_alternative<std::monostate>(input.mValue)) {
+                        if (bGraphCheck)
+                            throw std::invalid_argument("node[" + node.mName + "], input[" + input.mName + "] has no source, and no input semantic");
+                    }
                 } else {
                     validateShaderValueSemantics(input, mNodeStages[nodeID], true);
                 }
@@ -198,7 +200,9 @@ void ShaderGraph::validateNodes(bool bGraphCheck) const {
                     continue;
 
                 if (isSemanticBlank(input)) {
-                    throw std::runtime_error("input semantic should be set already");
+                    if (!std::holds_alternative<std::monostate>(input.mValue)) {
+                        throw std::runtime_error("input semantic should be set already");
+                    }
                 } else {
                     validateShaderValueSemantics(input, mNodeStages[nodeID], true);
                 }
@@ -215,15 +219,21 @@ void ShaderGraph::validateNodes(bool bGraphCheck) const {
 
             if (edges.first == edges.second) {
                 // no target, is final output
-                if (bGraphCheck) {
-                    validateShaderValueStageOutput(stagesAll, mNodeStages[nodeID]);
-                }
-                if (isSemanticBlank(output)) {
-                    if (bGraphCheck)
-                        std::cout << "[warning]" << "node[" + node.mName + "], output[" + output.mName + "] is unused" << std::endl;
+                if (std::holds_alternative<std::monostate>(output.mValue)) {
+                    // is global state output, do nothing
                 } else {
-                    if (bGraphCheck)
-                        validateShaderValueSemantics(output, mNodeStages[nodeID], false);
+                    if (bGraphCheck) {
+                        validateShaderValueStageOutput(stagesAll, mNodeStages[nodeID]);
+                    }
+                    if (isSemanticBlank(output)) {
+                        if (!std::holds_alternative<std::monostate>(output.mValue)) {
+                            if (bGraphCheck)
+                                std::cout << "[warning]" << "node[" + node.mName + "], output[" + output.mName + "] is unused" << std::endl;
+                        }
+                    } else {
+                        if (bGraphCheck)
+                            validateShaderValueSemantics(output, mNodeStages[nodeID], false);
+                    }
                 }
             } else {
                 // has target
@@ -240,7 +250,9 @@ void ShaderGraph::validateNodes(bool bGraphCheck) const {
                         continue;
 
                     if (isSemanticBlank(output)) {
-                        throw std::invalid_argument("output semantic should be specified");
+                        if (!std::holds_alternative<std::monostate>(output.mValue)) {
+                            throw std::invalid_argument("output semantic should be specified");
+                        }
                     } else {
                         if (bGraphCheck)
                             validateShaderValueSemantics(output, mNodeStages[nodeID], false);
@@ -641,11 +653,13 @@ bool ShaderGraph::try_addValueEdge(size_t srcNodeID, const ShaderValue& output,
         if (isSemanticBlank(output)) {
             auto iter = mNodeGraph[dstNodeID].mInputs.find(inputName);
             if (iter == mNodeGraph[dstNodeID].mInputs.end()) {
-                throw std::invalid_argument("shader stage output:" + output.mName + " has blank semantic");
+                throw std::invalid_argument("shader stage output:" + output.mName + " has blank semantic and is not input of dst node");
             }
             const auto& input = *iter;
             if (isSemanticBlank(input)) {
-                throw std::invalid_argument("shader stage output:" + output.mName + " has blank semantic");
+                if (!std::holds_alternative<std::monostate>(input.mValue)) {
+                    throw std::invalid_argument("shader stage output:" + output.mName + " has blank semantic");
+                }
             } else {
                 auto iter = mNodeGraph[srcNodeID].mOutputs.find(inputName);
                 if (iter == mNodeGraph[srcNodeID].mOutputs.end()) {
@@ -808,6 +822,8 @@ IdentityMap<ShaderSemanticValue> ShaderGraph::getShaderInputs() const {
     IdentityMap<ShaderSemanticValue> results;
     auto inputs = getNodeInputsWithoutSource();
     for (const auto& input : inputs) {
+        if (isGlobalState(input.second))
+            continue;
         if ((mNodeGraph[input.first].mBuilderFlags & System) &&
             std::holds_alternative<SV_Position_>(input.second.mSemantic))
         {
@@ -821,6 +837,9 @@ IdentityMap<ShaderSemanticValue> ShaderGraph::getShaderInputs() const {
 IdentityMap<ShaderSemanticValue> ShaderGraph::getShaderOutputs() const {
     IdentityMap<ShaderSemanticValue> results;
     for (const auto& output : mNodeGraph[0].mOutputs) {
+        if (isGlobalState(output)) {
+            continue;
+        }
         results.emplace(ShaderSemanticValue{ output.mSemantic, output.mValue, output.mName });
     }
     return results;

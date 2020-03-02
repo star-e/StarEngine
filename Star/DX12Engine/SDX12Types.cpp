@@ -231,16 +231,16 @@ DX12ShaderData::DX12ShaderData(DX12ShaderData&& rhs, const allocator_type& alloc
 
 DX12ShaderData::~DX12ShaderData() = default;
 
-DX12MaterialDescriptorList::allocator_type DX12MaterialDescriptorList::get_allocator() const noexcept {
+DX12ShaderDescriptorList::allocator_type DX12ShaderDescriptorList::get_allocator() const noexcept {
     return allocator_type(mRanges.get_allocator().resource());
 }
 
-DX12MaterialDescriptorList::DX12MaterialDescriptorList(const allocator_type& alloc)
+DX12ShaderDescriptorList::DX12ShaderDescriptorList(const allocator_type& alloc)
     : mRanges(alloc)
     , mUnboundedDescriptors(alloc)
 {}
 
-DX12MaterialDescriptorList::DX12MaterialDescriptorList(DX12MaterialDescriptorList const& rhs, const allocator_type& alloc)
+DX12ShaderDescriptorList::DX12ShaderDescriptorList(DX12ShaderDescriptorList const& rhs, const allocator_type& alloc)
     : mSlot(rhs.mSlot)
     , mCapacity(rhs.mCapacity)
     , mGpuOffset(rhs.mGpuOffset)
@@ -249,7 +249,7 @@ DX12MaterialDescriptorList::DX12MaterialDescriptorList(DX12MaterialDescriptorLis
     , mUnboundedDescriptors(rhs.mUnboundedDescriptors, alloc)
 {}
 
-DX12MaterialDescriptorList::DX12MaterialDescriptorList(DX12MaterialDescriptorList&& rhs, const allocator_type& alloc)
+DX12ShaderDescriptorList::DX12ShaderDescriptorList(DX12ShaderDescriptorList&& rhs, const allocator_type& alloc)
     : mSlot(std::move(rhs.mSlot))
     , mCapacity(std::move(rhs.mCapacity))
     , mGpuOffset(std::move(rhs.mGpuOffset))
@@ -258,30 +258,30 @@ DX12MaterialDescriptorList::DX12MaterialDescriptorList(DX12MaterialDescriptorLis
     , mUnboundedDescriptors(std::move(rhs.mUnboundedDescriptors), alloc)
 {}
 
-DX12MaterialDescriptorList::~DX12MaterialDescriptorList() = default;
+DX12ShaderDescriptorList::~DX12ShaderDescriptorList() = default;
 
-DX12MaterialDescriptorCollection::allocator_type DX12MaterialDescriptorCollection::get_allocator() const noexcept {
+DX12ShaderDescriptorCollection::allocator_type DX12ShaderDescriptorCollection::get_allocator() const noexcept {
     return allocator_type(mResourceViewLists.get_allocator().resource());
 }
 
-DX12MaterialDescriptorCollection::DX12MaterialDescriptorCollection(const allocator_type& alloc)
+DX12ShaderDescriptorCollection::DX12ShaderDescriptorCollection(const allocator_type& alloc)
     : mResourceViewLists(alloc)
     , mSamplerLists(alloc)
 {}
 
-DX12MaterialDescriptorCollection::DX12MaterialDescriptorCollection(DX12MaterialDescriptorCollection const& rhs, const allocator_type& alloc)
+DX12ShaderDescriptorCollection::DX12ShaderDescriptorCollection(DX12ShaderDescriptorCollection const& rhs, const allocator_type& alloc)
     : mIndex(rhs.mIndex)
     , mResourceViewLists(rhs.mResourceViewLists, alloc)
     , mSamplerLists(rhs.mSamplerLists, alloc)
 {}
 
-DX12MaterialDescriptorCollection::DX12MaterialDescriptorCollection(DX12MaterialDescriptorCollection&& rhs, const allocator_type& alloc)
+DX12ShaderDescriptorCollection::DX12ShaderDescriptorCollection(DX12ShaderDescriptorCollection&& rhs, const allocator_type& alloc)
     : mIndex(std::move(rhs.mIndex))
     , mResourceViewLists(std::move(rhs.mResourceViewLists), alloc)
     , mSamplerLists(std::move(rhs.mSamplerLists), alloc)
 {}
 
-DX12MaterialDescriptorCollection::~DX12MaterialDescriptorCollection() = default;
+DX12ShaderDescriptorCollection::~DX12ShaderDescriptorCollection() = default;
 
 DX12MaterialSubpassData::allocator_type DX12MaterialSubpassData::get_allocator() const noexcept {
     return allocator_type(mCollections.get_allocator().resource());
@@ -562,32 +562,28 @@ DX12UnorderedRenderQueue::DX12UnorderedRenderQueue(DX12UnorderedRenderQueue&& rh
 
 DX12UnorderedRenderQueue::~DX12UnorderedRenderQueue() = default;
 
-DX12RasterSubpass::allocator_type DX12RasterSubpass::get_allocator() const noexcept {
+DX12GraphicsSubpass::allocator_type DX12GraphicsSubpass::get_allocator() const noexcept {
     return allocator_type(mInputAttachments.get_allocator().resource());
 }
 
-DX12RasterSubpass::DX12RasterSubpass(const allocator_type& alloc)
+DX12GraphicsSubpass::DX12GraphicsSubpass(const allocator_type& alloc)
     : mInputAttachments(alloc)
     , mOutputAttachments(alloc)
     , mResolveAttachments(alloc)
     , mPreserveAttachments(alloc)
-    , mSRVs(alloc)
-    , mUAVs(alloc)
     , mPostViewTransitions(alloc)
     , mOrderedRenderQueue(alloc)
     , mConstantBuffers(alloc)
     , mDescriptors(alloc)
 {}
 
-DX12RasterSubpass::DX12RasterSubpass(DX12RasterSubpass const& rhs, const allocator_type& alloc)
+DX12GraphicsSubpass::DX12GraphicsSubpass(DX12GraphicsSubpass const& rhs, const allocator_type& alloc)
     : mSampleDesc(rhs.mSampleDesc)
     , mInputAttachments(rhs.mInputAttachments, alloc)
     , mOutputAttachments(rhs.mOutputAttachments, alloc)
     , mResolveAttachments(rhs.mResolveAttachments, alloc)
     , mDepthStencilAttachment(rhs.mDepthStencilAttachment)
     , mPreserveAttachments(rhs.mPreserveAttachments, alloc)
-    , mSRVs(rhs.mSRVs, alloc)
-    , mUAVs(rhs.mUAVs, alloc)
     , mPostViewTransitions(rhs.mPostViewTransitions, alloc)
     , mOrderedRenderQueue(rhs.mOrderedRenderQueue, alloc)
     , mRootSignature(rhs.mRootSignature)
@@ -595,15 +591,13 @@ DX12RasterSubpass::DX12RasterSubpass(DX12RasterSubpass const& rhs, const allocat
     , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
-DX12RasterSubpass::DX12RasterSubpass(DX12RasterSubpass&& rhs, const allocator_type& alloc)
+DX12GraphicsSubpass::DX12GraphicsSubpass(DX12GraphicsSubpass&& rhs, const allocator_type& alloc)
     : mSampleDesc(std::move(rhs.mSampleDesc))
     , mInputAttachments(std::move(rhs.mInputAttachments), alloc)
     , mOutputAttachments(std::move(rhs.mOutputAttachments), alloc)
     , mResolveAttachments(std::move(rhs.mResolveAttachments), alloc)
     , mDepthStencilAttachment(std::move(rhs.mDepthStencilAttachment))
     , mPreserveAttachments(std::move(rhs.mPreserveAttachments), alloc)
-    , mSRVs(std::move(rhs.mSRVs), alloc)
-    , mUAVs(std::move(rhs.mUAVs), alloc)
     , mPostViewTransitions(std::move(rhs.mPostViewTransitions), alloc)
     , mOrderedRenderQueue(std::move(rhs.mOrderedRenderQueue), alloc)
     , mRootSignature(std::move(rhs.mRootSignature))
@@ -611,14 +605,14 @@ DX12RasterSubpass::DX12RasterSubpass(DX12RasterSubpass&& rhs, const allocator_ty
     , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
-DX12RasterSubpass::~DX12RasterSubpass() = default;
+DX12GraphicsSubpass::~DX12GraphicsSubpass() = default;
 
 DX12RenderPass::allocator_type DX12RenderPass::get_allocator() const noexcept {
-    return allocator_type(mRasterSubpasses.get_allocator().resource());
+    return allocator_type(mGraphicsSubpasses.get_allocator().resource());
 }
 
 DX12RenderPass::DX12RenderPass(const allocator_type& alloc)
-    : mRasterSubpasses(alloc)
+    : mGraphicsSubpasses(alloc)
     , mViewports(alloc)
     , mScissorRects(alloc)
     , mFramebuffers(alloc)
@@ -626,7 +620,7 @@ DX12RenderPass::DX12RenderPass(const allocator_type& alloc)
 {}
 
 DX12RenderPass::DX12RenderPass(DX12RenderPass const& rhs, const allocator_type& alloc)
-    : mRasterSubpasses(rhs.mRasterSubpasses, alloc)
+    : mGraphicsSubpasses(rhs.mGraphicsSubpasses, alloc)
     , mViewports(rhs.mViewports, alloc)
     , mScissorRects(rhs.mScissorRects, alloc)
     , mFramebuffers(rhs.mFramebuffers, alloc)
@@ -634,7 +628,7 @@ DX12RenderPass::DX12RenderPass(DX12RenderPass const& rhs, const allocator_type& 
 {}
 
 DX12RenderPass::DX12RenderPass(DX12RenderPass&& rhs, const allocator_type& alloc)
-    : mRasterSubpasses(std::move(rhs.mRasterSubpasses), alloc)
+    : mGraphicsSubpasses(std::move(rhs.mGraphicsSubpasses), alloc)
     , mViewports(std::move(rhs.mViewports), alloc)
     , mScissorRects(std::move(rhs.mScissorRects), alloc)
     , mFramebuffers(std::move(rhs.mFramebuffers), alloc)
@@ -681,9 +675,16 @@ DX12RenderSolution::DX12RenderSolution(const allocator_type& alloc)
     : mPipelines(alloc)
     , mRTVSources(alloc)
     , mDSVSources(alloc)
+    , mCBVSources(alloc)
+    , mSRVSources(alloc)
+    , mUAVSources(alloc)
     , mFramebuffers(alloc)
     , mRTVs(alloc)
     , mDSVs(alloc)
+    , mCBVs(alloc)
+    , mSRVs(alloc)
+    , mUAVs(alloc)
+    , mAttributeIndex(alloc)
     , mPipelineIndex(alloc)
 {}
 
@@ -691,9 +692,16 @@ DX12RenderSolution::DX12RenderSolution(DX12RenderSolution const& rhs, const allo
     : mPipelines(rhs.mPipelines, alloc)
     , mRTVSources(rhs.mRTVSources, alloc)
     , mDSVSources(rhs.mDSVSources, alloc)
+    , mCBVSources(rhs.mCBVSources, alloc)
+    , mSRVSources(rhs.mSRVSources, alloc)
+    , mUAVSources(rhs.mUAVSources, alloc)
     , mFramebuffers(rhs.mFramebuffers, alloc)
     , mRTVs(rhs.mRTVs, alloc)
     , mDSVs(rhs.mDSVs, alloc)
+    , mCBVs(rhs.mCBVs, alloc)
+    , mSRVs(rhs.mSRVs, alloc)
+    , mUAVs(rhs.mUAVs, alloc)
+    , mAttributeIndex(rhs.mAttributeIndex, alloc)
     , mPipelineIndex(rhs.mPipelineIndex, alloc)
 {}
 
@@ -701,9 +709,16 @@ DX12RenderSolution::DX12RenderSolution(DX12RenderSolution&& rhs, const allocator
     : mPipelines(std::move(rhs.mPipelines), alloc)
     , mRTVSources(std::move(rhs.mRTVSources), alloc)
     , mDSVSources(std::move(rhs.mDSVSources), alloc)
+    , mCBVSources(std::move(rhs.mCBVSources), alloc)
+    , mSRVSources(std::move(rhs.mSRVSources), alloc)
+    , mUAVSources(std::move(rhs.mUAVSources), alloc)
     , mFramebuffers(std::move(rhs.mFramebuffers), alloc)
     , mRTVs(std::move(rhs.mRTVs), alloc)
     , mDSVs(std::move(rhs.mDSVs), alloc)
+    , mCBVs(std::move(rhs.mCBVs), alloc)
+    , mSRVs(std::move(rhs.mSRVs), alloc)
+    , mUAVs(std::move(rhs.mUAVs), alloc)
+    , mAttributeIndex(std::move(rhs.mAttributeIndex), alloc)
     , mPipelineIndex(std::move(rhs.mPipelineIndex), alloc)
 {}
 
@@ -724,6 +739,7 @@ DX12RenderWorks::DX12RenderWorks(DX12RenderWorks const& rhs, const allocator_typ
     , mFramebuffers(rhs.mFramebuffers, alloc)
     , mRTVs(rhs.mRTVs)
     , mDSVs(rhs.mDSVs)
+    , mCBV_SRV_UAVs(rhs.mCBV_SRV_UAVs)
     , mNumBackBuffers(rhs.mNumBackBuffers)
     , mSolutionIndex(rhs.mSolutionIndex, alloc)
 {}
@@ -733,6 +749,7 @@ DX12RenderWorks::DX12RenderWorks(DX12RenderWorks&& rhs, const allocator_type& al
     , mFramebuffers(std::move(rhs.mFramebuffers), alloc)
     , mRTVs(std::move(rhs.mRTVs))
     , mDSVs(std::move(rhs.mDSVs))
+    , mCBV_SRV_UAVs(std::move(rhs.mCBV_SRV_UAVs))
     , mNumBackBuffers(std::move(rhs.mNumBackBuffers))
     , mSolutionIndex(std::move(rhs.mSolutionIndex), alloc)
 {}
@@ -756,6 +773,7 @@ DX12RenderGraphData::DX12RenderGraphData(MetaID metaID, const allocator_type& al
 
 DX12RenderGraphData::DX12RenderGraphData(DX12RenderGraphData const& rhs, const allocator_type& alloc)
     : mMetaID(rhs.mMetaID)
+    , mDescriptorHeap(rhs.mDescriptorHeap)
     , mRenderGraph(rhs.mRenderGraph, alloc)
     , mShaderIndex(rhs.mShaderIndex, alloc)
     , mRenderGraphData(rhs.mRenderGraphData)
@@ -764,6 +782,7 @@ DX12RenderGraphData::DX12RenderGraphData(DX12RenderGraphData const& rhs, const a
 
 DX12RenderGraphData::DX12RenderGraphData(DX12RenderGraphData&& rhs, const allocator_type& alloc)
     : mMetaID(std::move(rhs.mMetaID))
+    , mDescriptorHeap(std::move(rhs.mDescriptorHeap))
     , mRenderGraph(std::move(rhs.mRenderGraph), alloc)
     , mShaderIndex(std::move(rhs.mShaderIndex), alloc)
     , mRenderGraphData(std::move(rhs.mRenderGraphData))

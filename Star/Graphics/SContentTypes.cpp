@@ -406,34 +406,6 @@ MaterialData::MaterialData(MaterialData&& rhs, const allocator_type& alloc)
 
 MaterialData::~MaterialData() = default;
 
-DrawCallData::allocator_type DrawCallData::get_allocator() const noexcept {
-    return allocator_type(mConstantMap.get_allocator().resource());
-}
-
-DrawCallData::DrawCallData(const allocator_type& alloc)
-    : mConstantMap(alloc)
-{}
-
-DrawCallData::DrawCallData(DrawCallData const& rhs, const allocator_type& alloc)
-    : mType(rhs.mType)
-    , mMesh(rhs.mMesh)
-    , mMaterial(rhs.mMaterial)
-    , mInstanceSize(rhs.mInstanceSize)
-    , mInstanceCount(rhs.mInstanceCount)
-    , mConstantMap(rhs.mConstantMap, alloc)
-{}
-
-DrawCallData::DrawCallData(DrawCallData&& rhs, const allocator_type& alloc)
-    : mType(std::move(rhs.mType))
-    , mMesh(std::move(rhs.mMesh))
-    , mMaterial(std::move(rhs.mMaterial))
-    , mInstanceSize(std::move(rhs.mInstanceSize))
-    , mInstanceCount(std::move(rhs.mInstanceCount))
-    , mConstantMap(std::move(rhs.mConstantMap), alloc)
-{}
-
-DrawCallData::~DrawCallData() = default;
-
 MeshRenderer::allocator_type MeshRenderer::get_allocator() const noexcept {
     return allocator_type(mMaterialIDs.get_allocator().resource());
 }

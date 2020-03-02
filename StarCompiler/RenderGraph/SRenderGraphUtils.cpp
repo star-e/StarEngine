@@ -80,7 +80,7 @@ std::string getRenderTargetStateName(const RenderTargetState& v) {
                     str += "<NonPixel>";
 
                 if (!v.mPixelShaderResource && !v.mNonPixelShaderResource) {
-                    throw std::runtime_error("shader resource must be pixel or non-pixel");
+                    throw std::runtime_error("shader resource must be pixel, non-pixel or both, possible reason: user has not provided any shader");
                 }
                 return str;
             },
@@ -991,6 +991,7 @@ RENDER_TARGET_VIEW_DESC buildRenderTargetViewDesc(
 
     return desc;
 }
+
 DEPTH_STENCIL_VIEW_DESC buildDepthStencilViewDesc(
     const Resource& resource,
     const ResourceDataView& view,
@@ -1074,6 +1075,157 @@ DEPTH_STENCIL_VIEW_DESC buildDepthStencilViewDesc(
                 },
                 [&](const Resource3D&) {
                     throw std::runtime_error("texture3d not supported");
+                }
+            ), resource.mDimension);
+        },
+        [&](const RaytracingView& ray) {
+            throw std::runtime_error("ray tracing not supported in rtv");
+        }
+    ), view);
+
+    return desc;
+}
+
+SHADER_RESOURCE_VIEW_DESC buildShaderResourceViewDesc(
+    const Resource& resource,
+    const ResourceDataView& view,
+    const PixelModel& viewModel
+) {
+    SHADER_RESOURCE_VIEW_DESC desc{};
+    auto format = makeTypeless(resource.mFormat);
+    auto pixel = getPixelFormat(resource.mFormat);
+
+    visit(overload(
+        [&](SNorm_) {
+            desc.mFormat = makeTypelessSNorm(format);
+        },
+        [&](UNorm_) {
+            desc.mFormat = makeTypelessUNorm(format);
+        },
+        [&](SRGB_) {
+            desc.mFormat = makeTypelessSRGB(format);
+        },
+        [&](UFloat_) {
+            desc.mFormat = makeTypelessUFloat(format);
+        },
+        [&](SFloat_) {
+            desc.mFormat = makeTypelessSFloat(format);
+        },
+        [&](UInt_) {
+            desc.mFormat = makeTypelessUInt(format);
+        },
+        [](auto) {}
+    ), pixel.mModel);
+
+    visit(overload(
+        [&](const BufferView& buffer) {
+            desc.mViewDimension = SRV_DIMENSION_BUFFER;
+            desc.mBuffer = BUFFER_SRV{ buffer.mFirstElement, buffer.mNumElements };
+        },
+        [&](const TextureView& tex) {
+            // mip slice
+            uint32_t mostDetailedMip = 0;
+            uint32_t mipLevels = 0;
+            float resourceMinLODClamp = 0.0f;
+
+            visit(overload(
+                [&](std::monostate) {
+                },
+                [&](const MipChainView& m) {
+                    mostDetailedMip = m.mMostDetailedMip;
+                    resourceMinLODClamp = m.mResourceMinLODClamp;
+                },
+                [&](const MipRangeView& m) {
+                    mostDetailedMip = m.mMostDetailedMip;
+                    mipLevels = m.mMipLevels;
+                    resourceMinLODClamp = m.mResourceMinLODClamp;
+                }
+            ), tex.mMipView);
+
+            desc.mShader4ComponentMapping = 0x1688; // D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING
+
+            visit(overload(
+                [&](const ResourceBuffer& buffer) {
+                    throw std::runtime_error("resource is buffer");
+                },
+                [&](const Resource1D&) {
+                    visit(overload(
+                        [&](std::monostate a) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURE1D;
+                            desc.mTexture1D = TEX1D_SRV{ mostDetailedMip, mipLevels, resourceMinLODClamp };
+                        },
+                        [&](const ArrayRange& a) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURE1DARRAY;
+                            desc.mTexture1DArray = TEX1D_ARRAY_SRV{
+                                mostDetailedMip, mipLevels, a.mFirstArraySlice, a.mArraySize, resourceMinLODClamp
+                            };
+                        },
+                        [&](auto) {
+                            throw std::runtime_error("depth range, cube slice, cube range not supported");
+                        }
+                    ), tex.mArrayOrDepthView);
+                },
+                [&](const Resource2D&) {
+                    uint32_t plane = 0;
+                    visit(overload(
+                        [&](std::monostate) {},
+                        [&](const PlaneSlice& p) {
+                            plane = p.mPlaneSlice;
+                        }
+                    ), tex.mPlaneView);
+
+                    visit(overload(
+                        [&](std::monostate a, std::monostate) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURE2D;
+                            desc.mTexture2D = TEX2D_SRV{
+                                mostDetailedMip, mipLevels, plane, resourceMinLODClamp
+                            };
+                        },
+                        [&](const ArrayRange& a, std::monostate) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURE2DARRAY;
+                            desc.mTexture2DArray = TEX2D_ARRAY_SRV{
+                                mostDetailedMip, mipLevels, a.mFirstArraySlice, a.mArraySize, plane, resourceMinLODClamp
+                            };
+                        },
+                        [&](std::monostate a, const Multisampling&) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURE2DMS;
+                            desc.mTexture2DMS = TEX2DMS_SRV{};
+                        },
+                        [&](const ArrayRange& a, const Multisampling&) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURE2DMSARRAY;
+                            desc.mTexture2DMSArray = TEX2DMS_ARRAY_SRV{
+                                a.mFirstArraySlice, a.mArraySize
+                            };
+                        },
+                        [&](const CubeSlice& a, std::monostate) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURECUBE;
+                            desc.mTextureCube = TEXCUBE_SRV{
+                                mostDetailedMip, mipLevels, resourceMinLODClamp
+                            };
+                        },
+                        [&](const CubeRange& a, std::monostate) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURECUBEARRAY;
+                            desc.mTextureCubeArray = TEXCUBE_ARRAY_SRV{
+                                mostDetailedMip, mipLevels, a.mFirst2DArrayFace, a.mNumCubes, resourceMinLODClamp
+                            };
+                        },
+                        [&](const auto&, const auto&) {
+                            throw std::runtime_error("depth range, cube slice, cube range not supported");
+                        }
+                    ), tex.mArrayOrDepthView, resource.mSampling);
+                },
+                [&](const Resource3D&) {
+                    visit(overload(
+                        [&](const DepthRange& a) {
+                            desc.mViewDimension = SRV_DIMENSION_TEXTURE3D;
+                            desc.mTexture3D = TEX3D_SRV{
+                                mostDetailedMip, mipLevels, resourceMinLODClamp
+                            };
+                        },
+                        [&](auto) {
+                            throw std::runtime_error("only depth range supported");
+                        }
+                    ), tex.mArrayOrDepthView);
                 }
             ), resource.mDimension);
         },

@@ -57,13 +57,13 @@ public:
 
     // materials
     bool try_createMaterial(std::string_view material, std::string_view shaderName);
-    void materialAddTexture(std::string_view material, std::string_view texture);
 
     // content
     std::pair<std::pair<const MetaID, Graphics::Render::ContentData>&, bool>
         try_createContent(std::string_view content);
     void clearContent(std::string_view content);
     Graphics::Render::FlattenedObjects& contentInstantiateFlattenedObjects(std::string_view content, std::string_view fbx);
+    void contentAddFullscreenTriangle(std::string_view content, std::string_view material);
     void saveContent(std::string_view content);
 
     // render graph

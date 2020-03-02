@@ -175,17 +175,15 @@ ShaderConstantBuffer::ShaderConstantBuffer(ShaderConstantBuffer&& rhs, const all
 
 ShaderConstantBuffer::~ShaderConstantBuffer() = default;
 
-RasterSubpass::allocator_type RasterSubpass::get_allocator() const noexcept {
+GraphicsSubpass::allocator_type GraphicsSubpass::get_allocator() const noexcept {
     return allocator_type(mInputAttachments.get_allocator().resource());
 }
 
-RasterSubpass::RasterSubpass(const allocator_type& alloc)
+GraphicsSubpass::GraphicsSubpass(const allocator_type& alloc)
     : mInputAttachments(alloc)
     , mOutputAttachments(alloc)
     , mResolveAttachments(alloc)
     , mPreserveAttachments(alloc)
-    , mSRVs(alloc)
-    , mUAVs(alloc)
     , mPostViewTransitions(alloc)
     , mOrderedRenderQueue(alloc)
     , mRootSignature(alloc)
@@ -193,15 +191,13 @@ RasterSubpass::RasterSubpass(const allocator_type& alloc)
     , mDescriptors(alloc)
 {}
 
-RasterSubpass::RasterSubpass(RasterSubpass const& rhs, const allocator_type& alloc)
+GraphicsSubpass::GraphicsSubpass(GraphicsSubpass const& rhs, const allocator_type& alloc)
     : mSampleDesc(rhs.mSampleDesc)
     , mInputAttachments(rhs.mInputAttachments, alloc)
     , mOutputAttachments(rhs.mOutputAttachments, alloc)
     , mResolveAttachments(rhs.mResolveAttachments, alloc)
     , mDepthStencilAttachment(rhs.mDepthStencilAttachment)
     , mPreserveAttachments(rhs.mPreserveAttachments, alloc)
-    , mSRVs(rhs.mSRVs, alloc)
-    , mUAVs(rhs.mUAVs, alloc)
     , mPostViewTransitions(rhs.mPostViewTransitions, alloc)
     , mOrderedRenderQueue(rhs.mOrderedRenderQueue, alloc)
     , mRootSignature(rhs.mRootSignature, alloc)
@@ -209,15 +205,13 @@ RasterSubpass::RasterSubpass(RasterSubpass const& rhs, const allocator_type& all
     , mDescriptors(rhs.mDescriptors, alloc)
 {}
 
-RasterSubpass::RasterSubpass(RasterSubpass&& rhs, const allocator_type& alloc)
+GraphicsSubpass::GraphicsSubpass(GraphicsSubpass&& rhs, const allocator_type& alloc)
     : mSampleDesc(std::move(rhs.mSampleDesc))
     , mInputAttachments(std::move(rhs.mInputAttachments), alloc)
     , mOutputAttachments(std::move(rhs.mOutputAttachments), alloc)
     , mResolveAttachments(std::move(rhs.mResolveAttachments), alloc)
     , mDepthStencilAttachment(std::move(rhs.mDepthStencilAttachment))
     , mPreserveAttachments(std::move(rhs.mPreserveAttachments), alloc)
-    , mSRVs(std::move(rhs.mSRVs), alloc)
-    , mUAVs(std::move(rhs.mUAVs), alloc)
     , mPostViewTransitions(std::move(rhs.mPostViewTransitions), alloc)
     , mOrderedRenderQueue(std::move(rhs.mOrderedRenderQueue), alloc)
     , mRootSignature(std::move(rhs.mRootSignature), alloc)
@@ -225,7 +219,7 @@ RasterSubpass::RasterSubpass(RasterSubpass&& rhs, const allocator_type& alloc)
     , mDescriptors(std::move(rhs.mDescriptors), alloc)
 {}
 
-RasterSubpass::~RasterSubpass() = default;
+GraphicsSubpass::~GraphicsSubpass() = default;
 
 ComputeSubpass::allocator_type ComputeSubpass::get_allocator() const noexcept {
     return allocator_type(mAttachments.get_allocator().resource());
@@ -271,9 +265,9 @@ RenderPass::RenderPass(const allocator_type& alloc)
     : mViewports(alloc)
     , mScissorRects(alloc)
     , mFramebuffers(alloc)
-    , mRasterSubpasses(alloc)
-    , mDependencies(alloc)
     , mComputeSubpasses(alloc)
+    , mGraphicsSubpasses(alloc)
+    , mDependencies(alloc)
     , mRaytracingSubpasses(alloc)
 {}
 
@@ -281,9 +275,9 @@ RenderPass::RenderPass(RenderPass const& rhs, const allocator_type& alloc)
     : mViewports(rhs.mViewports, alloc)
     , mScissorRects(rhs.mScissorRects, alloc)
     , mFramebuffers(rhs.mFramebuffers, alloc)
-    , mRasterSubpasses(rhs.mRasterSubpasses, alloc)
-    , mDependencies(rhs.mDependencies, alloc)
     , mComputeSubpasses(rhs.mComputeSubpasses, alloc)
+    , mGraphicsSubpasses(rhs.mGraphicsSubpasses, alloc)
+    , mDependencies(rhs.mDependencies, alloc)
     , mRaytracingSubpasses(rhs.mRaytracingSubpasses, alloc)
 {}
 
@@ -291,9 +285,9 @@ RenderPass::RenderPass(RenderPass&& rhs, const allocator_type& alloc)
     : mViewports(std::move(rhs.mViewports), alloc)
     , mScissorRects(std::move(rhs.mScissorRects), alloc)
     , mFramebuffers(std::move(rhs.mFramebuffers), alloc)
-    , mRasterSubpasses(std::move(rhs.mRasterSubpasses), alloc)
-    , mDependencies(std::move(rhs.mDependencies), alloc)
     , mComputeSubpasses(std::move(rhs.mComputeSubpasses), alloc)
+    , mGraphicsSubpasses(std::move(rhs.mGraphicsSubpasses), alloc)
+    , mDependencies(std::move(rhs.mDependencies), alloc)
     , mRaytracingSubpasses(std::move(rhs.mRaytracingSubpasses), alloc)
 {}
 
@@ -338,8 +332,15 @@ RenderSolution::RenderSolution(const allocator_type& alloc)
     , mFramebuffers(alloc)
     , mRTVSources(alloc)
     , mDSVSources(alloc)
+    , mCBVSources(alloc)
+    , mSRVSources(alloc)
+    , mUAVSources(alloc)
     , mRTVs(alloc)
     , mDSVs(alloc)
+    , mCBVs(alloc)
+    , mSRVs(alloc)
+    , mUAVs(alloc)
+    , mAttributeIndex(alloc)
     , mPipelineIndex(alloc)
 {}
 
@@ -348,8 +349,15 @@ RenderSolution::RenderSolution(RenderSolution const& rhs, const allocator_type& 
     , mFramebuffers(rhs.mFramebuffers, alloc)
     , mRTVSources(rhs.mRTVSources, alloc)
     , mDSVSources(rhs.mDSVSources, alloc)
+    , mCBVSources(rhs.mCBVSources, alloc)
+    , mSRVSources(rhs.mSRVSources, alloc)
+    , mUAVSources(rhs.mUAVSources, alloc)
     , mRTVs(rhs.mRTVs, alloc)
     , mDSVs(rhs.mDSVs, alloc)
+    , mCBVs(rhs.mCBVs, alloc)
+    , mSRVs(rhs.mSRVs, alloc)
+    , mUAVs(rhs.mUAVs, alloc)
+    , mAttributeIndex(rhs.mAttributeIndex, alloc)
     , mPipelineIndex(rhs.mPipelineIndex, alloc)
 {}
 
@@ -358,8 +366,15 @@ RenderSolution::RenderSolution(RenderSolution&& rhs, const allocator_type& alloc
     , mFramebuffers(std::move(rhs.mFramebuffers), alloc)
     , mRTVSources(std::move(rhs.mRTVSources), alloc)
     , mDSVSources(std::move(rhs.mDSVSources), alloc)
+    , mCBVSources(std::move(rhs.mCBVSources), alloc)
+    , mSRVSources(std::move(rhs.mSRVSources), alloc)
+    , mUAVSources(std::move(rhs.mUAVSources), alloc)
     , mRTVs(std::move(rhs.mRTVs), alloc)
     , mDSVs(std::move(rhs.mDSVs), alloc)
+    , mCBVs(std::move(rhs.mCBVs), alloc)
+    , mSRVs(std::move(rhs.mSRVs), alloc)
+    , mUAVs(std::move(rhs.mUAVs), alloc)
+    , mAttributeIndex(std::move(rhs.mAttributeIndex), alloc)
     , mPipelineIndex(std::move(rhs.mPipelineIndex), alloc)
 {}
 
@@ -382,8 +397,7 @@ RenderSwapChain::RenderSwapChain(RenderSwapChain const& rhs, const allocator_typ
     , mSolutions(rhs.mSolutions, alloc)
     , mNumBackBuffers(rhs.mNumBackBuffers)
     , mNumReserveFramebuffers(rhs.mNumReserveFramebuffers)
-    , mNumReserveSRVs(rhs.mNumReserveSRVs)
-    , mNumReserveUAVs(rhs.mNumReserveUAVs)
+    , mNumReserveCBV_SRV_UAVs(rhs.mNumReserveCBV_SRV_UAVs)
     , mNumReserveDSVs(rhs.mNumReserveDSVs)
     , mNumReserveRTVs(rhs.mNumReserveRTVs)
     , mSolutionIndex(rhs.mSolutionIndex, alloc)
@@ -396,8 +410,7 @@ RenderSwapChain::RenderSwapChain(RenderSwapChain&& rhs, const allocator_type& al
     , mSolutions(std::move(rhs.mSolutions), alloc)
     , mNumBackBuffers(std::move(rhs.mNumBackBuffers))
     , mNumReserveFramebuffers(std::move(rhs.mNumReserveFramebuffers))
-    , mNumReserveSRVs(std::move(rhs.mNumReserveSRVs))
-    , mNumReserveUAVs(std::move(rhs.mNumReserveUAVs))
+    , mNumReserveCBV_SRV_UAVs(std::move(rhs.mNumReserveCBV_SRV_UAVs))
     , mNumReserveDSVs(std::move(rhs.mNumReserveDSVs))
     , mNumReserveRTVs(std::move(rhs.mNumReserveRTVs))
     , mSolutionIndex(std::move(rhs.mSolutionIndex), alloc)

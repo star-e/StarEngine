@@ -85,15 +85,16 @@ void DX12SwapChain::createFramebuffers(IDXGIFactory4* pFactory,
         mSwapEvent.attach(mSwapChain->GetFrameLatencyWaitableObject());
     }
 
-    createRenderSolutionRenderTargets(mDevice, mSwapChain.get(), mRenderGraph->mRenderGraph, mCurrentSolution);
+    createRenderSolutionRenderTargets(mDevice, mSwapChain.get(), mRenderGraph->mDescriptorHeap,
+        mRenderGraph->mRenderGraph, mCurrentSolution, mCurrentPipeline);
 }
 
 void DX12SwapChain::resizeFramebuffers() {
     Expects(mSwapChain);
 
-    mRenderGraph->mRenderGraph.mFramebuffers.clear();
-    clearRenderTargets(mRenderGraph->mRenderGraph);
+    clearRenderTargets(mRenderGraph->mRenderGraph, mRenderGraph->mDescriptorHeap, mCurrentSolution, mCurrentPipeline);
 
+    mRenderGraph->mRenderGraph.mFramebuffers.clear();
     V(mSwapChain->ResizeBuffers(
         mRenderGraph->mRenderGraph.mNumBackBuffers,
         mWidth,
@@ -106,7 +107,8 @@ void DX12SwapChain::resizeFramebuffers() {
         V(mSwapChain->SetMaximumFrameLatency(std::max(1u, mMaxFrameLatency)));
     }
 
-    createRenderSolutionRenderTargets(mDevice, mSwapChain.get(), mRenderGraph->mRenderGraph, mCurrentSolution);
+    createRenderSolutionRenderTargets(mDevice, mSwapChain.get(), mRenderGraph->mDescriptorHeap,
+        mRenderGraph->mRenderGraph, mCurrentSolution, mCurrentPipeline);
 }
 
 void DX12SwapChain::present() {

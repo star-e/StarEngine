@@ -19,6 +19,36 @@
 
 namespace Star::Graphics::Render::Shader {
 
+ShaderGroup* ShaderGroups::try_getGroup(std::string_view bundleName, std::string_view pipelineName, std::string_view passName) {
+    auto bundleIter = mSolutions.find(bundleName);
+    if (bundleIter == mSolutions.end())
+        return nullptr;
+    auto pipelineIter = bundleIter->second.find(pipelineName);
+    if (pipelineIter == bundleIter->second.end())
+        return nullptr;
+
+    auto passIter = pipelineIter->second.at(UpdateEnum::PerPass).find(passName);
+    if (passIter == pipelineIter->second.at(UpdateEnum::PerPass).end())
+        return nullptr;
+        
+    return &passIter->second;
+}
+
+ShaderGroup const* ShaderGroups::try_getGroup(std::string_view bundleName, std::string_view pipelineName, std::string_view passName) const {
+    auto bundleIter = mSolutions.find(bundleName);
+    if (bundleIter == mSolutions.end())
+        return nullptr;
+    auto pipelineIter = bundleIter->second.find(pipelineName);
+    if (pipelineIter == bundleIter->second.end())
+        return nullptr;
+
+    auto passIter = pipelineIter->second.at(UpdateEnum::PerPass).find(passName);
+    if (passIter == pipelineIter->second.at(UpdateEnum::PerPass).end())
+        return nullptr;
+
+    return &passIter->second;
+}
+
 ShaderGroup& ShaderGroups::getGroup(std::string_view bundleName, std::string_view pipelineName, std::string_view passName) {
     auto& bundle = at(mSolutions, bundleName);
     auto& pipeline = at(bundle, pipelineName);
@@ -36,7 +66,13 @@ ShaderGroup const& ShaderGroups::getGroup(std::string_view bundleName, std::stri
 void ShaderGroups::bindProgram(const ShaderProgram& program, std::string_view shaderName,
     std::string_view bundleName, std::string_view pipelineName, std::string_view passName
 ) {
+    auto* pGroup = try_getGroup(bundleName, pipelineName, passName);
+    if (!pGroup)
+        return;
+
     auto& group = getGroup(bundleName, pipelineName, passName);
+    Expects(&group == pGroup);
+
     auto res = group.mPrograms.try_emplace(str(shaderName), std::pair{ &program, RootSignature{} });
     if (!res.second) {
         throw std::invalid_argument("Shader: " + str(shaderName) + " already exists in group: " + str(passName));

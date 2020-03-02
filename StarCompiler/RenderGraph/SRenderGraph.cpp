@@ -541,6 +541,7 @@ void GraphicsRenderNodeGraph::buildResourceViews() {
 
     OrderedIdentityMap<rtv_type> rtvs;
     OrderedIdentityMap<dsv_type> dsvs;
+    OrderedIdentityMap<cbv_srv_uav_type> cbv_srv_uavs;
 
     for (size_t k = 0; k != mNodeSorted.size(); ++k) {
         auto nodeID = mNodeSorted[k];
@@ -565,40 +566,25 @@ void GraphicsRenderNodeGraph::buildResourceViews() {
             ), output.mState);
         }
 
-        OrderedIdentityMap<descriptor_type> table;
         for (const auto& input : node.mInputs) {
             const auto& rt = at(mRenderTargets, input.mName);
-            if (isBackBuffer(rt))
-                continue;
+            if (isBackBuffer(rt)) {
+                throw std::invalid_argument("back buffer cannot be input");
+            }
 
             visit(overload(
                 [&](const DepthRead_& view) {
-                    auto res = table.emplace(SRV, input.mName, input.mData, input.mModel);
-                    if (res.second == false) {
-                        throw std::runtime_error("srv already exists: " + input.mName);
-                    }
+                    cbv_srv_uavs.emplace(SRV, input.mName, input.mData, input.mModel);
                 },
                 [&](const ShaderResource_& view) {
-                    auto res = table.emplace(SRV, input.mName, input.mData, input.mModel);
-                    if (res.second == false) {
-                        throw std::runtime_error("dsv already exists: " + input.mName);
-                    }
+                    cbv_srv_uavs.emplace(SRV, input.mName, input.mData, input.mModel);
                 },
                 [&](const UnorderedAccess_& view) {
-                    auto res = table.emplace(UAV, input.mName, input.mData, input.mModel);
-                    if (res.second == false) {
-                        throw std::runtime_error("uav already exists: " + input.mName);
-                    }
+                    cbv_srv_uavs.emplace(UAV, input.mName, input.mData, input.mModel);
                 },
                 [&](auto) {}
             ), input.mState);
         }
-
-        for (const auto& d : table) {
-            mCBV_SRV_UAVs.emplace_back(d);
-        }
-
-        mRangeCBV_SRV_UAVs.emplace_back(gsl::narrow<uint32_t>(table.size()));
     }
 
     // reorder rtv, dsv
@@ -607,6 +593,9 @@ void GraphicsRenderNodeGraph::buildResourceViews() {
     }
     for (const auto& dsv : dsvs) {
         mDSVs.emplace(dsv);
+    }
+    for (const auto& d : cbv_srv_uavs) {
+        mCBV_SRV_UAVs.emplace(d);
     }
 }
 
@@ -737,17 +726,6 @@ void GraphicsRenderNodeGraph::outputViews() const {
             std::cout << "RenderNode: ";
             CONSOLE_COLOR(Magenta);
             std::cout << node.mName << std::endl;
-        }
-
-        auto space = std::string(4, ' ');
-
-        if (mRangeCBV_SRV_UAVs[k] == 0) {
-            std::cout << space << "[none]" << std::endl;
-        } else {
-            for (size_t i = 0; i != mRangeCBV_SRV_UAVs[k]; ++i) {
-                const auto& view = mCBV_SRV_UAVs[idx++];
-                std::cout << space << get<0>(view) << ", " << get<1>(view) << ", " << get<2>(view) << ", " << get<3>(view) << std::endl;
-            }
         }
     }
 }

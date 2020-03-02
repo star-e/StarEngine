@@ -26,6 +26,9 @@ class ShaderGroups {
 public:
     using PassGroup = std::array<Map<std::string, ShaderGroup>, UpdateEnum::UpdateCount>;
 
+    ShaderGroup* try_getGroup(std::string_view bundleName, std::string_view pipelineName, std::string_view passName);
+    ShaderGroup const * try_getGroup(std::string_view bundleName, std::string_view pipelineName, std::string_view passName) const;
+
     ShaderGroup& getGroup(std::string_view bundleName, std::string_view pipelineName, std::string_view passName);
     ShaderGroup const& getGroup(std::string_view bundleName, std::string_view pipelineName, std::string_view passName) const;
 

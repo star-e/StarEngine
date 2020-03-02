@@ -47,8 +47,7 @@ DX12UploadBufferBlock::DX12UploadBufferBlock(gsl::not_null<ID3D12Device*> pDevic
 
     void* pData = nullptr;
     D3D12_RANGE readRange{ 0, 0 };
-    mBuffer->Map(0, &readRange, &pData);
-    Expects(boost::alignment::is_aligned(pData, sAlignment));
+    V(mBuffer->Map(0, &readRange, &pData));
     mDataBegin = reinterpret_cast<std::byte*>(pData);
     mDataCur = mDataBegin;
     mDataEnd = mDataBegin + size;

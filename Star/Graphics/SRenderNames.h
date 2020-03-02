@@ -290,6 +290,7 @@ inline const char* getName(const Dynamic_& v) noexcept { return "Dynamic"; }
 inline const char* getName(const Persistent_& v) noexcept { return "Persistent"; }
 inline const char* getName(const DescriptorIndex& v) noexcept { return "DescriptorIndex"; }
 inline const char* getName(const EngineSource_& v) noexcept { return "EngineSource"; }
+inline const char* getName(const RenderTargetSource_& v) noexcept { return "RenderTargetSource"; }
 inline const char* getName(const MaterialSource_& v) noexcept { return "MaterialSource"; }
 inline const char* getName(const matrix_& v) noexcept { return "matrix"; }
 inline const char* getName(const double4_& v) noexcept { return "double4"; }

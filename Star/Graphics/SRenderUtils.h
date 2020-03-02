@@ -21,6 +21,7 @@
 
 namespace Star::Graphics::Render {
 
-STAR_GRAPHICS_API uint32_t getSize(const AttributeType& type);
+STAR_GRAPHICS_API uint32_t getSize(const AttributeType& type) noexcept;
+STAR_GRAPHICS_API bool isConstant(const AttributeType& type) noexcept;
 
 }

@@ -29,7 +29,8 @@ namespace Descriptor {
 bool try_getType(std::string_view name, Type& type) noexcept {
     static const std::unordered_map<std::string_view, Type> index{
         { std::string_view(""), Type(std::in_place_type_t<ConstantBuffer_>()) },
-        { std::string_view("BaseColor"), Type(std::in_place_type_t<BaseColor_>()) },
+        { std::string_view("MainTex"), Type(std::in_place_type_t<MainTex_>()) },
+        { std::string_view("PointSampler"), Type(std::in_place_type_t<PointSampler_>()) },
         { std::string_view("LinearSampler"), Type(std::in_place_type_t<LinearSampler_>()) },
     };
 

@@ -62,6 +62,8 @@ struct CreationContext {
         mMemoryAllocated += sz;
         return mUploadBuffer->upload(data, sz, 1, alignment);
     }
+    uint32_t mCurrentSolution = 0;
+    uint32_t mCurrentPipeline = 0;
     ID3D12Device* mDevice = nullptr;
     ID3D12CommandQueue* mDirectQueue = nullptr;
     ID3D12CommandAllocator* mCommandAllocator = nullptr;

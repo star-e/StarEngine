@@ -17,14 +17,18 @@
 
 #include "SDX12RenderWorks.h"
 #include "SDX12Types.h"
+#include "SDX12ShaderDescriptorHeap.h"
+#include <Star/Graphics/SRenderUtils.h>
 
 namespace Star::Graphics::Render {
 
-void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* pSwapChain, DX12RenderWorks& rw, uint32_t id) {
+void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* pSwapChain,
+    DX12ShaderDescriptorHeap* pDescriptorHeap, DX12RenderWorks& rw, uint32_t id, uint32_t pipelineID
+) {
     //-------------------------------------------------------------------
     // SwapChain
     // Create render targets 
-    for (uint32_t i = 0; i != rw.mFramebuffers.size(); ++i) {
+    for (uint32_t i = 0; i != rw.mSolutions[id].mFramebuffers.size(); ++i) {
         const auto& rt = rw.mSolutions[id].mFramebuffers[i];
 
         if (i < rw.mNumBackBuffers) {
@@ -80,8 +84,8 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
         }
     }
 
-    const auto& sl = rw.mSolutions[id];
-    for (uint32_t i = 0; i != rw.mRTVs.size(); ++i) {
+    auto& sl = rw.mSolutions[id];
+    for (uint32_t i = 0; i != sl.mRTVs.size(); ++i) {
         const auto& rt = rw.mFramebuffers[sl.mRTVSources[i].mHandle];
         const auto& desc0 = sl.mRTVs[i];
         D3D12_RENDER_TARGET_VIEW_DESC desc;
@@ -91,7 +95,7 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
 
         pDevice->CreateRenderTargetView(rt.get(), &desc, rw.mRTVs.getCpuHandle(i));
     }
-    for (uint32_t i = 0; i != rw.mDSVs.size(); ++i) {
+    for (uint32_t i = 0; i != sl.mDSVs.size(); ++i) {
         const auto& ds = rw.mFramebuffers[sl.mDSVSources[i].mHandle];
         const auto& desc0 = sl.mDSVs[i];
 
@@ -103,9 +107,140 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
 
         pDevice->CreateDepthStencilView(ds.get(), &desc, rw.mDSVs.getCpuHandle(i));
     }
+
+    uint32_t cbv_srv_uavIndex = 0;
+
+    for (uint32_t i = 0; i != sl.mSRVs.size(); ++i) {
+        const auto& rt = rw.mFramebuffers[sl.mSRVSources[i].mHandle];
+        const auto& desc0 = sl.mSRVs[i];
+        D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
+        desc.Format = getDXGIFormat(desc0.mFormat);
+        desc.ViewDimension = getDX12(desc0.mViewDimension);
+        desc.Shader4ComponentMapping = desc0.mShader4ComponentMapping;
+        desc.Texture2D = getDX12(desc0.mTexture2D);
+        pDevice->CreateShaderResourceView(rt.get(), &desc, rw.mCBV_SRV_UAVs.getCpuHandle(cbv_srv_uavIndex));
+        ++cbv_srv_uavIndex;
+    }
+
+    auto& pipeline = sl.mPipelines[pipelineID];
+    for (auto& pass : pipeline.mPasses) {
+        for (auto& subpass : pass.mGraphicsSubpasses) {
+            for (auto& collection : subpass.mDescriptors) {
+                for (auto& dx12List : collection.mResourceViewLists) {
+                    visit(overload(
+                        [&](Persistent_) {
+                            if (collection.mIndex.mUpdate < PerPass)
+                                return;
+
+                            auto descs = pDescriptorHeap->allocatePersistent(dx12List.mCapacity);
+                            dx12List.mGpuOffset = descs.first.mGpuHandle;
+                            dx12List.mCpuOffset = descs.first.mCpuHandle;
+                            uint32_t offset = 0;
+                            for (const auto& range : dx12List.mRanges) {
+                                for (const auto& subrange : range.mSubranges) {
+                                    size_t i = 0;
+                                    visit(overload(
+                                        [&](EngineSource_) {
+                                            for (const auto& attr : subrange.mDescriptors) {
+                                                if (std::holds_alternative<SamplerState_>(attr.mAttributeType)) {
+                                                    throw std::runtime_error("resource view should not have samplers");
+                                                } else if (!isConstant(attr.mAttributeType)) {
+                                                    throw std::runtime_error("GraphicsSubpass EngineSource Descriptor not supported yet");
+                                                } else {
+                                                    throw std::runtime_error("descriptor should not be constant");
+                                                }
+                                            }
+                                        },
+                                        [&](RenderTargetSource_) {
+                                            for (const auto& attr : subrange.mDescriptors) {
+                                                auto id = sl.mAttributeIndex.at(attr.mID);
+                                                auto ptr = rw.mCBV_SRV_UAVs.getCpuHandle(id);
+                                                pDevice->CopyDescriptorsSimple(1, descs[i].mCpuHandle, ptr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+                                                ++i;
+                                            }
+                                        },
+                                        [&](MaterialSource_) {
+                                            throw std::runtime_error("GraphicsSubpass MaterialSource Descriptor not supported yet");
+                                        }
+                                    ), subrange.mSource);
+                                    Ensures(i == subrange.mDescriptors.size());
+                                    offset += gsl::narrow_cast<uint32_t>(subrange.mDescriptors.size());
+                                }
+                            }
+
+                            Ensures(offset == dx12List.mCapacity);
+
+                            for (const auto& unbounded : dx12List.mUnboundedDescriptors) {
+                                throw std::runtime_error("material resource view list unbounded not supported yet");
+                            }
+                        },
+                        [&](Dynamic_) {
+                            // do nothing
+                        }
+                    ), collection.mIndex.mPersistency);
+                }
+
+                for (const auto& dx12List : collection.mSamplerLists) {
+                    visit(overload(
+                        [&](Persistent_) {
+                            for (const auto& range : dx12List.mRanges) {
+                                if (std::holds_alternative<SSV_>(range.mType)) {
+                                    continue;
+                                }
+                                throw std::runtime_error("GraphicsSubpass sampler list not supported yet");
+                            }
+                            for (const auto& unbounded : dx12List.mUnboundedDescriptors) {
+                                throw std::runtime_error("material resource view list unbounded not supported yet");
+                            }
+                        },
+                        [&](Dynamic_) {
+                        }
+                    ), collection.mIndex.mPersistency);
+                }
+            }
+        }
+    }
 }
 
-void clearRenderTargets(DX12RenderWorks& rw) {
+void clearRenderTargets(DX12RenderWorks& rw, DX12ShaderDescriptorHeap* pDescriptorHeap, uint32_t solutionID, uint32_t pipelineID) {
+    auto& solution = rw.mSolutions[solutionID];
+    auto& pipeline = solution.mPipelines[pipelineID];
+    for (auto& pass : pipeline.mPasses) {
+        for (auto& subpass : pass.mGraphicsSubpasses) {
+            for (auto& collection : subpass.mDescriptors) {
+                for (auto& dx12List : collection.mResourceViewLists) {
+                    visit(overload(
+                        [&](Persistent_) {
+                            if (dx12List.mCpuOffset.ptr) {
+                                pDescriptorHeap->deallocatePersistent(dx12List.mCpuOffset, dx12List.mCapacity);
+                                dx12List.mGpuOffset = {};
+                                dx12List.mCpuOffset = {};
+                            }
+                        },
+                        [&](Dynamic_) {
+                            // do nothing
+                        }
+                    ), collection.mIndex.mPersistency);
+                }
+                for (auto& dx12List : collection.mResourceViewLists) {
+                    visit(overload(
+                        [&](Persistent_) {
+                            if (dx12List.mCpuOffset.ptr) {
+                                throw std::runtime_error("sampler descriptor not supported yet");
+                                //pDescriptorHeap->deallocatePersistent(dx12List.mCpuOffset, dx12List.mCapacity);
+                                dx12List.mGpuOffset = {};
+                                dx12List.mCpuOffset = {};
+                            }
+                        },
+                        [&](Dynamic_) {
+                            // do nothing
+                        }
+                    ), collection.mIndex.mPersistency);
+                }
+            }
+        }
+    }
+
     rw.mFramebuffers.clear();
 }
 

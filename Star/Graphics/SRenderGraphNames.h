@@ -42,7 +42,8 @@ inline const char* getName(const UnorderedRenderQueue& v) noexcept { return "Uno
 namespace Descriptor {
 
 inline const char* getName(const ConstantBuffer_& v) noexcept { return "ConstantBuffer"; }
-inline const char* getName(const BaseColor_& v) noexcept { return "BaseColor"; }
+inline const char* getName(const MainTex_& v) noexcept { return "MainTex"; }
+inline const char* getName(const PointSampler_& v) noexcept { return "PointSampler"; }
 inline const char* getName(const LinearSampler_& v) noexcept { return "LinearSampler"; }
 
 } // namespace Descriptor
@@ -63,8 +64,8 @@ inline const char* getName(const ShaderDescriptorList& v) noexcept { return "Sha
 inline const char* getName(const ShaderDescriptorCollection& v) noexcept { return "ShaderDescriptorCollection"; }
 inline const char* getName(const ShaderConstant& v) noexcept { return "ShaderConstant"; }
 inline const char* getName(const ShaderConstantBuffer& v) noexcept { return "ShaderConstantBuffer"; }
-inline const char* getName(const RasterSubpass& v) noexcept { return "RasterSubpass"; }
-inline const char* getName(const RasterSubpassDependency& v) noexcept { return "RasterSubpassDependency"; }
+inline const char* getName(const GraphicsSubpass& v) noexcept { return "GraphicsSubpass"; }
+inline const char* getName(const GraphicsSubpassDependency& v) noexcept { return "GraphicsSubpassDependency"; }
 inline const char* getName(const ComputeSubpass& v) noexcept { return "ComputeSubpass"; }
 inline const char* getName(const RaytracingSubpass& v) noexcept { return "RaytracingSubpass"; }
 inline const char* getName(const RenderPass& v) noexcept { return "RenderPass"; }

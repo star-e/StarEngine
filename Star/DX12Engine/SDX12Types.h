@@ -184,14 +184,14 @@ struct DX12ShaderData {
     uint32_t mRefCount = 0;
 };
 
-struct DX12MaterialDescriptorList {
+struct DX12ShaderDescriptorList {
     using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
     allocator_type get_allocator() const noexcept;
 
-    DX12MaterialDescriptorList(const allocator_type& alloc);
-    DX12MaterialDescriptorList(DX12MaterialDescriptorList&& rhs, const allocator_type& alloc);
-    DX12MaterialDescriptorList(DX12MaterialDescriptorList const& rhs, const allocator_type& alloc);
-    ~DX12MaterialDescriptorList();
+    DX12ShaderDescriptorList(const allocator_type& alloc);
+    DX12ShaderDescriptorList(DX12ShaderDescriptorList&& rhs, const allocator_type& alloc);
+    DX12ShaderDescriptorList(DX12ShaderDescriptorList const& rhs, const allocator_type& alloc);
+    ~DX12ShaderDescriptorList();
 
     uint32_t mSlot = 0;
     uint32_t mCapacity = 0;
@@ -201,18 +201,18 @@ struct DX12MaterialDescriptorList {
     std::pmr::vector<ShaderUnboundedDescriptor> mUnboundedDescriptors;
 };
 
-struct DX12MaterialDescriptorCollection {
+struct DX12ShaderDescriptorCollection {
     using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
     allocator_type get_allocator() const noexcept;
 
-    DX12MaterialDescriptorCollection(const allocator_type& alloc);
-    DX12MaterialDescriptorCollection(DX12MaterialDescriptorCollection&& rhs, const allocator_type& alloc);
-    DX12MaterialDescriptorCollection(DX12MaterialDescriptorCollection const& rhs, const allocator_type& alloc);
-    ~DX12MaterialDescriptorCollection();
+    DX12ShaderDescriptorCollection(const allocator_type& alloc);
+    DX12ShaderDescriptorCollection(DX12ShaderDescriptorCollection&& rhs, const allocator_type& alloc);
+    DX12ShaderDescriptorCollection(DX12ShaderDescriptorCollection const& rhs, const allocator_type& alloc);
+    ~DX12ShaderDescriptorCollection();
 
     DescriptorIndex mIndex;
-    std::pmr::vector<DX12MaterialDescriptorList> mResourceViewLists;
-    std::pmr::vector<DX12MaterialDescriptorList> mSamplerLists;
+    std::pmr::vector<DX12ShaderDescriptorList> mResourceViewLists;
+    std::pmr::vector<DX12ShaderDescriptorList> mSamplerLists;
 };
 
 struct DX12MaterialSubpassData {
@@ -224,7 +224,7 @@ struct DX12MaterialSubpassData {
     DX12MaterialSubpassData(DX12MaterialSubpassData const& rhs, const allocator_type& alloc);
     ~DX12MaterialSubpassData();
 
-    std::pmr::vector<DX12MaterialDescriptorCollection> mCollections;
+    std::pmr::vector<DX12ShaderDescriptorCollection> mCollections;
 };
 
 struct DX12MaterialPassData {
@@ -382,14 +382,14 @@ struct DX12UnorderedRenderQueue {
     std::pmr::vector<boost::intrusive_ptr<DX12ContentData>> mContents;
 };
 
-struct DX12RasterSubpass {
+struct DX12GraphicsSubpass {
     using allocator_type = std::pmr::polymorphic_allocator<std::byte>;
     allocator_type get_allocator() const noexcept;
 
-    DX12RasterSubpass(const allocator_type& alloc);
-    DX12RasterSubpass(DX12RasterSubpass&& rhs, const allocator_type& alloc);
-    DX12RasterSubpass(DX12RasterSubpass const& rhs, const allocator_type& alloc);
-    ~DX12RasterSubpass();
+    DX12GraphicsSubpass(const allocator_type& alloc);
+    DX12GraphicsSubpass(DX12GraphicsSubpass&& rhs, const allocator_type& alloc);
+    DX12GraphicsSubpass(DX12GraphicsSubpass const& rhs, const allocator_type& alloc);
+    ~DX12GraphicsSubpass();
 
     DXGI_SAMPLE_DESC mSampleDesc;
     std::pmr::vector<Attachment> mInputAttachments;
@@ -397,13 +397,11 @@ struct DX12RasterSubpass {
     std::pmr::vector<Attachment> mResolveAttachments;
     std::optional<Attachment> mDepthStencilAttachment;
     std::pmr::vector<Attachment> mPreserveAttachments;
-    std::pmr::vector<Attachment> mSRVs;
-    std::pmr::vector<Attachment> mUAVs;
     std::pmr::vector<RenderViewTransition> mPostViewTransitions;
     std::pmr::vector<DX12UnorderedRenderQueue> mOrderedRenderQueue;
     com_ptr<ID3D12RootSignature> mRootSignature;
     std::pmr::vector<ShaderConstantBuffer> mConstantBuffers;
-    std::pmr::vector<ShaderDescriptorCollection> mDescriptors;
+    std::pmr::vector<DX12ShaderDescriptorCollection> mDescriptors;
 };
 
 struct DX12RenderPass {
@@ -415,11 +413,11 @@ struct DX12RenderPass {
     DX12RenderPass(DX12RenderPass const& rhs, const allocator_type& alloc);
     ~DX12RenderPass();
 
-    std::pmr::vector<DX12RasterSubpass> mRasterSubpasses;
+    std::pmr::vector<DX12GraphicsSubpass> mGraphicsSubpasses;
     std::pmr::vector<VIEWPORT> mViewports;
     std::pmr::vector<RECT> mScissorRects;
     std::pmr::vector<FramebufferHandle> mFramebuffers;
-    std::pmr::vector<RasterSubpassDependency> mDependencies;
+    std::pmr::vector<GraphicsSubpassDependency> mDependencies;
 };
 
 struct DX12RenderPipeline {
@@ -450,9 +448,16 @@ struct DX12RenderSolution {
     std::pmr::vector<DX12RenderPipeline> mPipelines;
     std::pmr::vector<FramebufferHandle> mRTVSources;
     std::pmr::vector<FramebufferHandle> mDSVSources;
+    std::pmr::vector<FramebufferHandle> mCBVSources;
+    std::pmr::vector<FramebufferHandle> mSRVSources;
+    std::pmr::vector<FramebufferHandle> mUAVSources;
     std::pmr::vector<Framebuffer> mFramebuffers;
     std::pmr::vector<RENDER_TARGET_VIEW_DESC> mRTVs;
     std::pmr::vector<DEPTH_STENCIL_VIEW_DESC> mDSVs;
+    std::pmr::vector<CONSTANT_BUFFER_VIEW_DESC> mCBVs;
+    std::pmr::vector<SHADER_RESOURCE_VIEW_DESC> mSRVs;
+    std::pmr::vector<UNORDERED_ACCESS_VIEW_DESC> mUAVs;
+    PmrFlatMap<uint32_t, uint32_t> mAttributeIndex;
     PmrMap<std::pmr::string, uint32_t> mPipelineIndex;
 };
 
@@ -469,6 +474,7 @@ struct DX12RenderWorks {
     std::pmr::vector<com_ptr<ID3D12Resource>> mFramebuffers;
     DX12DescriptorArray<D3D12_DESCRIPTOR_HEAP_TYPE_RTV> mRTVs;
     DX12DescriptorArray<D3D12_DESCRIPTOR_HEAP_TYPE_DSV> mDSVs;
+    DX12DescriptorArray<D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV> mCBV_SRV_UAVs;
     uint32_t mNumBackBuffers = 0;
     PmrMap<std::pmr::string, uint32_t> mSolutionIndex;
 };
@@ -484,6 +490,7 @@ struct DX12RenderGraphData {
     ~DX12RenderGraphData();
 
     MetaID mMetaID;
+    DX12ShaderDescriptorHeap* mDescriptorHeap = nullptr;
     DX12RenderWorks mRenderGraph;
     PmrFlatMap<std::pmr::string, MetaID> mShaderIndex;
     Core::Fetch<RenderGraphData> mRenderGraphData;

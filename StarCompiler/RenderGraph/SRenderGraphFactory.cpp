@@ -25,6 +25,7 @@
 #include <Star/Graphics/SRenderGraphReflection.h>
 #include <StarCompiler/ShaderGraph/SShaderModules.h>
 #include <Star/Graphics/SRenderUtils.h>
+#include <StarCompiler/ShaderGraph/SShaderTypes.h>
 
 namespace Star {
 
@@ -125,6 +126,9 @@ void RenderSolutionFactory::updateRenderGraph(const Shader::ShaderModules& modul
     mShaderGroups = &shaderWorks;
 
     for (auto& [bundleName, bundle] : shaderWorks.mSolutions) {
+        if (bundleName != mName) {
+            continue;
+        }
         for (auto& [pipelineName, pipeline] : bundle) {
             auto& renderGraph = at(mNodeGraphs, pipelineName);
             for (auto& [name, group] : pipeline[PerPass]) {
@@ -152,6 +156,7 @@ void RenderSolutionFactory::updateRenderGraph(const Shader::ShaderModules& modul
                                     bTex = false;
                                 }
                             ), attr.mType);
+
                             if (!bTex)
                                 continue;
 
@@ -173,6 +178,10 @@ void RenderSolutionFactory::updateRenderGraph(const Shader::ShaderModules& modul
                                         }
                                     }
                                 }
+                            } else {
+                                if (std::holds_alternative<RenderTargetSource_>(attr.mDescriptor.mSource)) {
+                                    throw std::invalid_argument("attr: " + attr.mName + " is render target, but not found in render node");
+                                }
                             }
                         }
                     }
@@ -192,7 +201,7 @@ void RenderSolutionFactory::addContentOrdered(const UnorderedRenderQueue& conten
     auto& pipeline = renderWorks.mPipelines.at(pipelineID);
     auto passID = at(pipeline.mSubpassIndex, passName);
     auto& pass = pipeline.mPasses.at(passID.mPassID);
-    auto& subpass = pass.mRasterSubpasses.at(passID.mSubpassID);
+    auto& subpass = pass.mGraphicsSubpasses.at(passID.mSubpassID);
     subpass.mOrderedRenderQueue.emplace_back(content);
 }
 
@@ -266,10 +275,10 @@ void RenderSolutionFactory::outputFramebuffers(const OrderedNameMap<RenderTarget
 void RenderSolutionFactory::buildFramebuffers(
     const OrderedNameMap<RenderTargetResource>& bbs,
     const OrderedNameMap<RenderTargetResource>& rts,
-    RenderSolution& rw,
+    RenderSolution& sl,
     std::map<std::string, uint32_t>& rtIndex
 ) const {
-    Expects(rw.mFramebuffers.empty());
+    Expects(sl.mFramebuffers.empty());
     Expects(rtIndex.empty());
 
     if (bbs.size() != 1) {
@@ -281,7 +290,7 @@ void RenderSolutionFactory::buildFramebuffers(
             Expects(std::holds_alternative<Resource2D>(f.mResource.mDimension));
             const auto& tex = std::get<Resource2D>(f.mResource.mDimension);
 
-            rw.mFramebuffers.emplace_back(
+            sl.mFramebuffers.emplace_back(
                 Framebuffer{
                     RESOURCE_DESC{
                         getDimension(f.mResource.mDimension),
@@ -329,7 +338,7 @@ void RenderSolutionFactory::buildFramebuffers(
         ), cc);
 
 
-        rw.mFramebuffers.emplace_back(
+        sl.mFramebuffers.emplace_back(
             Framebuffer{ desc, cc }
         );
         auto res = rtIndex.emplace(f.mName, id);
@@ -411,8 +420,9 @@ void RenderSolutionFactory::collectDSVsMinimal(
         for (const auto& nodeID : graph.mNodeSorted) {
             const auto& node = graph.mNodeGraph[nodeID];
             for (const auto& output : node.mOutputs) {
-                if (exists(bbs, output.mName))
+                if (exists(bbs, output.mName)) {
                     continue;
+                }
 
                 const auto& rt = at(rts, output.mName);
 
@@ -431,6 +441,62 @@ void RenderSolutionFactory::collectDSVsMinimal(
                     },
                     [&](auto) {}
                 ), output.mState);
+            }
+        }
+    }
+}
+
+void RenderSolutionFactory::collectCBV_SRV_UAVsMinimal(const OrderedNameMap<RenderTargetResource>& bbs,
+    const OrderedNameMap<RenderTargetResource>& rts,
+    OrderedIdentityMap<GraphicsRenderNodeGraph::cbv_srv_uav_type>& views,
+    std::map<cbv_srv_uav_key, size_t>& indexMap
+) const {
+    Expects(views.empty());
+
+    auto srvMap = OrderedIdentityMap<GraphicsRenderNodeGraph::cbv_srv_uav_type>();
+
+    for (const auto& [graphName, graph] : mNodeGraphs) {
+        for (const auto& srv : graph.mCBV_SRV_UAVs) {
+            srvMap.emplace(srv);
+        }
+    }
+
+    // reorder
+    for (const auto& srv : srvMap) {
+        views.emplace(srv);
+    }
+
+    for (size_t m = 0; m != mNodeGraphs.size(); ++m) {
+        const auto& graph = mNodeGraphs.at(mGraphOrder[m]);
+        for (const auto& nodeID : graph.mNodeSorted) {
+            const auto& node = graph.mNodeGraph[nodeID];
+            for (const auto& input : node.mInputs) {
+                const auto& rt = at(rts, input.mName);
+                if (exists(bbs, input.mName)) {
+                    throw std::invalid_argument("back buffer cannot be input");
+                }
+
+                visit(overload(
+                    [&](const DepthRead_& view) {
+                        indexMap.emplace(std::piecewise_construct,
+                            std::forward_as_tuple(graph.mName, nodeID, SRV, input.mName, input.mData, input.mModel),
+                            std::forward_as_tuple(index(views, std::tuple{ SRV, input.mName, input.mData, input.mModel }))
+                        );
+                    },
+                    [&](const ShaderResource_& view) {
+                        indexMap.emplace(std::piecewise_construct,
+                            std::forward_as_tuple(graph.mName, nodeID, SRV, input.mName, input.mData, input.mModel),
+                            std::forward_as_tuple(index(views, std::tuple{ SRV, input.mName, input.mData, input.mModel }))
+                        );
+                    },
+                    [&](const UnorderedAccess_& view) {
+                        indexMap.emplace(std::piecewise_construct,
+                            std::forward_as_tuple(graph.mName, nodeID, UAV, input.mName, input.mData, input.mModel),
+                            std::forward_as_tuple(index(views, std::tuple{ UAV, input.mName, input.mData, input.mModel }))
+                        );
+                    },
+                    [&](auto) {}
+                ), input.mState);
             }
         }
     }
@@ -467,16 +533,16 @@ void RenderSolutionFactory::collectDSVsMinimal(
 //    return true;
 //}
 
-void RenderSolutionFactory::compile(std::string solutionName, RenderSolution& rw) const {
+void RenderSolutionFactory::compile(std::string solutionName, RenderSolution& sl) const {
     for (const auto& [graphName, graph] : mNodeGraphs) {
         {
-            auto res = rw.mPipelineIndex.emplace(std::piecewise_construct,
+            auto res = sl.mPipelineIndex.emplace(std::piecewise_construct,
                 std::forward_as_tuple(graphName),
-                std::forward_as_tuple((uint32_t)rw.mPipelines.size()));
+                std::forward_as_tuple((uint32_t)sl.mPipelines.size()));
             Ensures(res.second);
         }
-        rw.mPipelines.emplace_back();
-        auto& pipeline = rw.mPipelines.back();
+        sl.mPipelines.emplace_back();
+        auto& pipeline = sl.mPipelines.back();
 
         for (size_t k = graph.mNodeSorted.size(); k-- > 0;) {
             const auto& nodeID = graph.mNodeSorted[k];
@@ -493,8 +559,8 @@ void RenderSolutionFactory::compile(std::string solutionName, RenderSolution& rw
             pipeline.mPasses.emplace_back();
             auto& pass = pipeline.mPasses.back();
 
-            pass.mRasterSubpasses.emplace_back();
-            Ensures(pass.mRasterSubpasses.size() == 1);
+            pass.mGraphicsSubpasses.emplace_back();
+            Ensures(pass.mGraphicsSubpasses.size() == 1);
         }
     }
 }
@@ -505,7 +571,7 @@ void RenderSolutionFactory::collectAttributes(const Shader::ShaderModules& modul
 }
 
 void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::string solutionName,
-    RenderSolution& rw, std::ostringstream& oss
+    RenderSolution& sl, std::ostringstream& oss
 ) const {
     uint32_t rsgCount = 0;
     OrderedNameMap<RenderTargetResource> bbs;
@@ -521,7 +587,7 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
     outputFramebuffers(rts);
 
     std::map<std::string, uint32_t> rtIndex;
-    buildFramebuffers(bbs, rts, rw, rtIndex);
+    buildFramebuffers(bbs, rts, sl, rtIndex);
 
     // rtvs
     OrderedIdentityMap<GraphicsRenderNodeGraph::rtv_type> rtvs;
@@ -530,15 +596,22 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
 
     collectRTVsMinimal(rtvOffset, bbs, rts, rtvs, rtvIndex);
 
-    rw.mRTVs.resize(rtvOffset + rtvs.size());
-    rw.mRTVSources.resize(rtvOffset + rtvs.size());
+    sl.mRTVs.resize(rtvOffset + rtvs.size());
+    sl.mRTVSources.resize(rtvOffset + rtvs.size());
 
     // dsvs
     OrderedIdentityMap<GraphicsRenderNodeGraph::dsv_type> dsvs;
     std::map<dsv_key, size_t> dsvIndex;
     collectDSVsMinimal(bbs, rts, dsvs, dsvIndex);
-    rw.mDSVs.resize(dsvs.size());
-    rw.mDSVSources.resize(dsvs.size());
+    sl.mDSVs.resize(dsvs.size());
+    sl.mDSVSources.resize(dsvs.size());
+
+    // srvs
+    OrderedIdentityMap<GraphicsRenderNodeGraph::cbv_srv_uav_type> cbv_srv_uavs;
+    std::map<cbv_srv_uav_key, size_t> cbv_srv_uavIndex;
+    collectCBV_SRV_UAVsMinimal(bbs, rts, cbv_srv_uavs, cbv_srv_uavIndex);
+    sl.mSRVs.resize(cbv_srv_uavs.size());
+    sl.mSRVSources.resize(cbv_srv_uavs.size());
 
     // fix format
     Format format = {};
@@ -556,11 +629,11 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
 
     // create backbuffer rtvs
     for (auto i = 0u; i != mBackBufferCount; ++i) {
-        rw.mRTVSources[i] = FramebufferHandle{ i };
-        rw.mRTVSources[i + mBackBufferCount] = FramebufferHandle{ i };
+        sl.mRTVSources[i] = FramebufferHandle{ i };
+        sl.mRTVSources[i + mBackBufferCount] = FramebufferHandle{ i };
 
 
-        rw.mRTVs[i] = RENDER_TARGET_VIEW_DESC{
+        sl.mRTVs[i] = RENDER_TARGET_VIEW_DESC{
             format,
             RTV_DIMENSION_TEXTURE2D,
         };
@@ -570,7 +643,7 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
             CONSOLE_WARNING();
             std::cout << "backbuffer format srgb equal unorm" << std::endl;
         }
-        rw.mRTVs[i + mBackBufferCount] = RENDER_TARGET_VIEW_DESC{
+        sl.mRTVs[i + mBackBufferCount] = RENDER_TARGET_VIEW_DESC{
             formatS,
             RTV_DIMENSION_TEXTURE2D,
         };
@@ -581,8 +654,8 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
         size_t rtvID = 0;
         for (const auto& rtv : rtvs) {
             const auto& rt = at(rts, std::get<0>(rtv));
-            rw.mRTVs[rtvOffset + rtvID] = buildRenderTargetViewDesc(rt.mResource, std::get<1>(rtv), std::get<2>(rtv));
-            rw.mRTVSources[rtvOffset + rtvID] = FramebufferHandle{ rtIndex.at(rt.mName) };
+            sl.mRTVs[rtvOffset + rtvID] = buildRenderTargetViewDesc(rt.mResource, std::get<1>(rtv), std::get<2>(rtv));
+            sl.mRTVSources[rtvOffset + rtvID] = FramebufferHandle{ rtIndex.at(rt.mName) };
             ++rtvID;
         }
     }
@@ -592,15 +665,44 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
         size_t dsvID = 0;
         for (const auto& dsv : dsvs) {
             const auto& rt = at(rts, std::get<0>(dsv));
-            rw.mDSVs[dsvID] = buildDepthStencilViewDesc(rt.mResource, std::get<1>(dsv), std::get<2>(dsv));
-            rw.mDSVSources[dsvID] = FramebufferHandle{ rtIndex.at(rt.mName) };
+            sl.mDSVs[dsvID] = buildDepthStencilViewDesc(rt.mResource, std::get<1>(dsv), std::get<2>(dsv));
+            sl.mDSVSources[dsvID] = FramebufferHandle{ rtIndex.at(rt.mName) };
             ++dsvID;
+        }
+    }
+
+    // create srvs
+    {
+        size_t srvID = 0;
+        size_t uavID = 0;
+        size_t cbv_srv_uavID = 0;
+        for (const auto& d : cbv_srv_uavs) {
+            const auto& rt = at(rts, std::get<1>(d));
+            visit(overload(
+                [&](CBV_) {
+                    throw std::runtime_error("render target cbv not supported yet");
+                },
+                [&](SRV_) {
+                    sl.mSRVs[srvID] = buildShaderResourceViewDesc(rt.mResource, std::get<2>(d), std::get<3>(d));
+                    sl.mSRVSources[srvID] = FramebufferHandle{ rtIndex.at(rt.mName) };
+
+                    auto iter = attrs.mIndex.find(std::get<1>(d));
+                    if (iter == attrs.mIndex.end()) {
+                        throw std::invalid_argument("render srv not found in attributes");
+                    }
+                    sl.mAttributeIndex.emplace(iter->second, cbv_srv_uavID++);
+                    ++srvID;
+                },
+                [&](UAV_) {
+                    throw std::runtime_error("render target uav not supported yet");
+                }
+            ), std::get<0>(d));
         }
     }
 
     // build rtv, dsv
     for (const auto& [graphName, graph] : mNodeGraphs) {
-        auto& pipeline = rw.mPipelines.at(at(rw.mPipelineIndex, graphName));
+        auto& pipeline = sl.mPipelines.at(at(sl.mPipelineIndex, graphName));
 
         pipeline.mRTVInitialStates.resize(rtvOffset + rtvs.size());
         pipeline.mDSVInitialStates.resize(dsvs.size());
@@ -649,8 +751,8 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
             const auto& node = graph.mNodeGraph[nodeID];
             const auto& subpassIndex = at(pipeline.mSubpassIndex, node.mName);
             auto& pass = pipeline.mPasses.at(subpassIndex.mPassID);
-            auto& subpass = pass.mRasterSubpasses.at(subpassIndex.mSubpassID);
-            Expects(pass.mRasterSubpasses.size() == 1);
+            auto& subpass = pass.mGraphicsSubpasses.at(subpassIndex.mSubpassID);
+            Expects(pass.mGraphicsSubpasses.size() == 1);
 
             visit(overload(
                 [&](const Multisampling& s) {
@@ -703,6 +805,9 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
                             [&](EngineSource_) {
                                 getType(constant.mName, dst.mDataType);
                             },
+                            [&](RenderTargetSource_) {
+                                throw std::invalid_argument("RenderTargetSource has no constant");
+                            },
                             [&](MaterialSource_) {
                                 throw std::invalid_argument("PerPass attribute should not be material source");
                             }
@@ -722,8 +827,8 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
                     runtimeCollection.mResourceViewLists.reserve(collection.mResourceViewLists.size());
                     runtimeCollection.mSamplerLists.reserve(collection.mSamplerLists.size());
 
-                    auto buildList = [&runtimeCollection, &index, &group, &attrs](const Shader::DescriptorList& list) {
-                        auto& runtimeList = runtimeCollection.mResourceViewLists.emplace_back();
+                    auto buildList = [&index, &group, &attrs](const Shader::DescriptorList& list, std::pmr::vector<ShaderDescriptorList>& lists) {
+                        auto& runtimeList = lists.emplace_back();
                         runtimeList.mSlot = list.mSlot;
                         runtimeList.mRanges.reserve(list.mRanges.size());
                         runtimeList.mUnboundedDescriptors.reserve(list.mUnboundedDescriptors.size());
@@ -747,11 +852,17 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
                                 runtimeSubrange.mSource = source;
                                 runtimeSubrange.mDescriptors.reserve(subrange.mAttributes.size());
                                 for (const auto& attr : subrange.mAttributes) {
+                                    Expects(!isConstant(attr));
                                     auto& d = runtimeSubrange.mDescriptors.emplace_back();
                                     d.mAttributeType = attr.mType;
                                     visit(overload(
                                         [&](EngineSource_) {
-                                            getType(attr.mName, d.mDataType);
+                                            if (!try_getType(attr.mName, d.mDataType)) {
+                                                throw std::invalid_argument("engine attribute: " + attr.mName + ", data type not found");
+                                            }
+                                        },
+                                        [&](RenderTargetSource_) {
+                                            try_getType(attr.mName, d.mDataType);
                                         },
                                         [&](MaterialSource_) {
                                             try_getType(attr.mName, d.mDataType);
@@ -775,10 +886,10 @@ void RenderSolutionFactory::build(const Shader::AttributeDatabase& attrs, std::s
                         }
                     };
                     for (const auto& [space, list] : collection.mResourceViewLists) {
-                        buildList(list);
+                        buildList(list, runtimeCollection.mResourceViewLists);
                     }
                     for (const auto& [space, list] : collection.mSamplerLists) {
-                        buildList(list);
+                        buildList(list, runtimeCollection.mSamplerLists);
                     }
                 }
             }
