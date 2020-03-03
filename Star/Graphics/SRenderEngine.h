@@ -54,7 +54,9 @@ public:
         uint32_t mFrameQueueSize = 3;
         uint32_t mShaderDescriptorCapacity = 0;
         uint32_t mShaderDescriptorCircularReserve = 0;
-        std::string_view mRenderGraph;
+        MetaID mRenderGraph = {};
+        std::string_view mSolutionName;
+        std::string_view mPipelineName;
     };
 
     Engine();

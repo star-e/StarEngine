@@ -32,7 +32,8 @@ LuminousDesktop& LuminousDesktop::instance() {
     return *sApp;
 }
 
-LuminousDesktop::LuminousDesktop(HINSTANCE hInstance, int nCmd)
+LuminousDesktop::LuminousDesktop(HINSTANCE hInstance, int nCmd, const MetaID& renderGraph,
+    std::string_view solutionName, std::string_view pipelineName)
     : DesktopApp(hInstance, DesktopApp::Desc{})
     // buffers
     //, mPerFrameBuffer(4 * 1024 * 1024)
@@ -58,6 +59,10 @@ LuminousDesktop::LuminousDesktop(HINSTANCE hInstance, int nCmd)
     configs.mFrameQueueSize = 3;
     configs.mShaderDescriptorCapacity = 8192;
     configs.mShaderDescriptorCircularReserve = 2048;
+
+    configs.mRenderGraph = renderGraph;
+    configs.mSolutionName = solutionName;
+    configs.mPipelineName = pipelineName;
 
     Engine::Context context{
         &mRenderService, &mTaskService,

@@ -24,6 +24,8 @@ DX12SwapChain::DX12SwapChain(ID3D12Device* pDevice, const EngineMemory& memory,
     boost::intrusive_ptr<DX12RenderGraphData> render)
     : mMemory(memory)
     , mDevice(pDevice)
+    , mCurrentSolution(mMemory.mPool)
+    , mCurrentPipeline(mMemory.mPool)
     , mRenderGraph(std::move(render))
     , mWaitWork(std::make_shared<boost::asio::io_context::work>(mWaitService))
 {

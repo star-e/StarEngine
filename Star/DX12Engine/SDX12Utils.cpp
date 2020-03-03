@@ -876,7 +876,12 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                 Expects(solution.mPipelines.size() == solutionData.mPipelines.size());
                 uint32_t pipelineID = 0;
                 for (auto&& [pipeline, pipelineData0] : boost::combine(solution.mPipelines, solutionData.mPipelines)) {
-                    if (solutionID != context.mCurrentSolution || pipelineID != context.mCurrentPipeline)
+                    auto currentSolutionId = at(sc.mSolutionIndex, context.mCurrentSolution);
+                    if (solutionID != currentSolutionId)
+                        continue;
+
+                    auto currentPipelineID = at(solutionData.mPipelineIndex, context.mCurrentPipeline);
+                    if (pipelineID != currentPipelineID)
                         continue;
 
                     const auto& pipelineData = pipelineData0.get<0>();

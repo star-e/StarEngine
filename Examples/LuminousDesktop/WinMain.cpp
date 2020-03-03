@@ -20,7 +20,12 @@
 using namespace Star;
 
 int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int nCmd) {
-    LuminousDesktop app(hInstance, nCmd);
+    MetaID renderGraphID;
+    std::stringstream ss;
+    ss << "823b599a-677e-4bb6-83c4-cd28818f3e82";
+    ss >> renderGraphID;
+
+    LuminousDesktop app(hInstance, nCmd, renderGraphID, "Deferred", "Diffuse");
     app.run();
 
     return 0;

@@ -45,6 +45,9 @@ private:
     std::thread::id mThreadID = {};
     EngineMemory mMemory;
     Context mContext;
+    MetaID mRenderGraph = {};
+    std::pmr::string mSolutionName;
+    std::pmr::string mPipelineName;
 
     std::shared_ptr<boost::asio::io_context::work> mTaskWork;
 

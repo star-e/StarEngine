@@ -360,17 +360,7 @@ Format makeTypelessDepthOnly(Format format) noexcept {
     switch(format) {
     case Format::R32_TYPELESS: return Format::D32_SFLOAT;
     case Format::R16_TYPELESS: return Format::D16_UNORM;
-    case Format::R32G8X24_TYPELESS_2PACK32: return Format::R32_SFLOAT_X8X24_TYPELESS_2PACK32;
-    case Format::R24G8_TYPELESS_PACK32: return Format::R24_UNORM_X8_TYPELESS_PACK32;
-    default: return format;
-    }
-}
-
-Format makeTypelessStencilOnly(Format format) noexcept {
-    switch(format) {
-    case Format::R8_TYPELESS: return Format::S8_UINT;
-    case Format::R32G8X24_TYPELESS_2PACK32: return Format::X32_TYPELESS_G8X24_UINT_2PACK32;
-    case Format::R24G8_TYPELESS_PACK32: return Format::X24_TYPELESS_G8_UINT_PACK32;
+    case Format::R24G8_TYPELESS_PACK32: return Format::D24_UNORM_X8_TYPELESS_PACK32;
     default: return format;
     }
 }

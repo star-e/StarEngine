@@ -23,13 +23,19 @@
 namespace Star::Graphics::Render {
 
 void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* pSwapChain,
-    DX12ShaderDescriptorHeap* pDescriptorHeap, DX12RenderWorks& rw, uint32_t id, uint32_t pipelineID
+    DX12ShaderDescriptorHeap* pDescriptorHeap, DX12RenderWorks& rw, std::string_view solutionName, std::string_view pipelineName
 ) {
     //-------------------------------------------------------------------
     // SwapChain
     // Create render targets 
-    for (uint32_t i = 0; i != rw.mSolutions[id].mFramebuffers.size(); ++i) {
-        const auto& rt = rw.mSolutions[id].mFramebuffers[i];
+    auto solutionID = at(rw.mSolutionIndex, solutionName);
+    auto& solution = rw.mSolutions.at(solutionID);
+
+    auto pipelineID = at(solution.mPipelineIndex, pipelineName);
+    auto& pipeline = solution.mPipelines.at(pipelineID);
+
+    for (uint32_t i = 0; i != solution.mFramebuffers.size(); ++i) {
+        const auto& rt = solution.mFramebuffers[i];
 
         if (i < rw.mNumBackBuffers) {
             Expects(!rw.mFramebuffers[i]);
@@ -84,10 +90,9 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
         }
     }
 
-    auto& sl = rw.mSolutions[id];
-    for (uint32_t i = 0; i != sl.mRTVs.size(); ++i) {
-        const auto& rt = rw.mFramebuffers[sl.mRTVSources[i].mHandle];
-        const auto& desc0 = sl.mRTVs[i];
+    for (uint32_t i = 0; i != solution.mRTVs.size(); ++i) {
+        const auto& rt = rw.mFramebuffers[solution.mRTVSources[i].mHandle];
+        const auto& desc0 = solution.mRTVs[i];
         D3D12_RENDER_TARGET_VIEW_DESC desc;
         desc.Format = getDXGIFormat(desc0.mFormat);
         desc.ViewDimension = (D3D12_RTV_DIMENSION)desc0.mViewDimension;
@@ -95,9 +100,9 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
 
         pDevice->CreateRenderTargetView(rt.get(), &desc, rw.mRTVs.getCpuHandle(i));
     }
-    for (uint32_t i = 0; i != sl.mDSVs.size(); ++i) {
-        const auto& ds = rw.mFramebuffers[sl.mDSVSources[i].mHandle];
-        const auto& desc0 = sl.mDSVs[i];
+    for (uint32_t i = 0; i != solution.mDSVs.size(); ++i) {
+        const auto& ds = rw.mFramebuffers[solution.mDSVSources[i].mHandle];
+        const auto& desc0 = solution.mDSVs[i];
 
         D3D12_DEPTH_STENCIL_VIEW_DESC desc;
         desc.Format = getDXGIFormat(desc0.mFormat);
@@ -110,9 +115,9 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
 
     uint32_t cbv_srv_uavIndex = 0;
 
-    for (uint32_t i = 0; i != sl.mSRVs.size(); ++i) {
-        const auto& rt = rw.mFramebuffers[sl.mSRVSources[i].mHandle];
-        const auto& desc0 = sl.mSRVs[i];
+    for (uint32_t i = 0; i != solution.mSRVs.size(); ++i) {
+        const auto& rt = rw.mFramebuffers[solution.mSRVSources[i].mHandle];
+        const auto& desc0 = solution.mSRVs[i];
         D3D12_SHADER_RESOURCE_VIEW_DESC desc{};
         desc.Format = getDXGIFormat(desc0.mFormat);
         desc.ViewDimension = getDX12(desc0.mViewDimension);
@@ -122,7 +127,6 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
         ++cbv_srv_uavIndex;
     }
 
-    auto& pipeline = sl.mPipelines[pipelineID];
     for (auto& pass : pipeline.mPasses) {
         for (auto& subpass : pass.mGraphicsSubpasses) {
             for (auto& collection : subpass.mDescriptors) {
@@ -153,7 +157,7 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
                                         },
                                         [&](RenderTargetSource_) {
                                             for (const auto& attr : subrange.mDescriptors) {
-                                                auto id = sl.mAttributeIndex.at(attr.mID);
+                                                auto id = solution.mAttributeIndex.at(attr.mID);
                                                 auto ptr = rw.mCBV_SRV_UAVs.getCpuHandle(id);
                                                 pDevice->CopyDescriptorsSimple(1, descs[i].mCpuHandle, ptr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
                                                 ++i;
@@ -202,9 +206,13 @@ void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* p
     }
 }
 
-void clearRenderTargets(DX12RenderWorks& rw, DX12ShaderDescriptorHeap* pDescriptorHeap, uint32_t solutionID, uint32_t pipelineID) {
-    auto& solution = rw.mSolutions[solutionID];
-    auto& pipeline = solution.mPipelines[pipelineID];
+void clearRenderTargets(DX12RenderWorks& rw, DX12ShaderDescriptorHeap* pDescriptorHeap, std::string_view solutionName, std::string_view pipelineName) {
+    auto solutionID = at(rw.mSolutionIndex, solutionName);
+    auto& solution = rw.mSolutions.at(solutionID);
+
+    auto pipelineID = at(solution.mPipelineIndex, pipelineName);
+    auto& pipeline = solution.mPipelines.at(pipelineID);
+
     for (auto& pass : pipeline.mPasses) {
         for (auto& subpass : pass.mGraphicsSubpasses) {
             for (auto& collection : subpass.mDescriptors) {

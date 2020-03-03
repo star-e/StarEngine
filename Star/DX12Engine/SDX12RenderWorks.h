@@ -21,7 +21,10 @@
 namespace Star::Graphics::Render {
 
 void createRenderSolutionRenderTargets(ID3D12Device* pDevice, IDXGISwapChain3* pSwapChain,
-    DX12ShaderDescriptorHeap* pDescriptorHeap, DX12RenderWorks& rw, uint32_t solutionID, uint32_t pipelineID);
-void clearRenderTargets(DX12RenderWorks& rw, DX12ShaderDescriptorHeap* pDescriptorHeap, uint32_t solutionID, uint32_t pipelineID);
+    DX12ShaderDescriptorHeap* pDescriptorHeap, DX12RenderWorks& rw,
+    std::string_view solutionName, std::string_view pipelineName);
+
+void clearRenderTargets(DX12RenderWorks& rw, DX12ShaderDescriptorHeap* pDescriptorHeap,
+    std::string_view solutionName, std::string_view pipelineName);
 
 }

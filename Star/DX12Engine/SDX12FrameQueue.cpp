@@ -113,8 +113,8 @@ const DX12FrameContext* DX12FrameQueue::beginFrame(const DX12SwapChain& sc) {
     pFrame->mRenderSolution = &sc.currentSolution();
     pFrame->mRenderWorks = &sc.mRenderGraph->mRenderGraph;
 
-    pFrame->mSolutionID = sc.mCurrentSolution;
-    pFrame->mPipelineID = sc.mCurrentPipeline;
+    pFrame->mSolutionID = sc.getSolutionID();
+    pFrame->mPipelineID = sc.getPipelineID();
 
     return pFrame;
 }

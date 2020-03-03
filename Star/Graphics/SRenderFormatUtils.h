@@ -36,7 +36,6 @@ STAR_GRAPHICS_API Format makeTypelessSFloat(Format format) noexcept;
 STAR_GRAPHICS_API Format makeTypelessDouble(Format format) noexcept;
 STAR_GRAPHICS_API Format makeTypelessDepthStencil(Format format) noexcept;
 STAR_GRAPHICS_API Format makeTypelessDepthOnly(Format format) noexcept;
-STAR_GRAPHICS_API Format makeTypelessStencilOnly(Format format) noexcept;
 
 STAR_GRAPHICS_API bool supportSRGB(Format format) noexcept;
 STAR_GRAPHICS_API bool isSRGB(Format format) noexcept;

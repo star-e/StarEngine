@@ -31,7 +31,6 @@
 #include <Star/AssetFactory/SAssetFactory.h>
 #include <StarCompiler/ShaderGraph/SShaderDSL.h>
 
-#include "SBuildShaders.h"
 using namespace Star;
 using namespace Star::Graphics;
 using namespace Star::Graphics::Render;
@@ -57,39 +56,6 @@ void buildForwardSolution(RenderSolutionFactory& renderSolutionFactory) {
     context.mStrictLightingColorSpace = false;
     context.mVerbose = true;
 
-    //// Image Effects
-    //{
-    //    GraphicsRenderNodeGraph graph{ "ImageEffects", context };
-    //    graph.mRenderTargets = {
-    //        rt("Color", Format::S_R8G8B8A8_SRGB, Width{ 1280 }, Height{ 720 }, DefaultClearColor, Device, BackBuffer),
-    //    };
-
-    //    NODE(Output,
-    //        Outputs{
-    //            present("Color"),
-    //        }
-    //    );
-
-    //    NODE(Color,
-    //        Outputs{
-    //            rtv("Color", DefaultClearColor),
-    //        },
-    //        Queue{
-    //            Unordered{
-    //                { gen("Contents/Pipeline") },
-    //            },
-    //        }
-    //    );
-
-    //    CONNECT(Color, Output);
-
-    //    graph.compile();
-
-    //    renderSolutionFactory.addPipeline(std::move(graph));
-
-    //    std::cout << std::endl;
-    //}
-
     // Forward
     {
         GraphicsRenderNodeGraph graph{ "Diffuse", context };
@@ -104,15 +70,15 @@ void buildForwardSolution(RenderSolutionFactory& renderSolutionFactory) {
             }
         );
 
-        //NODE(Transparent,
-        //    Outputs{
-        //        rtv("Color"),
-        //        dsv_readonly("DepthStencil", Load),
-        //    },
-        //    Inputs{
-        //        srv_depth("DepthStencil"),
-        //    }
-        //);
+        NODE(Transparent,
+            Outputs{
+                rtv("Color"),
+                dsv_readonly("DepthStencil", Load),
+            },
+            Inputs{
+                srv_depth("DepthStencil"),
+            }
+        );
 
         NODE(Lighting,
             Outputs{
@@ -121,8 +87,8 @@ void buildForwardSolution(RenderSolutionFactory& renderSolutionFactory) {
             }
         );
 
-        //CONNECT(Lighting, Transparent);
-        CONNECT(Lighting, Output);
+        CONNECT(Lighting, Transparent);
+        CONNECT(Transparent, Output);
 
         graph.compile();
 
@@ -195,19 +161,6 @@ void buildDeferredSolution(RenderSolutionFactory& renderSolutionFactory) {
     }
 }
 
-void buildMaterials(Resources& resources) {
-    //boost::uuids::name_generator_sha1 gen(boost::uuids::ns::oid());
-
-    //MetaID pipelineID = gen("Materials/Pipeline");
-
-    //auto res = resources.mMaterials.emplace(std::piecewise_construct,
-    //    std::forward_as_tuple(pipelineID), std::forward_as_tuple());
-    //Ensures(res.second);
-
-    //auto& mat = res.first->second;
-    //mat.mShader = "Star/RenderPipeline";
-}
-
 std::string to_underscore(const std::string& name) {
     auto name2 = boost::algorithm::replace_all_copy(name, " ", "_");
     boost::algorithm::to_lower(name2);
@@ -277,8 +230,10 @@ int buildMainShaders(const ShaderModules& modules, ShaderDatabase& db) {
 
     Shader("Star/Fullscreen/Deferred Pipeline", "fullscreen-deferred_pipeline.shader") {
         SinglePass("Deferred", "Diffuse", "PostProcessing", 0) {
+
             Pass.mShaderState.mDepthStencilState.mDepthEnabled = false;
             Pass.mShaderState.mDepthStencilState.mStencilEnable = false;
+
             PixelShader({ "color", half4, SV_Target }) {
                 Group(CopyRadiance);
             }
@@ -288,8 +243,10 @@ int buildMainShaders(const ShaderModules& modules, ShaderDatabase& db) {
         }
 
         SinglePass("Deferred", "Diffuse", "Lighting", 0) {
+
             Pass.mShaderState.mDepthStencilState.mDepthEnabled = false;
             Pass.mShaderState.mDepthStencilState.mStencilEnable = false;
+
             PixelShader({ "color", half4, SV_Target }) {
                 Group(EvaluateDirectionalLight);
                 Group(InitColor);
@@ -381,156 +338,6 @@ int main() {
         std::cout << e.what() << std::endl;
         return 1;
     }
-
-    //try {
-    //    RenderSolutionFactory renderSolutionFactory("Desktop");
-    //    buildForwardSolution(renderSolutionFactory);
-
-    //    ShaderModules modules;
-    //    createBasicModules(modules);
-
-    //    ShaderDatabase shaderDB;
-    //    buildTestShaders(modules, shaderDB);
-
-    //    ShaderGroups shaderGroups;
-
-    //    renderSolutionFactory.buildShaderGroup(shaderGroups);
-    //    shaderDB.fillShaderGroups(shaderGroups);
-
-    //    shaderGroups.buildRootSignatures(modules, PerPass);
-
-    //    ShaderAssetBuilder asset;
-    //    asset.buildShaders(shaderDB, shaderGroups, modules);
-
-    //    {
-    //        ContentSettings settings(std::pmr::get_default_resource());
-    //        auto& meshLayout = settings.mVertexLayouts.emplace_back();
-    //        auto& desc = meshLayout.mBuffers.emplace_back();
-    //        desc.mElements = {
-    //            { POSITION, 0, Format::R32G32B32_SFLOAT },
-    //            { NORMAL, 12, Format::R32G32B32_SFLOAT },
-    //            { TEXCOORD, 24, Format::R32G32_SFLOAT },
-    //        };
-    //        meshLayout.mIndex = {
-    //            { "vertex", { 0, 0} },
-    //            { "normal", { 0, 1 } },
-    //            { "uv", { 0, 2} },
-    //        };
-    //        settings.mIndex.emplace("StaticMesh", 0);
-
-    //        std::ofstream ofs(R"(..\..\..\deploy\asset\default_settings.star)", std::ios::binary);
-    //        boost::archive::binary_oarchive oa(ofs);
-    //        oa << settings;
-    //    }
-    //    {
-    //        Resources resources(std::pmr::get_default_resource());
-    //        asset.build(resources);
-    //        buildMaterials(resources);
-    //        std::ofstream ofs(R"(..\..\..\deploy\asset\default_resources.star)", std::ios::binary);
-    //        boost::archive::binary_oarchive oa(ofs);
-    //        oa << resources;
-    //    }
-
-    //    MetaID contentID{};
-    //    {
-    //        Asset::AssetFactory manager("../../../deploy/tree", "../../../deploy/windows2",
-    //            std::pmr::get_default_resource());
-
-    //        manager.processAssets();
-    //        manager.importAssetInfo();
-    //        manager.exportFlattenedObjects();
-    //        manager.readAssets();
-
-    //        //ContentData scene(std::pmr::get_default_resource());
-    //        //manager.try_createContent("model/scene/sponza_pbr.fbx", scene);
-    //        //const auto& contentID = manager.exportContentData(scene, "model/scene/sponza.content");
-
-    //        //Contents contents(std::pmr::get_default_resource());
-    //        //boost::uuids::name_generator_sha1 gen(boost::uuids::ns::oid());
-    //        //auto metaID = gen("Contents/Pipeline");
-    //        //auto res = contents.mData.emplace(std::piecewise_construct,
-    //        //    std::forward_as_tuple(metaID), std::forward_as_tuple());
-    //        //Ensures(res.second);
-    //        //auto& content = res.first->second;
-    //        //content.mIDs.emplace_back(ContentID{ DrawCall, 0 });
-    //        //content.mDrawCalls.emplace_back();
-    //        //auto& dc = content.mDrawCalls.back();
-    //        //dc.mType = FullScreenTriangle;
-    //        //dc.mMaterial = gen("Materials/Pipeline");
-    //        //dc.mInstanceCount = 1;
-    //        //contents.mData.try_emplace(contentID, content);
-    //        //std::ofstream ofs(R"(..\..\..\deploy\asset\default_contents.star)", std::ios::binary);
-    //        //boost::archive::binary_oarchive oa(ofs);
-    //        //oa << contents;
-    //    }
-
-    //    renderSolutionFactory.updateRenderGraph(modules, shaderGroups);
-    //    {
-    //        renderSolutionFactory.validateGraphs();
-
-    //        RenderSolution renderSolution(std::pmr::get_default_resource());
-    //        renderSolutionFactory.build(renderSolution);
-    //        UnorderedRenderQueue queue(std::pmr::get_default_resource());
-    //        queue.mContents.emplace_back(contentID);
-
-    //        renderSolutionFactory.addContentOrdered(queue, "Forward", "Lighting", renderSolution);
-    //        renderSolutionFactory.addContentOrdered(queue, "Deferred", "Geometry", renderSolution);
-
-    //        RenderSwapChain sc(std::pmr::get_default_resource());
-    //        sc.mName = "Scene";
-    //        sc.mWidth = 1280u;
-    //        sc.mHeight = 720u;
-    //        sc.mSolutions.emplace_back(renderSolution);
-    //        sc.mNumBackBuffers = 3;
-    //        sc.mNumReserveFramebuffers = gsl::narrow_cast<uint32_t>(renderSolution.mFramebuffers.size());
-    //        sc.mNumReserveSRVs = 0;
-    //        sc.mNumReserveUAVs = 0;
-    //        sc.mNumReserveDSVs = gsl::narrow_cast<uint32_t>(renderSolution.mDSVs.size());
-    //        sc.mNumReserveRTVs = gsl::narrow_cast<uint32_t>(renderSolution.mRTVs.size());
-    //        sc.mSolutionIndex.emplace("Desktop", 0);
-
-    //        {
-    //            std::ofstream ofs(R"(..\..\..\deploy\asset\pipeline.star)", std::ios::binary);
-    //            boost::archive::binary_oarchive oa(ofs);
-    //            oa << sc;
-    //        }
-    //    }
-
-    //    //shaderGroups.saveShaders(R"(..\..\Star\Shaders2)");
-    //    //compileShaders(shaderGroups, R"(..\..\Star\Shaders2)", R"(..\..\..\deploy\data\shaders2)");
-    //} catch (std::invalid_argument& e) {
-    //    {
-    //        CONSOLE_COLOR(Red);
-    //        std::cout << "[error] ";
-    //    } 
-    //    std::cout << e.what() << std::endl;
-    //    return 1;
-    //}
-
-    try {
-        ShaderModules modules;
-        ShaderDatabase shaderDB;
-        createStarModules(modules);
-        buildUnityShaders(modules, shaderDB);
-    } catch (std::invalid_argument & e) {
-        {
-            CONSOLE_COLOR(Red);
-            std::cout << "[error] ";
-        }
-        std::cout << e.what() << std::endl;
-        return 1;
-    }
-
-    //try {
-
-    //} catch (std::invalid_argument & e) {
-    //    {
-    //        CONSOLE_COLOR(Red);
-    //        std::cout << "[error] ";
-    //    }
-    //    std::cout << e.what() << std::endl;
-    //    return 1;
-    //}
 
     CONSOLE_COLOR(Green);
     std::cout << "[succeeded]";

@@ -50,15 +50,24 @@ public:
         return mRenderGraph->mRenderGraph.mRTVs.getCpuHandle(size_t(id) + sRGB * mRenderGraph->mRenderGraph.mNumBackBuffers);
     }
 
-    const DX12RenderSolution& currentSolution() const noexcept {
-        Expects((size_t)mCurrentSolution < mRenderGraph->mRenderGraph.mSolutions.size());
-        return mRenderGraph->mRenderGraph.mSolutions[mCurrentSolution];
+    uint32_t getSolutionID() const {
+        return mRenderGraph->mRenderGraph.mSolutionIndex.at(mCurrentSolution);
     }
 
-    const DX12RenderPipeline& currentPipeline() const noexcept {
-        const auto& rw = currentSolution();
-        Expects(mCurrentPipeline < rw.mPipelines.size());
-        return rw.mPipelines[mCurrentPipeline];
+    uint32_t getPipelineID() const {
+        const auto& solution = currentSolution();
+        return solution.mPipelineIndex.at(mCurrentPipeline);
+    }
+
+    const DX12RenderSolution& currentSolution() const {
+        auto solutionID = mRenderGraph->mRenderGraph.mSolutionIndex.at(mCurrentSolution);
+        return mRenderGraph->mRenderGraph.mSolutions.at(solutionID);
+    }
+
+    const DX12RenderPipeline& currentPipeline() const {
+        const auto& solution = currentSolution();
+        auto pipelineID = solution.mPipelineIndex.at(mCurrentPipeline);
+        return solution.mPipelines.at(pipelineID);
     }
 
     // BackBuffers
@@ -66,8 +75,8 @@ public:
     EngineMemory mMemory = {};
     com_ptr<IDXGISwapChain3> mSwapChain;
     winrt::handle mSwapEvent;
-    uint32_t mCurrentSolution = 1;
-    uint32_t mCurrentPipeline = 0;
+    std::pmr::string mCurrentSolution;
+    std::pmr::string mCurrentPipeline;
     boost::intrusive_ptr<DX12RenderGraphData> mRenderGraph;
 
     boost::asio::io_context mWaitService;

@@ -26,7 +26,8 @@ class LuminousDesktop : public DesktopApp {
 public:
     static LuminousDesktop& instance();
 
-    LuminousDesktop(HINSTANCE hInstance, int nCmd);
+    LuminousDesktop(HINSTANCE hInstance, int nCmd, const MetaID& renderGraph,
+        std::string_view solutionName, std::string_view pipelineName);
     ~LuminousDesktop();
 
     void resizeWindow(const Graphics::Render::SwapChainContext& context);

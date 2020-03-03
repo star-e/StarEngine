@@ -34,6 +34,9 @@ DX12Engine::DX12Engine(
     : mThreadID(std::this_thread::get_id())
     , mMemory(memory)
     , mContext(context)
+    , mRenderGraph(configs.mRenderGraph)
+    , mSolutionName(configs.mSolutionName, mMemory.mPool)
+    , mPipelineName(configs.mPipelineName, mMemory.mPool)
     , mTaskWork(std::make_shared<boost::asio::io_context::work>(*context.mTaskService))
     , mFactory(DX12::createFactory())
     , mDevice(DX12::createDevice(mFactory.get()))
@@ -70,10 +73,7 @@ void DX12Engine::start() {
     DX12UploadBuffer uploadBuffer(mUploadBufferPool,
         gsl::narrow_cast<uint32_t>(mFrameQueue.mFrames.size()), 0);
 
-    uint32_t currentSolution = 1;
-    uint32_t currentPipeline = 0;
-
-    CreationContext creation{ currentSolution, currentPipeline,
+    CreationContext creation{ mSolutionName, mPipelineName,
         mDevice.get(), mFrameQueue.mDirectQueue.get(),
         mFrameQueue.mFrames.at(mFrameQueue.mNextFrameIndex).mCommandAllocator.get(),
         mFrameQueue.mFrames.at(mFrameQueue.mNextFrameIndex).mCommandList.get(),
@@ -136,14 +136,12 @@ void DX12Engine::start() {
     }
     creation.flush();
     
-    MetaID metaID{};
-    std::stringstream ss;
-    ss << "823b599a-677e-4bb6-83c4-cd28818f3e82";
-    ss >> metaID;
-    creation.mRenderGraph = metaID;
+
+
+    creation.mRenderGraph = mRenderGraph;
 
     creation.record();
-    try_createDX12(creation, mPersistentResources, metaID, Core::RenderGraph, false);
+    try_createDX12(creation, mPersistentResources, mRenderGraph, Core::RenderGraph, false);
     creation.flush();
 
     mMemory.mPerFrame->release();
@@ -207,16 +205,16 @@ void DX12Engine::resizeSwapChain(uint32_t id, const SwapChainContext& sc) {
 
 void DX12Engine::startSwapChain(uint32_t id, void* hWnd) {
     post(*mContext.mRenderStrand, [=]() {
-        MetaID metaID{};
-        std::stringstream ss;
-        ss << "823b599a-677e-4bb6-83c4-cd28818f3e82";
-        ss >> metaID;
-        auto iter = mPersistentResources.mRenderGraphs.find(metaID);
+        auto iter = mPersistentResources.mRenderGraphs.find(mRenderGraph);
 
         Expects(!mSwapChains.at(id));
         auto& sc = mSwapChains.at(id);
+
         sc = std::make_shared<DX12SwapChain>(mDevice.get(), mMemory,
             boost::intrusive_ptr<DX12RenderGraphData>(const_cast<DX12RenderGraphData*>(&*iter)));
+
+        sc->mCurrentSolution = mSolutionName;
+        sc->mCurrentPipeline = mPipelineName;
 
         sc->mWindowHandle = hWnd;
 

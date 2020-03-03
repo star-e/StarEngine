@@ -586,20 +586,24 @@ public:
 
             renderSwapChain.mNumBackBuffers = 3;
 
+            std::ostringstream oss;
+            uint32_t count = 0;
+            auto fileRSG = mFolder / renderGraphInfo.mName;
             for (auto& [solutionName, factory] : rg.mSolutionFactories) {
                 auto& solutionData = renderSwapChain.mSolutions.at(at(renderSwapChain.mSolutionIndex, solutionName));
 
-                std::ostringstream oss;
+                if (count++)
+                    oss << "\n";
+
                 factory.build(attributes, solutionName, solutionData, oss);
-                auto fileRSG = mFolder / renderGraphInfo.mName;
                 fileRSG.replace_extension(".rsg");
-                updateFile(fileRSG, oss.str());
                 renderSwapChain.mNumReserveFramebuffers = std::max(renderSwapChain.mNumReserveFramebuffers, gsl::narrow<uint32_t>(solutionData.mFramebuffers.size()));
                 renderSwapChain.mNumReserveCBV_SRV_UAVs = std::max(renderSwapChain.mNumReserveCBV_SRV_UAVs,
                     gsl::narrow<uint32_t>(solutionData.mCBVs.size() + solutionData.mSRVs.size() + solutionData.mUAVs.size()));
                 renderSwapChain.mNumReserveDSVs = std::max(renderSwapChain.mNumReserveDSVs, gsl::narrow<uint32_t>(solutionData.mDSVs.size()));
                 renderSwapChain.mNumReserveRTVs = std::max(renderSwapChain.mNumReserveRTVs, gsl::narrow<uint32_t>(solutionData.mRTVs.size()));
             }
+            updateFile(fileRSG, oss.str());
 
             updateResource(renderGraphInfo.mName, mResources.mRenderGraphs.at(renderGraphInfo.mMetaID));
         }

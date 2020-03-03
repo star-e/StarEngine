@@ -33,6 +33,8 @@
 #include <Star/PrecompiledHeaders/SCore.h>
 #include <Star/PrecompiledHeaders/SCoreRuntime.h>
 
+#include <boost/uuid/uuid_io.hpp>
+
 #include <rxcpp/rx.hpp>
 
 #include <Star/SCoreDump.h>
