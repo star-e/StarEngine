@@ -26,61 +26,6 @@ namespace Graphics {
 
 namespace Render {
 
-#define DECL_VIEW_CNTR(FUNC, STATE) \
-inline RenderValue FUNC(std::string_view name,                    \
-    ResourceDataView data = TextureView{ MipRangeView{ 0, 1 } }                            \
-) {                                                                                        \
-    RenderValue value;                                                                     \
-    value.mName = name;                                                                    \
-    value.mState = STATE;                                                         \
-    value.mData = std::move(data);                                                         \
-    return value;                                                                          \
-}                                                                                          \
-                                                                                           \
-inline RenderValue FUNC(std::string_view name,                    \
-    LoadOp load, ResourceDataView data = TextureView{ MipRangeView{ 0, 1 } }               \
-) {                                                                                        \
-    RenderValue value;                                                                     \
-    value.mName = name;                                                                    \
-    value.mState = STATE;                                                         \
-    value.mData = std::move(data);                                                         \
-    value.mLoadOp = std::move(load);                                                       \
-    return value;                                                                          \
-}                                                                                          \
-                                                                                           \
-inline RenderValue FUNC(std::string_view name,                    \
-    StoreOp store, ResourceDataView data = TextureView{ MipRangeView{ 0, 1 } }             \
-) {                                                                                        \
-    RenderValue value;                                                                     \
-    value.mName = name;                                                                    \
-    value.mState = STATE;                                                         \
-    value.mData = std::move(data);                                                         \
-    value.mStoreOp = std::move(store);                                                     \
-    return value;                                                                          \
-}                                                                                          \
-                                                                                           \
-inline RenderValue FUNC(std::string_view name,                    \
-    LoadOp load, StoreOp store, ResourceDataView data = TextureView{ MipRangeView{ 0, 1 } }\
-) {                                                                                        \
-    RenderValue value;                                                                     \
-    value.mName = name;                                                                    \
-    value.mState = STATE;                                                         \
-    value.mData = std::move(data);                                                         \
-    value.mLoadOp = std::move(load);                                                       \
-    value.mStoreOp = std::move(store);                                                     \
-    return value;                                                                          \
-}
-
-DECL_VIEW_CNTR(srv, ShaderResource)
-DECL_VIEW_CNTR(srv_depth, DepthRead)
-DECL_VIEW_CNTR(uav, UnorderedAccess)
-DECL_VIEW_CNTR(rtv, RenderTarget)
-DECL_VIEW_CNTR(dsv, DepthWrite)
-DECL_VIEW_CNTR(dsv_readonly, DepthRead)
-//DECL_VIEW_CNTR(rtv_resolve, ResolveDest)
-DECL_VIEW_CNTR(present, Present)
-#undef DECL_VIEW_CNTR
-
 inline bool equal(const RenderValue& lhs, const RenderValue& rhs) noexcept {
     return std::forward_as_tuple(lhs.mName, lhs.mData)
         == std::forward_as_tuple(rhs.mName, rhs.mData);

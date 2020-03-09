@@ -2966,16 +2966,17 @@ struct DescriptorIndex {
     Persistency mPersistency;
 };
 
-inline bool operator==(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
+inline bool operator==(const DescriptorIndex& lhs, const DescriptorIndex& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mUpdate, lhs.mType, lhs.mVisibility, lhs.mPersistency) ==
         std::forward_as_tuple(rhs.mUpdate, rhs.mType, rhs.mVisibility, rhs.mPersistency);
 }
-inline bool operator!=(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
+
+inline bool operator!=(const DescriptorIndex& lhs, const DescriptorIndex& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const DescriptorIndex&lhs, const DescriptorIndex&rhs) noexcept {
+inline bool operator<(const DescriptorIndex& lhs, const DescriptorIndex& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mUpdate, lhs.mType, lhs.mVisibility, lhs.mPersistency) <
         std::forward_as_tuple(rhs.mUpdate, rhs.mType, rhs.mVisibility, rhs.mPersistency);

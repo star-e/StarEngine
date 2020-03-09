@@ -66,24 +66,24 @@ void buildForwardSolution(RenderSolutionFactory& renderSolutionFactory) {
 
         NODE(Output,
             Outputs{
-                present("Color"),
+                { "Color", Present },
             }
         );
 
         NODE(Transparent,
             Outputs{
-                rtv("Color"),
-                dsv_readonly("DepthStencil", Load),
+                { "Color", RenderTarget },
+                { "DepthStencil", DepthRead },
             },
             Inputs{
-                srv_depth("DepthStencil"),
+                { "DepthStencil", DepthRead },
             }
         );
 
         NODE(Lighting,
             Outputs{
-                rtv("Color", DefaultClearColor),
-                dsv("DepthStencil", ClearDepthStencil()),
+                { "Color", RenderTarget },
+                { "DepthStencil", DepthWrite, ClearDepthStencil{} },
             }
         );
 
@@ -115,35 +115,35 @@ void buildDeferredSolution(RenderSolutionFactory& renderSolutionFactory) {
 
         NODE(Output,
             Outputs{
-                present("Color"),
+                { "Color", Present },
             }
         );
 
         NODE(PostProcessing, /*Device,*/
             Outputs{
-                rtv("Color", DefaultClearColor),
+                { "Color", RenderTarget, DefaultClearColor },
             },
             Inputs{
-                srv("Radiance"),
+                { "Radiance", ShaderResource },
             }
         );
 
         NODE(Lighting,
             Outputs{
-                rtv("Radiance", DontRead),
+                { "Radiance", RenderTarget, DontRead },
             },
             Inputs{
-                srv("BaseColor"),
-                srv("Normal"),
-                srv_depth("DepthStencil"),
+                { "BaseColor", ShaderResource },
+                { "Normal", ShaderResource },
+                { "DepthStencil", DepthRead },
             }
         );
 
         NODE(Geometry,
             Outputs{
-                rtv("BaseColor", AlbedoClearColor),
-                rtv("Normal", NormalClearColor),
-                dsv("DepthStencil", ClearDepthStencil()),
+                { "BaseColor", RenderTarget, AlbedoClearColor },
+                { "Normal", RenderTarget, NormalClearColor },
+                { "DepthStencil", DepthWrite, ClearDepthStencil() },
             }
         );
 
@@ -178,6 +178,7 @@ int buildMainShaders(const ShaderModules& modules, ShaderDatabase& db) {
                         Group(EvaluateDirectionalLight);
                         Group(InitColor);
                         Group(NdotL);
+                        //Group(VisualizeWorldNormal);
                         Group(DirectionalLight);
                         if (!normalmap.empty()) {
                             Group(TangentNormalToWorld);

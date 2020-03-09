@@ -103,16 +103,17 @@ struct ShaderStruct {
     std::string mName;
 };
 
-inline bool operator==(const ShaderStruct&lhs, const ShaderStruct&rhs) noexcept {
+inline bool operator==(const ShaderStruct& lhs, const ShaderStruct& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mName) ==
         std::forward_as_tuple(rhs.mName);
 }
-inline bool operator!=(const ShaderStruct&lhs, const ShaderStruct&rhs) noexcept {
+
+inline bool operator!=(const ShaderStruct& lhs, const ShaderStruct& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const ShaderStruct&lhs, const ShaderStruct&rhs) noexcept {
+inline bool operator<(const ShaderStruct& lhs, const ShaderStruct& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mName) <
         std::forward_as_tuple(rhs.mName);
@@ -252,7 +253,7 @@ struct AttributeDescriptor {
     std::string mName;
 };
 
-inline bool operator<(const AttributeDescriptor&lhs, const AttributeDescriptor&rhs) noexcept {
+inline bool operator<(const AttributeDescriptor& lhs, const AttributeDescriptor& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mUpdate, lhs.mRootParameterType, lhs.mPersistency, lhs.mDescriptorType, lhs.mRegisterSpace, lhs.mSource, lhs.mBoundedness, lhs.mName) <
         std::forward_as_tuple(rhs.mUpdate, rhs.mRootParameterType, rhs.mPersistency, rhs.mDescriptorType, rhs.mRegisterSpace, rhs.mSource, rhs.mBoundedness, rhs.mName);
@@ -397,7 +398,7 @@ struct AttributeKey {
     ShaderResourceDataView mData;
 };
 
-inline bool operator<(const AttributeKey&lhs, const AttributeKey&rhs) noexcept {
+inline bool operator<(const AttributeKey& lhs, const AttributeKey& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mName, lhs.mData) <
         std::forward_as_tuple(rhs.mName, rhs.mData);
@@ -409,16 +410,17 @@ struct AttributeUsage {
     ShaderResourceDataView mData;
 };
 
-inline bool operator==(const AttributeUsage&lhs, const AttributeUsage&rhs) noexcept {
+inline bool operator==(const AttributeUsage& lhs, const AttributeUsage& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mName, lhs.mType, lhs.mData) ==
         std::forward_as_tuple(rhs.mName, rhs.mType, rhs.mData);
 }
-inline bool operator!=(const AttributeUsage&lhs, const AttributeUsage&rhs) noexcept {
+
+inline bool operator!=(const AttributeUsage& lhs, const AttributeUsage& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const AttributeUsage&lhs, const AttributeUsage&rhs) noexcept {
+inline bool operator<(const AttributeUsage& lhs, const AttributeUsage& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mName, lhs.mType, lhs.mData) <
         std::forward_as_tuple(rhs.mName, rhs.mType, rhs.mData);
@@ -439,7 +441,7 @@ struct ShaderSemanticValue {
     std::string mName;
 };
 
-inline bool operator<(const ShaderSemanticValue&lhs, const ShaderSemanticValue&rhs) noexcept {
+inline bool operator<(const ShaderSemanticValue& lhs, const ShaderSemanticValue& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mSemantic, lhs.mValue, lhs.mName) <
         std::forward_as_tuple(rhs.mSemantic, rhs.mValue, rhs.mName);
@@ -487,7 +489,7 @@ struct Constant {
     std::string mName;
 };
 
-inline bool operator<(const Constant&lhs, const Constant&rhs) noexcept {
+inline bool operator<(const Constant& lhs, const Constant& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mType, lhs.mName) <
         std::forward_as_tuple(rhs.mType, rhs.mName);

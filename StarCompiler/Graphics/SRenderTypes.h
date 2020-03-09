@@ -38,16 +38,17 @@ struct BufferView {
     BufferFlag mFlags;
 };
 
-inline bool operator==(const BufferView&lhs, const BufferView&rhs) noexcept {
+inline bool operator==(const BufferView& lhs, const BufferView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirstElement, lhs.mNumElements, lhs.mStructureByteStride, lhs.mFlags) ==
         std::forward_as_tuple(rhs.mFirstElement, rhs.mNumElements, rhs.mStructureByteStride, rhs.mFlags);
 }
-inline bool operator!=(const BufferView&lhs, const BufferView&rhs) noexcept {
+
+inline bool operator!=(const BufferView& lhs, const BufferView& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const BufferView&lhs, const BufferView&rhs) noexcept {
+inline bool operator<(const BufferView& lhs, const BufferView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirstElement, lhs.mNumElements, lhs.mStructureByteStride, lhs.mFlags) <
         std::forward_as_tuple(rhs.mFirstElement, rhs.mNumElements, rhs.mStructureByteStride, rhs.mFlags);
@@ -58,16 +59,17 @@ struct MipChainView {
     float mResourceMinLODClamp = 0;
 };
 
-inline bool operator==(const MipChainView&lhs, const MipChainView&rhs) noexcept {
+inline bool operator==(const MipChainView& lhs, const MipChainView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mMostDetailedMip, lhs.mResourceMinLODClamp) ==
         std::forward_as_tuple(rhs.mMostDetailedMip, rhs.mResourceMinLODClamp);
 }
-inline bool operator!=(const MipChainView&lhs, const MipChainView&rhs) noexcept {
+
+inline bool operator!=(const MipChainView& lhs, const MipChainView& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const MipChainView&lhs, const MipChainView&rhs) noexcept {
+inline bool operator<(const MipChainView& lhs, const MipChainView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mMostDetailedMip, lhs.mResourceMinLODClamp) <
         std::forward_as_tuple(rhs.mMostDetailedMip, rhs.mResourceMinLODClamp);
@@ -79,16 +81,17 @@ struct MipRangeView {
     float mResourceMinLODClamp = 0;
 };
 
-inline bool operator==(const MipRangeView&lhs, const MipRangeView&rhs) noexcept {
+inline bool operator==(const MipRangeView& lhs, const MipRangeView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mMostDetailedMip, lhs.mMipLevels, lhs.mResourceMinLODClamp) ==
         std::forward_as_tuple(rhs.mMostDetailedMip, rhs.mMipLevels, rhs.mResourceMinLODClamp);
 }
-inline bool operator!=(const MipRangeView&lhs, const MipRangeView&rhs) noexcept {
+
+inline bool operator!=(const MipRangeView& lhs, const MipRangeView& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const MipRangeView&lhs, const MipRangeView&rhs) noexcept {
+inline bool operator<(const MipRangeView& lhs, const MipRangeView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mMostDetailedMip, lhs.mMipLevels, lhs.mResourceMinLODClamp) <
         std::forward_as_tuple(rhs.mMostDetailedMip, rhs.mMipLevels, rhs.mResourceMinLODClamp);
@@ -100,16 +103,17 @@ struct PlaneSlice {
     uint32_t mPlaneSlice = 0;
 };
 
-inline bool operator==(const PlaneSlice&lhs, const PlaneSlice&rhs) noexcept {
+inline bool operator==(const PlaneSlice& lhs, const PlaneSlice& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mPlaneSlice) ==
         std::forward_as_tuple(rhs.mPlaneSlice);
 }
-inline bool operator!=(const PlaneSlice&lhs, const PlaneSlice&rhs) noexcept {
+
+inline bool operator!=(const PlaneSlice& lhs, const PlaneSlice& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const PlaneSlice&lhs, const PlaneSlice&rhs) noexcept {
+inline bool operator<(const PlaneSlice& lhs, const PlaneSlice& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mPlaneSlice) <
         std::forward_as_tuple(rhs.mPlaneSlice);
@@ -122,16 +126,17 @@ struct ArrayRange {
     uint32_t mArraySize = 0;
 };
 
-inline bool operator==(const ArrayRange&lhs, const ArrayRange&rhs) noexcept {
+inline bool operator==(const ArrayRange& lhs, const ArrayRange& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirstArraySlice, lhs.mArraySize) ==
         std::forward_as_tuple(rhs.mFirstArraySlice, rhs.mArraySize);
 }
-inline bool operator!=(const ArrayRange&lhs, const ArrayRange&rhs) noexcept {
+
+inline bool operator!=(const ArrayRange& lhs, const ArrayRange& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const ArrayRange&lhs, const ArrayRange&rhs) noexcept {
+inline bool operator<(const ArrayRange& lhs, const ArrayRange& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirstArraySlice, lhs.mArraySize) <
         std::forward_as_tuple(rhs.mFirstArraySlice, rhs.mArraySize);
@@ -142,16 +147,17 @@ struct DepthRange {
     uint32_t mWSize = 0;
 };
 
-inline bool operator==(const DepthRange&lhs, const DepthRange&rhs) noexcept {
+inline bool operator==(const DepthRange& lhs, const DepthRange& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirstWSlice, lhs.mWSize) ==
         std::forward_as_tuple(rhs.mFirstWSlice, rhs.mWSize);
 }
-inline bool operator!=(const DepthRange&lhs, const DepthRange&rhs) noexcept {
+
+inline bool operator!=(const DepthRange& lhs, const DepthRange& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const DepthRange&lhs, const DepthRange&rhs) noexcept {
+inline bool operator<(const DepthRange& lhs, const DepthRange& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirstWSlice, lhs.mWSize) <
         std::forward_as_tuple(rhs.mFirstWSlice, rhs.mWSize);
@@ -159,16 +165,17 @@ inline bool operator<(const DepthRange&lhs, const DepthRange&rhs) noexcept {
 
 struct CubeSlice {};
 
-inline bool operator==(const CubeSlice&lhs, const CubeSlice&rhs) noexcept {
+inline bool operator==(const CubeSlice& lhs, const CubeSlice& rhs) noexcept {
     return
         std::forward_as_tuple() ==
         std::forward_as_tuple();
 }
-inline bool operator!=(const CubeSlice&lhs, const CubeSlice&rhs) noexcept {
+
+inline bool operator!=(const CubeSlice& lhs, const CubeSlice& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const CubeSlice&lhs, const CubeSlice&rhs) noexcept {
+inline bool operator<(const CubeSlice& lhs, const CubeSlice& rhs) noexcept {
     return
         std::forward_as_tuple() <
         std::forward_as_tuple();
@@ -179,16 +186,17 @@ struct CubeRange {
     uint32_t mNumCubes = 0;
 };
 
-inline bool operator==(const CubeRange&lhs, const CubeRange&rhs) noexcept {
+inline bool operator==(const CubeRange& lhs, const CubeRange& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirst2DArrayFace, lhs.mNumCubes) ==
         std::forward_as_tuple(rhs.mFirst2DArrayFace, rhs.mNumCubes);
 }
-inline bool operator!=(const CubeRange&lhs, const CubeRange&rhs) noexcept {
+
+inline bool operator!=(const CubeRange& lhs, const CubeRange& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const CubeRange&lhs, const CubeRange&rhs) noexcept {
+inline bool operator<(const CubeRange& lhs, const CubeRange& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mFirst2DArrayFace, lhs.mNumCubes) <
         std::forward_as_tuple(rhs.mFirst2DArrayFace, rhs.mNumCubes);
@@ -202,16 +210,17 @@ struct TextureView {
     ArrayOrDepthView mArrayOrDepthView;
 };
 
-inline bool operator==(const TextureView&lhs, const TextureView&rhs) noexcept {
+inline bool operator==(const TextureView& lhs, const TextureView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mMipView, lhs.mPlaneView, lhs.mArrayOrDepthView) ==
         std::forward_as_tuple(rhs.mMipView, rhs.mPlaneView, rhs.mArrayOrDepthView);
 }
-inline bool operator!=(const TextureView&lhs, const TextureView&rhs) noexcept {
+
+inline bool operator!=(const TextureView& lhs, const TextureView& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const TextureView&lhs, const TextureView&rhs) noexcept {
+inline bool operator<(const TextureView& lhs, const TextureView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mMipView, lhs.mPlaneView, lhs.mArrayOrDepthView) <
         std::forward_as_tuple(rhs.mMipView, rhs.mPlaneView, rhs.mArrayOrDepthView);
@@ -221,16 +230,17 @@ struct RaytracingView {
     std::string mName;
 };
 
-inline bool operator==(const RaytracingView&lhs, const RaytracingView&rhs) noexcept {
+inline bool operator==(const RaytracingView& lhs, const RaytracingView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mName) ==
         std::forward_as_tuple(rhs.mName);
 }
-inline bool operator!=(const RaytracingView&lhs, const RaytracingView&rhs) noexcept {
+
+inline bool operator!=(const RaytracingView& lhs, const RaytracingView& rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const RaytracingView&lhs, const RaytracingView&rhs) noexcept {
+inline bool operator<(const RaytracingView& lhs, const RaytracingView& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mName) <
         std::forward_as_tuple(rhs.mName);

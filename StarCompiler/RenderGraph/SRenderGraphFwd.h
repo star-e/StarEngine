@@ -74,14 +74,14 @@ struct CopyDest_;
 struct CopySource_;
 struct ResolveDest_;
 struct ResolveSource_;
+struct AccelerationStructure_;
 struct Present_;
-struct Raytracing_;
 struct Predication_;
 
-using TextureViewState = std::variant<Common_, RenderTarget_, UnorderedAccess_, DepthWrite_, DepthRead_, ShaderResource_, CopyDest_, CopySource_, ResolveDest_, ResolveSource_, Present_>;
+using ResourceState = std::variant<Common_, RenderTarget_, UnorderedAccess_, DepthWrite_, DepthRead_, ShaderResource_, CopyDest_, CopySource_, ResolveDest_, ResolveSource_, AccelerationStructure_, Present_>;
 
-struct RenderTargetState;
 struct RenderValue;
+struct RenderTargetState;
 struct NodeRenderTargetState;
 struct RenderTargetStateTransition;
 struct RenderTargetStateTransitions;

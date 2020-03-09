@@ -31,7 +31,7 @@ void validateResourceDataView(const Resource& resource, const ResourceDataView& 
 void validateResourceView(const Resource& resource, const ResourceDataView& view, const ResourceViewType& state);
 
 void validateTextureViewState(const Resource& resource, const ResourceDataView& view,
-    const TextureViewState& state, const SourceTarget& st, const API& api);
+    const ResourceState& state, const SourceTarget& st, const API& api);
 
 void validateRenderTarget(const RenderTargetResource& r);
 PixelModel validateRenderTargetBinding(const ColorSpace& cs, const RenderTargetResource& rt);
@@ -40,7 +40,7 @@ void validateRenderValue(const Resource& resource, const RenderValue& node,
     const SourceTarget& st, const API& api);
 
 void validateViewConvertion(const ResourceViewType& input, const ResourceViewType& output);
-void validateTextureViewTransition(const TextureViewState& input, const TextureViewState& output);
+void validateTextureViewTransition(const ResourceState& input, const ResourceState& output);
 
 // utils
 bool isMSAA(const RenderTargetResource& r);
@@ -151,17 +151,20 @@ inline RESOURCE_STATES buildResourceStates(const RenderTargetState& state) {
             }
             return static_cast<RESOURCE_STATES>(flags);
         },
-        [&](CopyDest_) {
+        [](CopyDest_) {
             return RESOURCE_STATE_COPY_SOURCE;
         },
-        [&](CopySource_) {
+        [](CopySource_) {
             return RESOURCE_STATE_COPY_SOURCE;
         },
-        [&](ResolveDest_) {
+        [](ResolveDest_) {
             return RESOURCE_STATE_RESOLVE_DEST;
         },
-        [&](ResolveSource_) {
+        [](ResolveSource_) {
             return RESOURCE_STATE_RESOLVE_SOURCE;
+        },
+        [](AccelerationStructure_) {
+            return RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE;
         },
         [](Present_) {
             return RESOURCE_STATE_PRESENT;
@@ -259,7 +262,6 @@ inline const char* getViewName(const ResourceViewType& v) {
     ), v);
 }
 
-const char* getStateName(const TextureViewState& v);
 std::string getRenderTargetStateName(const RenderTargetState& v);
 
 }

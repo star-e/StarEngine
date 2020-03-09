@@ -58,11 +58,11 @@ inline const char* getName(const CopyDest_& v) noexcept { return "CopyDest"; }
 inline const char* getName(const CopySource_& v) noexcept { return "CopySource"; }
 inline const char* getName(const ResolveDest_& v) noexcept { return "ResolveDest"; }
 inline const char* getName(const ResolveSource_& v) noexcept { return "ResolveSource"; }
+inline const char* getName(const AccelerationStructure_& v) noexcept { return "AccelerationStructure"; }
 inline const char* getName(const Present_& v) noexcept { return "Present"; }
-inline const char* getName(const Raytracing_& v) noexcept { return "Raytracing"; }
 inline const char* getName(const Predication_& v) noexcept { return "Predication"; }
-inline const char* getName(const RenderTargetState& v) noexcept { return "RenderTargetState"; }
 inline const char* getName(const RenderValue& v) noexcept { return "RenderValue"; }
+inline const char* getName(const RenderTargetState& v) noexcept { return "RenderTargetState"; }
 inline const char* getName(const NodeRenderTargetState& v) noexcept { return "NodeRenderTargetState"; }
 inline const char* getName(const RenderTargetStateTransition& v) noexcept { return "RenderTargetStateTransition"; }
 inline const char* getName(const RenderTargetStateTransitions& v) noexcept { return "RenderTargetStateTransitions"; }

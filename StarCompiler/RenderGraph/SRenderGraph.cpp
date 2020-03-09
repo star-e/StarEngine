@@ -20,6 +20,7 @@
 #include "SRenderGraphDSL.h"
 #include <Star/SGraphUtils.h>
 #include <StarCompiler/Graphics/SRenderFormatUtils.h>
+#include <StarCompiler/RenderGraph/SRenderGraphNames.h>
 
 namespace Star::Graphics::Render {
 
@@ -662,7 +663,7 @@ void GraphicsRenderNodeGraph::outputValueStates() const {
             CONSOLE_COLOR(Cyan);
             auto idx = findIndex(v.second, v.second.mStates.back().mNodeID);
             std::cout << "initial: " <<
-                getStateName(getPrevState(v.second, idx).mRenderTargetState.mState);
+                getVariantName(getPrevState(v.second, idx).mRenderTargetState.mState);
         }
         std::cout << std::endl;
 

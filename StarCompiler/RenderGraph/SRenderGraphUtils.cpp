@@ -43,24 +43,8 @@ OrderedNameMap<RenderValue> getValues(const RenderNode& node) {
     return values;
 }
 
-const char* getStateName(const TextureViewState& v) {
-    return visit(overload(
-        [](Common_) { return "Common"; },
-        [](RenderTarget_) { return "RenderTarget"; },
-        [](UnorderedAccess_) { return "UnorderedAccess"; },
-        [](DepthWrite_) { return "DepthWrite"; },
-        [](DepthRead_) { return "DepthRead"; },
-        [](ShaderResource_) { return "ShaderResource"; },
-        [](CopyDest_) { return "CopyDest"; },
-        [](CopySource_) { return "CopySource"; },
-        [](ResolveDest_) { return "ResolveDest"; },
-        [](ResolveSource_) { return "ResolveSource"; },
-        [](Present_) { return "Present"; }
-    ), v);
-}
-
 std::string getRenderTargetStateName(const RenderTargetState& v) {
-    return getStateName(v.mState) +
+    return getVariantName(v.mState) +
         visit(overload(
             [&](DepthRead_) -> std::string {
                 std::string str;
@@ -125,7 +109,7 @@ void validateViewConvertion(const ResourceViewType& input, const ResourceViewTyp
     ), output, input);
 }
 
-void validateTextureViewTransition(const TextureViewState& src, const TextureViewState& dst) {
+void validateTextureViewTransition(const ResourceState& src, const ResourceState& dst) {
     visit(overload(
         [&](Common_, auto) {},
         [&](RenderTarget_, Common_) {},
@@ -551,13 +535,20 @@ void validateResourceView(const Resource& resource,
             ), state);
         },
         [&](const RaytracingView&) {
-            throw std::invalid_argument("[state] raytracing view not supported yet");
+            visit(overload(
+                [&](SRV_) {
+                    // do nothing
+                },
+                [&](auto) {
+                    throw std::invalid_argument("[state] raytracing acceleration structure only support srv");
+                }
+            ), state);
         }
     ), view);
 }
 
 void validateTextureViewState(const Resource& resource, const ResourceDataView& view,
-    const TextureViewState& state, const SourceTarget& st, const API& api
+    const ResourceState& state, const SourceTarget& st, const API& api
 ) {
     visit(overload(
         [&](Source_) {
@@ -600,6 +591,9 @@ void validateTextureViewState(const Resource& resource, const ResourceDataView& 
                         throw std::invalid_argument("only ms texture supports Resolve Source");
                     }
                 },
+                [&](AccelerationStructure_) {
+                    validateResourceView(resource, view, SRV);
+                },
                 [&](Present_) {
                     throw std::invalid_argument("Present_ is output only");
                 }
@@ -637,6 +631,9 @@ void validateTextureViewState(const Resource& resource, const ResourceDataView& 
                 },
                 [&](ResolveSource_) {
                     throw std::invalid_argument("target cannot be resolve source");
+                },
+                [&](AccelerationStructure_) {
+                    throw std::invalid_argument("target cannot be AccelerationStructure");
                 },
                 [&](Present_) {
                 }

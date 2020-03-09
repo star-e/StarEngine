@@ -38,12 +38,13 @@ struct VertexElement {
     Format mFormat;
 };
 
-inline bool operator==(const VertexElement&lhs, const VertexElement&rhs) noexcept {
+inline bool operator==(const VertexElement& lhs, const VertexElement& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mType, lhs.mAlignedByteOffset, lhs.mFormat) ==
         std::forward_as_tuple(rhs.mType, rhs.mAlignedByteOffset, rhs.mFormat);
 }
-inline bool operator!=(const VertexElement&lhs, const VertexElement&rhs) noexcept {
+
+inline bool operator!=(const VertexElement& lhs, const VertexElement& rhs) noexcept {
     return !(lhs == rhs);
 }
 
@@ -52,12 +53,13 @@ struct VertexElementIndex {
     uint32_t mElementID;
 };
 
-inline bool operator==(const VertexElementIndex&lhs, const VertexElementIndex&rhs) noexcept {
+inline bool operator==(const VertexElementIndex& lhs, const VertexElementIndex& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mBufferID, lhs.mElementID) ==
         std::forward_as_tuple(rhs.mBufferID, rhs.mElementID);
 }
-inline bool operator!=(const VertexElementIndex&lhs, const VertexElementIndex&rhs) noexcept {
+
+inline bool operator!=(const VertexElementIndex& lhs, const VertexElementIndex& rhs) noexcept {
     return !(lhs == rhs);
 }
 
@@ -74,12 +76,13 @@ struct STAR_GRAPHICS_API VertexBufferDesc {
     uint32_t mVertexSize;
 };
 
-inline bool operator==(const VertexBufferDesc&lhs, const VertexBufferDesc&rhs) noexcept {
+inline bool operator==(const VertexBufferDesc& lhs, const VertexBufferDesc& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mElements, lhs.mVertexSize) ==
         std::forward_as_tuple(rhs.mElements, rhs.mVertexSize);
 }
-inline bool operator!=(const VertexBufferDesc&lhs, const VertexBufferDesc&rhs) noexcept {
+
+inline bool operator!=(const VertexBufferDesc& lhs, const VertexBufferDesc& rhs) noexcept {
     return !(lhs == rhs);
 }
 
@@ -98,12 +101,13 @@ struct STAR_GRAPHICS_API MeshBufferLayout {
     PRIMITIVE_TOPOLOGY_TYPE mPrimitiveTopologyType = PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 };
 
-inline bool operator==(const MeshBufferLayout&lhs, const MeshBufferLayout&rhs) noexcept {
+inline bool operator==(const MeshBufferLayout& lhs, const MeshBufferLayout& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mBuffers, lhs.mIndex, lhs.mStripCutValue, lhs.mPrimitiveTopologyType) ==
         std::forward_as_tuple(rhs.mBuffers, rhs.mIndex, rhs.mStripCutValue, rhs.mPrimitiveTopologyType);
 }
-inline bool operator!=(const MeshBufferLayout&lhs, const MeshBufferLayout&rhs) noexcept {
+
+inline bool operator!=(const MeshBufferLayout& lhs, const MeshBufferLayout& rhs) noexcept {
     return !(lhs == rhs);
 }
 

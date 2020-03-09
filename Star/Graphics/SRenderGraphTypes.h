@@ -62,12 +62,13 @@ struct ClearColor {
     Format mClearFormat = Format::UNKNOWN;
 };
 
-inline bool operator==(const ClearColor&lhs, const ClearColor&rhs) noexcept {
+inline bool operator==(const ClearColor& lhs, const ClearColor& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mClearColor, lhs.mClearFormat) ==
         std::forward_as_tuple(rhs.mClearColor, rhs.mClearFormat);
 }
-inline bool operator!=(const ClearColor&lhs, const ClearColor&rhs) noexcept {
+
+inline bool operator!=(const ClearColor& lhs, const ClearColor& rhs) noexcept {
     return !(lhs == rhs);
 }
 
@@ -80,12 +81,13 @@ struct ClearDepthStencil {
     Format mClearFormat = Format::UNKNOWN;
 };
 
-inline bool operator==(const ClearDepthStencil&lhs, const ClearDepthStencil&rhs) noexcept {
+inline bool operator==(const ClearDepthStencil& lhs, const ClearDepthStencil& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mDepthClearValue, lhs.mStencilClearValue, lhs.mClearDepth, lhs.mClearStencil, lhs.mUnused, lhs.mClearFormat) ==
         std::forward_as_tuple(rhs.mDepthClearValue, rhs.mStencilClearValue, rhs.mClearDepth, rhs.mClearStencil, rhs.mUnused, rhs.mClearFormat);
 }
-inline bool operator!=(const ClearDepthStencil&lhs, const ClearDepthStencil&rhs) noexcept {
+
+inline bool operator!=(const ClearDepthStencil& lhs, const ClearDepthStencil& rhs) noexcept {
     return !(lhs == rhs);
 }
 
@@ -331,7 +333,7 @@ struct RenderSubpassDesc {
     uint32_t mSubpassID = 0;
 };
 
-inline bool operator<(const RenderSubpassDesc&lhs, const RenderSubpassDesc&rhs) noexcept {
+inline bool operator<(const RenderSubpassDesc& lhs, const RenderSubpassDesc& rhs) noexcept {
     return
         std::forward_as_tuple(lhs.mPassID, lhs.mSubpassID) <
         std::forward_as_tuple(rhs.mPassID, rhs.mSubpassID);
