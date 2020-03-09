@@ -32,7 +32,7 @@ https://zhuanlan.zhihu.com/starengine
 
 3. git clone vcpkg到本地。 https://github.com/Microsoft/vcpkg 
 
-4. 在本地vcpkg目录打开cmd，然后在cmd中键入.\bootstrap编译vcpkg
+4. 在本地vcpkg目录打开cmd，然后在cmd中键入.\bootstrap编译vcpkg。将StarEngine/custom/boost下的文件，覆盖vcpkg installed目录下的同名文件。修复boost::unordere_map序列化bug，开启multi_index的pmr支持。
 
 5. 在cmd中键入，vcpkg install --triplet x64-windows eigen3 boost libjpeg-turbo libpng tiff rxcpp directxtex ms-gsl。vcpkg会自动安装boost、eigen3等依赖。安装时间视网络环境与机器配置而定。顺利的话，在30分钟左右。
 
