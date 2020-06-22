@@ -494,7 +494,7 @@ void saveDDS(std::ostream& os, const Graphics::Render::TextureData& tex0) {
 
         DirectX::Blob blob;
         HRESULT hr = DirectX::SaveToDDSMemory(reinterpret_cast<const DirectX::Image*>(images.data()),
-            images.size(), meta, 0, blob);
+            images.size(), meta, DirectX::DDS_FLAGS_NONE, blob);
 
         if (hr) {
             S_ERROR << "Save DDS File :failed" << std::endl;
