@@ -7,7 +7,7 @@ https://zhuanlan.zhihu.com/starengine
 # 系统要求
 良好的网络环境，能顺利连接github与microsoft。
 
-## Visual Studio 2019 16.6, 需要安装以下模块。
+## Visual Studio 2019 16.8, 需要安装以下模块。
 
 1.Desktop development with C++
 
@@ -32,11 +32,11 @@ https://zhuanlan.zhihu.com/starengine
 
 3. git clone vcpkg到本地。 https://github.com/Microsoft/vcpkg 
 
-4. 在cmd中键入，vcpkg install --triplet x64-windows eigen3 boost libjpeg-turbo libpng tiff rxcpp directxtex ms-gsl。vcpkg会自动安装boost、eigen3等依赖。安装时间视网络环境与机器配置而定。顺利的话，在30分钟左右。
+4. 打开cmd或者powershell，跳转至{vcpkg文件夹}，键入.\bootstrap-vcpkg.bat，编译vcpkg。
 
-5. 设置$(StarVcpkg)系统环境变量，目录为本地vcpkg目录。例如 C:\vcpkg。
+5. cmd或者powershell跳转到{StarEngine文件夹}下，键入{vcpkg文件夹}\vcpkg.exe install --triplet x64-windows --feature-flags manifests
 
-6. 设置$(StarFbx)系统环境变量，目录为本地fbxsdk目录。例如 C:\fbxsdk\2019.5
+6. vcpkg会自动安装boost、eigen3等依赖。安装时间视网络环境与机器配置而定。顺利的话，30分钟左右完成安装。
 
 7. 打开StarEngine目录下的Star.sln，选择x64-Development即可开始编译。
 
