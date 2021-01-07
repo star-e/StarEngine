@@ -19,6 +19,8 @@
     </UnderDebugFullSuffix>
     <UnderConfigSuffix Condition="'$(Configuration)'=='Debug'">debug</UnderConfigSuffix>
     <UnderConfigSuffix Condition="'$(Configuration)'!='Debug'">release</UnderConfigSuffix>
+    <NoDevConfiguration Condition="'$(Configuration)'=='Debug'">Debug</NoDevConfiguration>
+    <NoDevConfiguration Condition="'$(Configuration)'!='Debug'">Release</NoDevConfiguration>
     <BoostDebug Condition="'$(Configuration)'=='Debug'">-gd</BoostDebug>
     <BoostDebug Condition="'$(Configuration)'!='Debug'">
     </BoostDebug>
@@ -34,7 +36,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\;$(StarVcpkg)\installed\$(Platform)-windows\include;$(StarVcpkg)\installed\$(Platform)-windows\include\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\;..\..\vcpkg_installed\$(Platform)-windows\include;..\..\vcpkg_installed\$(Platform)-windows\include\eigen3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 /JMC %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;__AVX2__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>

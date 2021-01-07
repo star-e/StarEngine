@@ -45,12 +45,10 @@
     <ClCompile Include="SLuminousGameWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <Filter>2.Misc</Filter>
-    </None>
     <None Include="PropertySheet.props">
       <Filter>2.Misc</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LuminousDesktop.rc">

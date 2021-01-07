@@ -6,7 +6,7 @@
   <ItemDefinitionGroup>
     <ClCompile />
     <Link>
-      <AdditionalDependencies>Bcrypt.lib;$(StarVcpkg)\installed\$(Platform)-windows\$(VcpkgDebug)lib\boost_*.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Bcrypt.lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\boost_serialization-vc140-mt$(BoostDebug).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile />
   </ItemDefinitionGroup>

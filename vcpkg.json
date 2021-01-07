@@ -1,0 +1,19 @@
+{
+    "name": "starengine",
+    "version-string": "0.01.00",
+    "port-version": 0,
+    "homepage": "https://github.com/star-e/StarEngine",
+    "description": "An experimental game engine.",
+    "dependencies": [
+        "ms-gsl",
+        "boost",
+        "eigen3",
+        "libjpeg-turbo",
+        "libpng",
+        "tiff",
+        "openexr",
+        "rxcpp",
+        "directxtex"
+    ],
+    "supports": "windows & !arm & !x86"
+}

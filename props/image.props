@@ -8,7 +8,7 @@
       <PreprocessorDefinitions>BOOST_GIL_IO_ENABLE_GRAY_ALPHA;OPENEXR_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\libpng*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\turbojpeg$(DebugSuffix).lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\jpeg$(DebugSuffix).lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\tiff*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Half*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Ilm*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Iex*.lib;..\..\..\..\vcpkg\installed\$(Platform)-windows\$(VcpkgDebug)lib\Imath*.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\libpng*.lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\turbojpeg$(DebugSuffix).lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\jpeg$(DebugSuffix).lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\tiff*.lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\Half*.lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\Ilm*.lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\Iex*.lib;..\..\vcpkg_installed\$(Platform)-windows\$(VcpkgDebug)lib\Imath*.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />

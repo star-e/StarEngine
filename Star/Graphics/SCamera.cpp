@@ -101,7 +101,7 @@ void Camera::lookTo(gsl::span<const float, 3> eye,
 
 void Camera::lookAt(gsl::span<const float, 3> eye, gsl::span<const float, 3> at, gsl::span<const float, 3> up) {
     Vector3f dir(at[0] - eye[0], at[1] - eye[1], at[2] - eye[2]);
-    lookTo(eye, { dir.data(), 3 }, up);
+    lookTo(eye, gsl::span<const float, 3>{ dir.data(), 3 }, up);
 }
 
 void Camera::lookTo(const Vector3f& eye, const Vector3f& dir, const Vector3f& up) {

@@ -6,11 +6,11 @@
   <ItemDefinitionGroup>
     <Link>
       <AdditionalDependencies>libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(StarFbx)\lib\vs2017\$(PlatformShortName)\$(UnderConfigSuffix);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\dependencies\fbxsdk\2019.5\lib\vs2017\$(PlatformShortName)\$(NoDevConfiguration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent />
     <ClCompile>
-      <AdditionalIncludeDirectories>$(StarFbx)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\dependencies\fbxsdk\2019.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>

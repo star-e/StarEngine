@@ -194,11 +194,12 @@ winrt::handle createFenceEvent() {
 com_ptr<ID3D12Resource> createBuffer(ID3D12Device* pDevice, uint64_t size) {
     com_ptr<ID3D12Resource> ptr;
     HRESULT hr = S_OK;
-
+    CD3DX12_HEAP_PROPERTIES heapDesc(D3D12_HEAP_TYPE_DEFAULT);
+    auto desc = CD3DX12_RESOURCE_DESC::Buffer(size);
     V(pDevice->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapDesc,
         D3D12_HEAP_FLAG_NONE,
-        &CD3DX12_RESOURCE_DESC::Buffer(size),
+        &desc,
         D3D12_RESOURCE_STATE_COPY_DEST,
         nullptr,
         IID_PPV_ARGS(ptr.put())));
@@ -208,8 +209,9 @@ com_ptr<ID3D12Resource> createBuffer(ID3D12Device* pDevice, uint64_t size) {
 
 com_ptr<ID3D12Resource> createTexture2D(ID3D12Device* pDevice, const D3D12_RESOURCE_DESC& desc) {
     com_ptr<ID3D12Resource> tex;
+    CD3DX12_HEAP_PROPERTIES heapDesc(D3D12_HEAP_TYPE_DEFAULT);
     V(pDevice->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        &heapDesc,
         D3D12_HEAP_FLAG_NONE,
         &desc,
         D3D12_RESOURCE_STATE_COPY_DEST,

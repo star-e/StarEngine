@@ -313,23 +313,23 @@ void createIndex(DX12ShaderData& prototype, const ShaderData& prototypeData,
     emplaceIndex(prototype.mSolutionIndex, prototypeData.mSolutions, renderGraph.mSolutionIndex);
     Ensures(prototype.mSolutionIndex.size() == prototypeData.mSolutions.size());
     for (auto&& [solution, solutionData] : boost::combine(prototype.mSolutions, prototypeData.mSolutions)) {
-        const auto& renderSolution = renderGraph.mSolutions.at(renderGraph.mSolutionIndex.at(solutionData.get<0>().first));
-        Expects(solution.mPipelines.size() == solutionData.get<0>().second.mPipelines.size());
-        emplaceIndex(solution.mPipelineIndex, solutionData.get<0>().second.mPipelines, renderSolution.mPipelineIndex);
-        Ensures(solution.mPipelineIndex.size() == solutionData.get<0>().second.mPipelines.size());
-        for (auto&& [pipeline, pipelineData] : boost::combine(solution.mPipelines, solutionData.get<0>().second.mPipelines)) {
-            const auto& renderPipeline = renderSolution.mPipelines.at(renderSolution.mPipelineIndex.at(pipelineData.get<0>().first));
-            Expects(pipeline.mQueues.size() == pipelineData.get<0>().second.mQueues.size());
-            emplaceIndex(pipeline.mQueueIndex, pipelineData.get<0>().second.mQueues, renderPipeline.mSubpassIndex);
-            Ensures(pipeline.mQueueIndex.size() == pipelineData.get<0>().second.mQueues.size());
-            for (auto&& [queue, queueData] : boost::combine(pipeline.mQueues, pipelineData.get<0>().second.mQueues)) {
-                //const auto& passDesc = renderPipeline.mSubpassIndex.at(queueData.get<0>().first);
+        const auto& renderSolution = renderGraph.mSolutions.at(renderGraph.mSolutionIndex.at(solutionData.first));
+        Expects(solution.mPipelines.size() == solutionData.second.mPipelines.size());
+        emplaceIndex(solution.mPipelineIndex, solutionData.second.mPipelines, renderSolution.mPipelineIndex);
+        Ensures(solution.mPipelineIndex.size() == solutionData.second.mPipelines.size());
+        for (auto&& [pipeline, pipelineData] : boost::combine(solution.mPipelines, solutionData.second.mPipelines)) {
+            const auto& renderPipeline = renderSolution.mPipelines.at(renderSolution.mPipelineIndex.at(pipelineData.first));
+            Expects(pipeline.mQueues.size() == pipelineData.second.mQueues.size());
+            emplaceIndex(pipeline.mQueueIndex, pipelineData.second.mQueues, renderPipeline.mSubpassIndex);
+            Ensures(pipeline.mQueueIndex.size() == pipelineData.second.mQueues.size());
+            for (auto&& [queue, queueData] : boost::combine(pipeline.mQueues, pipelineData.second.mQueues)) {
+                //const auto& passDesc = renderPipeline.mSubpassIndex.at(queueData.first);
                 //const auto& renderPass = renderPipeline.mPasses.at(passDesc.mPassID);
                 //const auto& renderSubpass = renderPass.mSubpasses.at(passDesc.mSubpassID);
-                for (auto&& [level, levelData] : boost::combine(queue.mLevels, queueData.get<0>().second.mLevels)) {
-                    Expects(level.mPasses.size() == levelData.get<0>().mPasses.size());
-                    emplaceIndex(level.mPassIndex, levelData.get<0>().mPasses);
-                    Ensures(level.mPassIndex.size() == levelData.get<0>().mPasses.size());
+                for (auto&& [level, levelData] : boost::combine(queue.mLevels, queueData.second.mLevels)) {
+                    Expects(level.mPasses.size() == levelData.mPasses.size());
+                    emplaceIndex(level.mPassIndex, levelData.mPasses);
+                    Ensures(level.mPassIndex.size() == levelData.mPasses.size());
                 }
             }
         }
@@ -460,18 +460,18 @@ std::pair<DX12ShaderData*, bool> try_createDX12ShaderData(CreationContext& conte
                 createIndex(prototype, prototypeData, rg.mRenderGraph);
                 Expects(prototype.mSolutions.size() == prototypeData.mSolutions.size());
                 for (auto&& [solution, solutionData] : boost::combine(prototype.mSolutions, prototypeData.mSolutions)) {
-                    const auto& renderSolution = rg.mRenderGraph.mSolutions.at(rg.mRenderGraph.mSolutionIndex.at(solutionData.get<0>().first));
-                    for (auto&& [pipeline, pipelineData] : boost::combine(solution.mPipelines, solutionData.get<0>().second.mPipelines)) {
-                        const auto& renderPipeline = renderSolution.mPipelines.at(renderSolution.mPipelineIndex.at(pipelineData.get<0>().first));
-                        for (auto&& [queue, queueData] : boost::combine(pipeline.mQueues, pipelineData.get<0>().second.mQueues)) {
-                            const auto& passDesc = renderPipeline.mSubpassIndex.at(queueData.get<0>().first);
+                    const auto& renderSolution = rg.mRenderGraph.mSolutions.at(rg.mRenderGraph.mSolutionIndex.at(solutionData.first));
+                    for (auto&& [pipeline, pipelineData] : boost::combine(solution.mPipelines, solutionData.second.mPipelines)) {
+                        const auto& renderPipeline = renderSolution.mPipelines.at(renderSolution.mPipelineIndex.at(pipelineData.first));
+                        for (auto&& [queue, queueData] : boost::combine(pipeline.mQueues, pipelineData.second.mQueues)) {
+                            const auto& passDesc = renderPipeline.mSubpassIndex.at(queueData.first);
                             const auto& renderPass = renderPipeline.mPasses.at(passDesc.mPassID);
                             const auto& renderSubpass = renderPass.mGraphicsSubpasses.at(passDesc.mSubpassID);
-                            for (auto&& [level, levelData] : boost::combine(queue.mLevels, queueData.get<0>().second.mLevels)) {
-                                for (auto&& [variant, variantData] : boost::combine(level.mPasses, levelData.get<0>().mPasses)) {
-                                    for (auto&& [subpass, subpassData0] : boost::combine(variant.mSubpasses, variantData.get<0>().second.mSubpasses)) {
+                            for (auto&& [level, levelData] : boost::combine(queue.mLevels, queueData.second.mLevels)) {
+                                for (auto&& [variant, variantData] : boost::combine(level.mPasses, levelData.mPasses)) {
+                                    for (auto&& [subpass, subpassData0] : boost::combine(variant.mSubpasses, variantData.second.mSubpasses)) {
                                         createShaderResources(renderSolution, renderSubpass,
-                                            subpass, subpassData0.get<0>(), resources.mSettings, context.mDevice, context.mMemoryArena);
+                                            subpass, subpassData0, resources.mSettings, context.mDevice, context.mMemoryArena);
                                     }
                                 }
                             }
@@ -870,12 +870,10 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
 
             Expects(render2.mRenderGraph.mSolutions.size() == sc.mSolutions.size());
             uint32_t solutionID = 0;
-            for (auto&& [solution, solutionData0] : boost::combine(render2.mRenderGraph.mSolutions, sc.mSolutions)) {
-                const auto& solutionData = solutionData0.get<0>();
-
+            for (auto&& [solution, solutionData] : boost::combine(render2.mRenderGraph.mSolutions, sc.mSolutions)) {
                 Expects(solution.mPipelines.size() == solutionData.mPipelines.size());
                 uint32_t pipelineID = 0;
-                for (auto&& [pipeline, pipelineData0] : boost::combine(solution.mPipelines, solutionData.mPipelines)) {
+                for (auto&& [pipeline, pipelineData] : boost::combine(solution.mPipelines, solutionData.mPipelines)) {
                     auto currentSolutionId = at(sc.mSolutionIndex, context.mCurrentSolution);
                     if (solutionID != currentSolutionId)
                         continue;
@@ -884,16 +882,10 @@ std::pair<DX12RenderGraphData*, bool> try_createDX12RenderGraphData(CreationCont
                     if (pipelineID != currentPipelineID)
                         continue;
 
-                    const auto& pipelineData = pipelineData0.get<0>();
-
                     Expects(pipeline.mPasses.size() == pipelineData.mPasses.size());
-                    for (auto&& [pass, passData0] : boost::combine(pipeline.mPasses, pipelineData.mPasses)) {
-                        const auto& passData = passData0.get<0>();
-
+                    for (auto&& [pass, passData] : boost::combine(pipeline.mPasses, pipelineData.mPasses)) {
                         Expects(pass.mGraphicsSubpasses.size() == passData.mGraphicsSubpasses.size());
-                        for (auto&& [subpass, subpassData0] : boost::combine(pass.mGraphicsSubpasses, passData.mGraphicsSubpasses)) {
-                            const auto& subpassData = subpassData0.get<0>();
-
+                        for (auto&& [subpass, subpassData] : boost::combine(pass.mGraphicsSubpasses, passData.mGraphicsSubpasses)) {
                             subpass.mOrderedRenderQueue.reserve(subpassData.mOrderedRenderQueue.size());
                             for (const auto& unorderedQueueData : subpassData.mOrderedRenderQueue) {
                                 auto& unorderedQueue = subpass.mOrderedRenderQueue.emplace_back();
