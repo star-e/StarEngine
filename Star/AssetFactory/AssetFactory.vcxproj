@@ -319,7 +319,14 @@
     </ClCompile>
     <ClCompile Include="SAssetFbx.cpp" />
     <ClCompile Include="SAssetFbxImporter.cpp" />
-    <ClCompile Include="SAssetFactory.cpp" />
+    <ClCompile Include="SAssetFactory.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Development|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Development|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="SAssetTexture.cpp" />
     <ClCompile Include="SAssetTypes.cpp" />
     <ClCompile Include="SAssetUtils.cpp" />

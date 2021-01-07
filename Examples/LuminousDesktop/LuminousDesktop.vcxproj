@@ -142,12 +142,18 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</InlineFunctionExpansion>
     </ClCompile>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">xcopy /Y ..\..\dependencies\fbxsdk\2019.5\lib\vs2017\$(PlatformShortName)\$(NoDevConfiguration)\libfbxsdk.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
     <ClCompile>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</InlineFunctionExpansion>
     </ClCompile>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">xcopy /Y ..\..\dependencies\fbxsdk\2019.5\lib\vs2017\$(PlatformShortName)\$(NoDevConfiguration)\libfbxsdk.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -160,6 +166,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">xcopy /Y ..\..\dependencies\fbxsdk\2019.5\lib\vs2017\$(PlatformShortName)\$(NoDevConfiguration)\libfbxsdk.dll $(OutDir)</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">xcopy /Y ..\..\dependencies\fbxsdk\2019.5\lib\vs2017\$(PlatformShortName)\$(NoDevConfiguration)\libfbxsdk.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Development'">
     <ClCompile>
@@ -174,6 +186,12 @@
       <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Development|Win32'">DebugFastLink</GenerateDebugInformation>
       <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Development|x64'">DebugFastLink</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Development|Win32'">xcopy /Y ..\..\dependencies\fbxsdk\2019.5\lib\vs2017\$(PlatformShortName)\$(NoDevConfiguration)\libfbxsdk.dll $(OutDir)</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Development|x64'">xcopy /Y ..\..\dependencies\fbxsdk\2019.5\lib\vs2017\$(PlatformShortName)\$(NoDevConfiguration)\libfbxsdk.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
