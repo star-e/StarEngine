@@ -28,12 +28,16 @@ public:
     PmrBinaryInArchive(std::istream& is, std::pmr::memory_resource* mr, unsigned int flags = 0)
         : boost::archive::binary_iarchive_impl<PmrBinaryInArchive, std::istream::char_type, std::istream::traits_type>(is, flags)
         , mMemoryResource(mr)
-    {}
+    {
+        init(flags);
+    }
 
     PmrBinaryInArchive(std::streambuf& bsb, std::pmr::memory_resource* mr, unsigned int flags = 0)
         : boost::archive::binary_iarchive_impl<PmrBinaryInArchive, std::istream::char_type, std::istream::traits_type>(bsb, flags)
         , mMemoryResource(mr)
-    {}
+    {
+        init(flags);
+    }
 
     std::pmr::memory_resource* resource() const noexcept {
         return mMemoryResource;
